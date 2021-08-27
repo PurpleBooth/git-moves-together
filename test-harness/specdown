@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+REPOSITORY_DIR="$PWD"
+TEMPORARY_DIR="$(mktemp -d)"
+
+export PATH="$REPOSITORY_DIR/target/release/:$REPOSITORY_DIR/target/debug/:$PATH"
+git -C "$TEMPORARY_DIR" init .
+git -C "$TEMPORARY_DIR" config commit.gpgsign false
+rm "$TEMPORARY_DIR/.git/hooks/"*
+specdown run --running-dir "$TEMPORARY_DIR" "${@}"
