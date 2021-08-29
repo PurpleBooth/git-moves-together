@@ -1,5 +1,3 @@
-#![feature(total_cmp)]
-
 use std::path::PathBuf;
 
 use partial_application::partial;
