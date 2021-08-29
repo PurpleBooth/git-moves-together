@@ -44,6 +44,7 @@ direct commit based coupling
 
 ``` shell,script(name="coupling",expected_exit_code=0)
 git-moves-together
+git log
 ```
 
 ``` text,verify(script_name="coupling",stream=stdout)
