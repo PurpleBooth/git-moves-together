@@ -10,7 +10,7 @@ visible.
 If every time I commit no file moves at the same time, that's 0 coupling
 
 ``` shell,script(name="no-coupling-setup",expected_exit_code=0)
-git init --template "$(mktemp -d)" .
+git -c "init.defaultBranch=main" init --template "$(mktemp -d)" .
 echo $RANDOM | md5sum | head -c 20 > file_1
 git add file_1
 git commit --message "demo"
