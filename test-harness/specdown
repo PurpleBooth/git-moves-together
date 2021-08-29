@@ -5,6 +5,9 @@ set -euo pipefail
 REPOSITORY_DIR="$PWD"
 TEMPORARY_DIR="$(mktemp -d)"
 
+if [[ -z "$(git config init.defaultBranch)" ]]; then
+    git config init.defaultBranch main
+fi
 
 export GIT_COMMITTER_NAME=John Doe
 export GIT_COMMITTER_EMAIL=john@doe.org
