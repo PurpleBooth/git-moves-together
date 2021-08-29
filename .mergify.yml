@@ -6,8 +6,8 @@ queue_rules:
   - status-success=version
   - status-success=test (macos-latest)
   - status-success=test (ubuntu-latest)
-  - status-success=specdown (ubuntu-latest, https://github.com/specdown/specdown/releases/download/v0.41.0/specdown-...
-  - status-success=specdown (macos-latest, https://github.com/specdown/specdown/releases/download/v0.41.0/specdown-x...
+  - status-success=specdown (ubuntu-latest)
+  - status-success=specdown (macos-latest)
   - status-success=lints
   - status-success=lint-markdown
 
@@ -27,8 +27,8 @@ pull_request_rules:
   - status-success=version
   - status-success=test (macos-latest)
   - status-success=test (ubuntu-latest)
-  - status-success=specdown (ubuntu-latest, https://github.com/specdown/specdown/releases/download/v0.41.0/specdown-...
-  - status-success=specdown (macos-latest, https://github.com/specdown/specdown/releases/download/v0.41.0/specdown-x...
+  - status-success=specdown (ubuntu-latest)
+  - status-success=specdown (macos-latest)
   - status-success=lints
   - status-success=lint-markdown
   - base=main
