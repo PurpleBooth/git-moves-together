@@ -5,6 +5,11 @@ set -euo pipefail
 REPOSITORY_DIR="$PWD"
 TEMPORARY_DIR="$(mktemp -d)"
 
+
+export GIT_COMMITTER_NAME=John Doe
+export GIT_COMMITTER_EMAIL=john@doe.org
+export GIT_AUTHOR_NAME=John Doe
+export GIT_AUTHOR_EMAIL=john@doe.org
 export PATH="$REPOSITORY_DIR/target/release/:$REPOSITORY_DIR/target/debug/:$PATH"
 git -C "$TEMPORARY_DIR" init .
 git -C "$TEMPORARY_DIR" config commit.gpgsign false
