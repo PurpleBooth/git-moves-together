@@ -5,7 +5,6 @@ class GitMovesTogether < Formula
   sha256 "{{ file_sha }}"
 
   depends_on "rust" => :build
-  depends_on "git" => :test
 
   def install
     system "cargo", "install", "--locked", "--root", prefix, "--path", "."
