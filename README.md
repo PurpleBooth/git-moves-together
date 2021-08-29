@@ -9,7 +9,7 @@ visible.
 
 If every time I commit no file moves at the same time, that's 0 coupling
 
-```shell,script(name="no-coupling-setup", expected_exit_code=0)
+``` shell,script(name="no-coupling-setup",expected_exit_code=0)
 git init --template "$(mktemp -d)" .
 pwgen > file_1
 git add file_1
@@ -19,21 +19,20 @@ git add file_2
 git commit --message "demo"
 ```
 
-When we run git-moves-together 
-we can see that these files have no direct commit based coupling
+When we run git-moves-together we can see that these files have no
+direct commit based coupling
 
-```shell,script(name="no-coupling", expected_exit_code=0)
+``` shell,script(name="no-coupling",expected_exit_code=0)
 git-moves-together .
 ```
 
-
-```text,verify(script_name="no-coupling", stream=stdout)
+``` text,verify(script_name="no-coupling",stream=stdout)
 0 files move together
 ```
 
 If we then make a change to both files in the same commit
 
-```shell,script(name="coupling-setup", expected_exit_code=0)
+``` shell,script(name="coupling-setup",expected_exit_code=0)
 pwgen > file_1
 pwgen > file_2
 pwgen > file_3
@@ -41,14 +40,14 @@ git add file_1 file_2 file_3
 git commit --message "demo"
 ```
 
-When we run git-moves-together
-we can see that these files have no direct commit based coupling
+When we run git-moves-together we can see that these files have no
+direct commit based coupling
 
-```shell,script(name="coupling", expected_exit_code=0)
+``` shell,script(name="coupling",expected_exit_code=0)
 git-moves-together .
 ```
 
-```text,verify(script_name="coupling", stream=stdout)
+``` text,verify(script_name="coupling",stream=stdout)
 +--------+--------+----------------+
 | File A | File B | Moves Together |
 +==================================+
@@ -65,7 +64,7 @@ git-moves-together .
 
 ## Usage
 
-```shell,script(name="help", expected_exit_code=0)
+``` shell,script(name="help",expected_exit_code=0)
 git-moves-together -h
 ```
 

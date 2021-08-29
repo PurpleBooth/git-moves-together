@@ -1,0 +1,397 @@
+name: Test
+on:
+  push:
+    branches:
+    - '*'
+  pull_request:
+jobs:
+  lint-markdown:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: PurpleBooth/gfmfmt-action@v1.0.5
+
+  specdown:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+        - os: macos-latest
+          specdown: https://github.com/specdown/specdown/releases/download/v0.41.0/specdown-x86_64-apple-darwin
+        - os: ubuntu-latest
+          specdown: https://github.com/specdown/specdown/releases/download/v0.41.0/specdown-x86_64-unknown-linux-gnu
+    steps:
+    - uses: actions/checkout@v2.3.4
+    - uses: actions/cache@v2.1.6
+      with:
+        path: |
+          .cache
+          ~/.cargo/registry
+          ~/.cargo/git
+          ~/.cargo/bin
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    - run: |
+        set -euo pipefail
+        mkdir -p "$GITHUB_WORKSPACE/target/assorted/bin"
+        curl -Lo "$GITHUB_WORKSPACE/target/assorted/bin/specdown" "$SPECDOWN_URL"
+        chmod +x "$GITHUB_WORKSPACE/target/assorted/bin/specdown"
+        echo "$GITHUB_WORKSPACE/target/assorted/bin" >> "$GITHUB_PATH"
+      env:
+        SPECDOWN_URL: ${{ matrix.specdown }}
+      name: Download Specdown
+    - uses: actions-rs/toolchain@v1.0.7
+      with:
+        profile: minimal
+        toolchain: stable
+        default: true
+    - run: make specdown
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2.3.4
+      name: Checkout the repository
+    - uses: actions/cache@v2.1.6
+      name: Cache cargo
+      with:
+        path: |
+          .cache
+          ~/.cargo/registry
+          ~/.cargo/git
+          ~/.cargo/bin
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    - uses: actions-rs/audit-check@v1.2.0
+      name: Audit check cargo packages
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+  version:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2.3.4
+      with:
+        fetch-depth: 0
+    - uses: chaaz/versio-actions/install@v1.1
+      name: Install versio
+    - name: Check projects
+      run: versio check
+      env:
+        RUST_LOG: versio=trace
+        RUST_BACKTRACE: 1
+    - name: Print changes
+      run: versio plan
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_USER: ${{ github.actor }}
+        RUST_LOG: versio=trace
+        RUST_BACKTRACE: 1
+  check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2.3.4
+    - uses: actions/cache@v2.1.6
+      with:
+        path: |
+          .cache
+          ~/.cargo/registry
+          ~/.cargo/git
+          ~/.cargo/bin
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    - uses: actions-rs/toolchain@v1.0.7
+      with:
+        profile: minimal
+        toolchain: stable
+        default: true
+    - uses: actions-rs/cargo@v1.0.3
+      with:
+        command: check
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+        - os: macos-latest
+        - os: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2.3.4
+    - uses: actions/cache@v2.1.6
+      with:
+        path: |
+          .cache
+          ~/.cargo/registry
+          ~/.cargo/git
+          ~/.cargo/bin
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    - uses: actions-rs/toolchain@v1.0.7
+      with:
+        profile: minimal
+        toolchain: stable
+        default: true
+    - uses: actions-rs/cargo@v1.0.3
+      with:
+        args: ' --locked'
+        command: test
+  lints:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2.3.4
+    - uses: actions/cache@v2.1.6
+      with:
+        path: |
+          .cache
+          ~/.cargo/registry
+          ~/.cargo/git
+          ~/.cargo/bin
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    - uses: actions-rs/toolchain@v1.0.7
+      with:
+        profile: minimal
+        toolchain: nightly
+        default: true
+        components: rustfmt, clippy
+    - uses: actions-rs/cargo@v1.0.3
+      with:
+        command: fmt
+        args: --all -- --check
+    - uses: actions-rs/cargo@v1.0.3
+      with:
+        command: clippy
+        args: --all-targets --all-features -- -D warnings -Dclippy::all -D clippy::pedantic
+          -D clippy::cargo -A clippy::multiple-crate-versions
+    - uses: gaurav-nelson/github-action-markdown-link-check@1.0.13
+
+  release:
+    if: github.ref == 'refs/heads/main'
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_USER: ${{ github.actor }}
+    needs:
+    - version
+    - specdown
+    - test
+    - lints
+    - lint-markdown
+    - check
+    - security-audit
+    outputs:
+      version_bump: ${{ steps.version_bump.outputs.version_bump }}
+      current_version: ${{ steps.current_version.outputs.current_version }}
+      previous_version: ${{ steps.previous_version.outputs.previous_version }}
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2.3.4
+      with:
+        fetch-depth: 0
+    - uses: chaaz/versio-actions/install@v1.1
+      name: Install versio
+    - id: previous_version
+      run: echo ::set-output "name=previous_version::$( versio get --id 1 -v )"
+    - run: echo ::set-output "name=BUMP::$( versio release --dry-run )"
+      id: get_versio_plan
+    - name: Generate release
+      if: ${{ contains(steps.get_versio_plan.outputs.BUMP, ' -> ') }}
+      run: |
+        versio release
+    - run: echo ::set-output "name=current_version::$( versio get --id 1 -v )"
+      id: current_version
+    - run: echo ::set-output "name=version_bump::true"
+      if: steps.current_version.outputs.current_version != steps.previous_version.outputs.previous_version
+      id: version_bump
+
+  build:
+    needs:
+    - release
+    if: needs.release.outputs.version_bump
+    runs-on: ${{ matrix.os }}
+    steps:
+    - run: ${{ matrix.install }}
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      name: Install additional dependencies
+    - uses: actions/checkout@v2.3.4
+      name: Checkout the repository
+      with:
+        ref: v${{ needs.release.outputs.current_version }}
+    - uses: actions/cache@v2.1.6
+      name: Cache cargo dependencies
+      with:
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        path: |
+          .cache
+          ~/.cargo/registry
+          ~/.cargo/git
+          ~/.cargo/bin
+          target
+    - uses: actions-rs/toolchain@v1.0.7
+      name: Install rust toolchain
+      with:
+        default: true
+        profile: minimal
+        toolchain: stable
+    - uses: actions-rs/cargo@v1.0.3
+      name: Build release version
+      with:
+        args: --release --locked
+        command: build
+    - id: get_repository_name
+      name: Calculate repository name
+      run: echo ::set-output name=REPOSITORY_NAME::$(echo "$GITHUB_REPOSITORY" | awk
+        -F / '{print $2}' | sed -e "s/:refs//")
+      shell: bash
+    - name: Move binary to upload location
+      env:
+        TARGET: ${{ matrix.target }}
+        EXTENSION: ${{ matrix.suffix }}
+        REPOSITORY_NAME: ${{ steps.get_repository_name.outputs.REPOSITORY_NAME }}
+      run: mv ./target/release/$REPOSITORY_NAME$EXTENSION ./$REPOSITORY_NAME-$TARGET$EXTENSION
+      shell: bash
+    - uses: actions/upload-artifact@v2
+      name: Store built binary version
+      with:
+        name: bins
+        path: ${{ steps.get_repository_name.outputs.REPOSITORY_NAME }}-${{ matrix.target
+          }}${{ matrix.suffix }}
+    strategy:
+      matrix:
+        include:
+        - os: macos-latest
+          suffix: ''
+          target: x86_64-apple-darwin
+          install: ''
+        - os: ubuntu-latest
+          suffix: ''
+          target: x86_64-unknown-linux-gnu
+          install: ''
+
+  github-release:
+    needs:
+    - release
+    - build
+    if: needs.release.outputs.version_bump
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2.3.4
+      name: Checkout the repository
+      with:
+        ref: v${{ needs.release.outputs.current_version }}
+        fetch-depth: 0
+    - uses: actions/cache@v2.1.6
+      name: Cache cargo dependencies
+      with:
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        path: |
+          .cache
+          ~/.cargo/registry
+          ~/.cargo/git
+          ~/.cargo/bin
+          target
+    - uses: actions/download-artifact@v2
+      name: Retrieve assets
+    - uses: actions-rs/toolchain@v1.0.7
+      name: Install rust toolchain
+      with:
+        default: true
+        profile: minimal
+        toolchain: stable
+    - id: get_repository_name
+      name: Calculate repository name
+      run: echo ::set-output name=REPOSITORY_NAME::$(echo "$GITHUB_REPOSITORY" | awk
+        -F / '{print $2}' | sed -e "s/:refs//")
+      shell: bash
+    - run: cargo install git-cz
+    - run: git cz changelog "$FROM..$TO" > CHANGELOG.md
+      env:
+        FROM: v${{ needs.release.outputs.previous_version }}
+        TO: v${{ needs.release.outputs.current_version }}
+    - env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      id: create_release
+      uses: ncipollo/release-action@v1.8.8
+      with:
+        allowUpdates: true
+        token: ${{ secrets.COMMITTER_TOKEN }}
+        bodyFile: CHANGELOG.md
+        name: Release v${{ needs.release.outputs.current_version }}
+        tag: v${{ needs.release.outputs.current_version }}
+        artifacts: ./bins/*
+
+  generate-formula:
+    name: Generate Homebrew Formula
+    needs:
+    - release
+    if: needs.release.outputs.version_bump
+    runs-on: ubuntu-latest
+    steps:
+    - id: get_repository_name
+      name: Work out repository name
+      run: echo ::set-output "name=REPOSITORY_NAME::$(echo "$GITHUB_REPOSITORY" |
+        awk -F / '{print $2}' | sed -e "s/:refs//")"
+      shell: bash
+    - uses: actions/checkout@v2.3.4
+      name: Checkout this repository
+      with:
+        ref: v${{ needs.release.outputs.current_version }}
+        path: main-repo
+    - name: Import GPG key
+      uses: crazy-max/ghaction-import-gpg@v3.2.0
+      with:
+        gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.GPG_PASSPHRASE }}
+        git-user-signingkey: true
+        git-commit-gpgsign: true
+        git-tag-gpgsign: true
+        workdir: main-repo
+    - uses: actions/checkout@v2.3.4
+      with:
+        repository: PurpleBooth/homebrew-repo
+        token: ${{ secrets.COMMITTER_TOKEN }}
+        path: homebrew-repo
+        ref: main
+      name: Checkout the custom tap
+    - name: Import GPG key
+      uses: crazy-max/ghaction-import-gpg@v3.2.0
+      with:
+        gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+        passphrase: ${{ secrets.GPG_PASSPHRASE }}
+        git-user-signingkey: true
+        git-commit-gpgsign: true
+        git-tag-gpgsign: true
+        workdir: homebrew-repo
+    - run: |
+        curl -Lo file.tar.gz "https://github.com/$GIT_REPO/archive/$GIT_TAG.tar.gz"
+        sha256sum -b file.tar.gz | awk '{ print $1 }' > hash
+        echo ::set-output "name=SHA256::$( cat hash )"
+      id: hash
+      shell: bash
+      env:
+        GIT_REPO: ${{ github.repository }}
+        GIT_TAG: v${{ needs.release.outputs.current_version }}
+      name: Calculate the binary hash
+    - uses: cuchi/jinja2-action@v1.2.0
+      with:
+        template: main-repo/homebrew/formula.rb.j2
+        output_file: formula.rb
+        variables: |
+          github_repo=${{ github.repository }}
+          git_tag=v${{ needs.release.outputs.current_version }}
+          file_sha=${{ steps.hash.outputs.SHA256 }}
+      name: Generate the template
+    - shell: bash
+      name: Open a PR on the custom tap repository
+      run: |
+        VERSION="$(echo $GIT_TAG | sed 's/^refs\/tags\///')"
+        git -C homebrew-repo switch -c "$REPOSITORY_NAME-$VERSION"
+        cp formula.rb "homebrew-repo/Formula/$REPOSITORY_NAME.rb"
+        git -C homebrew-repo add "Formula/$REPOSITORY_NAME.rb"
+        git -C homebrew-repo commit -m "fix: Update $REPOSITORY_NAME to $VERSION"
+        git -C homebrew-repo push origin "$REPOSITORY_NAME-$VERSION"
+        (cd homebrew-repo && gh pr create --label releases --base main --fill)
+      env:
+        REPOSITORY_NAME: ${{ steps.get_repository_name.outputs.REPOSITORY_NAME }}
+        GIT_TAG: v${{ needs.release.outputs.current_version }}
+        GITHUB_TOKEN: ${{ secrets.COMMITTER_TOKEN }}
+
