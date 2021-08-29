@@ -69,7 +69,7 @@ git-moves-together -h
 ```
 
 ``` text,verify(script_name="help",stream=stdout)
-git-moves-together 0.1.4
+git-moves-together 0.1.5
 
 Billie Thompson <billie@billiecodes.com>
 

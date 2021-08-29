@@ -131,7 +131,7 @@ dependencies = [
 
 [[package]]
 name = "git-moves-together"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "clap",
  "comfy-table",
