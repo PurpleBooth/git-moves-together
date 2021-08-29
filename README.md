@@ -43,6 +43,8 @@ When we run git-moves-together we can see that these files have no
 direct commit based coupling
 
 ``` shell,script(name="coupling",expected_exit_code=0)
+git status
+ls
 git-moves-together .
 ```
 
