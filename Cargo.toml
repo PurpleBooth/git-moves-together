@@ -2,8 +2,21 @@
 name = "git-moves-together"
 version = "0.1.0"
 edition = "2018"
+categories = ["development-tools", "command-line-utilities"]
+keywords = ["git", "coupling"]
+repository = "https://github.com/PurpleBooth/git-moves-together"
+description = "Find files that move at the same time in a git repository to identify coupling"
+license = "CC0-1.0"
+authors = ["Billie Thompson <billie@billiecodes.com>"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 git2 = "0.13"
+partial_application = "0.2.1"
+thiserror = "1.0.28"
+clap = "3.0.0-beta.4"
+comfy-table = "4.1.1"
+[dev-dependencies]
+tempfile = "3.2.0"
+rand = "0.8.4"

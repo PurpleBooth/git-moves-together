@@ -11,10 +11,10 @@ If every time I commit no file moves at the same time, that's 0 coupling
 
 ```shell,script(name="no-coupling-setup", expected_exit_code=0)
 git init --template "$(mktemp -d)" .
-touch file_1
+pwgen > file_1
 git add file_1
 git commit --message "demo"
-touch file_2
+pwgen > file_2
 git add file_2
 git commit --message "demo"
 ```
@@ -34,9 +34,9 @@ git-moves-together .
 If we then make a change to both files in the same commit
 
 ```shell,script(name="coupling-setup", expected_exit_code=0)
-echo "change 1" > file_1
-cp file_1 file_2
-cp file_1 file_3
+pwgen > file_1
+pwgen > file_2
+pwgen > file_3
 git add file_1 file_2 file_3
 git commit --message "demo"
 ```
@@ -49,5 +49,50 @@ git-moves-together .
 ```
 
 ```text,verify(script_name="coupling", stream=stdout)
-file_1, file_2 move together 33%
++--------+--------+----------------+
+| File A | File B | Moves Together |
++==================================+
+| file_2 | file_3 | 100.00%        |
+|--------+--------+----------------|
+| file_1 | file_3 | 100.00%        |
+|--------+--------+----------------|
+| file_1 | file_2 | 50.00%         |
++--------+--------+----------------+
+
+
+3 files move together
+```
+
+## Usage
+
+```shell,script(name="help", expected_exit_code=0)
+git-moves-together -h
+```
+
+``` text,verify(script_name="help",stream=stdout)
+git-moves-together 0.1.0
+
+Billie Thompson <billie@billiecodes.com>
+
+Find files that move at the same time in a git repository to identify coupling
+
+USAGE:
+    git-moves-together [git-repo]
+
+ARGS:
+    <git-repo>    A repository to analyse [env: GIT_REPO=] [default: .]
+
+FLAGS:
+    -h, --help       Print help information
+    -V, --version    Print version information
+```
+
+## Installing
+
+See the [releases
+page](https://github.com/PurpleBooth/ellipsis/releases/latest) we build
+for linux and mac (all x86_64), alternatively use brew
+
+``` shell,skip()
+brew install PurpleBooth/repo/git-moves-together
 ```
