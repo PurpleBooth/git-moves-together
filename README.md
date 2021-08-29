@@ -44,8 +44,13 @@ When we run git-moves-together we can see that these files have no
 direct commit based coupling
 
 ``` shell,script(name="coupling",expected_exit_code=0)
-git-moves-together
-git log
+cat file_1
+echo ===
+cat file_2
+echo ===
+cat file_3
+echo ===
+git-moves-together $PWD
 ```
 
 ``` text,verify(script_name="coupling",stream=stdout)
