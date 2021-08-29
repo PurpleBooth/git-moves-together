@@ -42,7 +42,7 @@ fmt:
 	cargo fix --allow-dirty
 	cargo +nightly clippy --allow-dirty --fix -Z unstable-options --all-features -- -D warnings -Dclippy::all -D clippy::pedantic
 	cargo fmt --all
-	#yamlfmt -w .github/*.yml .github/workflows/*.yml .*.yml
+	yamlfmt -w .github/*.yml .github/workflows/*.yml .*.yml
 
 .PHONY: clean
 ## Clean the build directory
