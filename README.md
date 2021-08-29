@@ -22,7 +22,7 @@ When we run git-moves-together we can see that these files have no
 direct commit based coupling
 
 ``` shell,script(name="no-coupling",expected_exit_code=0)
-git-moves-together .
+git-moves-together
 ```
 
 ``` text,verify(script_name="no-coupling",stream=stdout)
@@ -43,7 +43,7 @@ When we run git-moves-together we can see that these files have no
 direct commit based coupling
 
 ``` shell,script(name="coupling",expected_exit_code=0)
-git-moves-together .
+git-moves-together
 ```
 
 ``` text,verify(script_name="coupling",stream=stdout)
