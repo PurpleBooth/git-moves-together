@@ -6,6 +6,9 @@ class GitMovesTogether < Formula
 
   depends_on "rust" => :build
   depends_on "openssl@1.1"
+  on_linux do
+    depends_on "zlib"
+  end
 
   def install
     system "cargo", "install", "--locked", "--root", prefix, "--path", "."
