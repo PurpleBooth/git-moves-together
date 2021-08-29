@@ -2,7 +2,7 @@ options:
   prev_tag: versio-prev
 
 projects:
-- name: ellipsis
+- name: git-moves-together
   id: 1
   tag_prefix: ''
   labels: cargo
