@@ -12,10 +12,10 @@ If every time I commit no file moves at the same time, that's 0 coupling
 ``` shell,script(name="no-coupling-setup",expected_exit_code=0)
 echo $RANDOM | md5sum | head -c 20 > file_1
 git add .
-git commit --message "demo"
+git commit --message "demo: no-coupling-setup"
 echo $RANDOM | md5sum | head -c 20 > file_2
 git add .
-git commit --message "demo"
+git commit --message "demo: no-coupling-setup"
 ```
 
 When we run git-moves-together we can see that these files have no
@@ -32,11 +32,12 @@ git-moves-together
 If we then make a change to both files in the same commit
 
 ``` shell,script(name="coupling-setup",expected_exit_code=0)
+rm file_1 file_2
 echo $RANDOM | md5sum | head -c 20 > file_1
 echo $RANDOM | md5sum | head -c 20 > file_2
 echo $RANDOM | md5sum | head -c 20 > file_3
 git add .
-git commit --message "demo"
+git commit --message "demo: coupling-setup"
 ```
 
 When we run git-moves-together we can see that these files have no
