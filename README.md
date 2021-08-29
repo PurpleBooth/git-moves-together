@@ -11,10 +11,10 @@ If every time I commit no file moves at the same time, that's 0 coupling
 
 ``` shell,script(name="no-coupling-setup",expected_exit_code=0)
 echo $RANDOM | md5sum | head -c 20 > file_1
-git add file_1
+git add .
 git commit --message "demo"
 echo $RANDOM | md5sum | head -c 20 > file_2
-git add file_2
+git add .
 git commit --message "demo"
 ```
 
@@ -35,7 +35,7 @@ If we then make a change to both files in the same commit
 echo $RANDOM | md5sum | head -c 20 > file_1
 echo $RANDOM | md5sum | head -c 20 > file_2
 echo $RANDOM | md5sum | head -c 20 > file_3
-git add file_1 file_2 file_3
+git add .
 git commit --message "demo"
 ```
 
@@ -43,8 +43,6 @@ When we run git-moves-together we can see that these files have no
 direct commit based coupling
 
 ``` shell,script(name="coupling",expected_exit_code=0)
-git status
-ls
 git-moves-together .
 ```
 
