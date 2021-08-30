@@ -5,14 +5,13 @@ use partial_application::partial;
 use repository::interface::Repository;
 
 use crate::errors::Error;
-use crate::repository::interface::{ChangeDelta, Snapshot};
+use crate::repository::interface::ChangeDelta;
 use crate::repository::libgit2::LibGit2;
 use crate::statistics::Statistics;
-use chrono::Utc;
-use std::ffi::OsStr;
 
 mod cli;
 mod errors;
+mod filters;
 mod repository;
 mod statistics;
 
@@ -50,14 +49,7 @@ fn main() -> Result<(), crate::errors::Error> {
 fn add_prefix((delta, prefix): (&Vec<ChangeDelta>, &str)) -> Vec<ChangeDelta> {
     delta
         .iter()
-        .map(|x| {
-            x.clone().add_prefix(
-                PathBuf::from(prefix)
-                    .file_name()
-                    .and_then(OsStr::to_str)
-                    .unwrap_or(prefix),
-            )
-        })
+        .map(partial!(ChangeDelta::add_prefix_from_filename=> _, prefix))
         .collect::<Vec<_>>()
 }
 
@@ -67,16 +59,8 @@ fn read_deltas(max_days: Option<i64>, path_str: &str) -> Result<Vec<ChangeDelta>
     let delta = repo
         .snapshots_in_current_branch()?
         .iter()
-        .filter(partial!(within_time_limit => max_days, _))
+        .filter(partial!(filters::within_time_limit => max_days, _))
         .map(partial!(Repository::compare_with_parent => &repo, _))
         .collect::<Result<Vec<_>, crate::repository::errors::Error>>()?;
     Ok(delta)
-}
-
-fn within_time_limit(max_days: Option<i64>, snapshot: &Snapshot) -> bool {
-    match max_days {
-        None => true,
-        Some(max_days) => chrono::Duration::days(max_days)
-            .gt(&Utc::now().signed_duration_since(snapshot.timestamp())),
-    }
 }

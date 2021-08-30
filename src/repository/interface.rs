@@ -1,7 +1,9 @@
 use crate::repository::errors::Error;
 use chrono::{DateTime, Utc};
 use partial_application::partial;
+use std::ffi::OsStr;
 use std::iter::FromIterator;
+use std::path::PathBuf;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub(crate) struct SnapshotId(String);
@@ -119,6 +121,15 @@ impl ChangeDelta {
                 .iter()
                 .map(partial!(ChangedFilePath::add_prefix => _, prefix))
                 .collect(),
+        )
+    }
+
+    pub(crate) fn add_prefix_from_filename(&self, path: &str) -> ChangeDelta {
+        self.clone().add_prefix(
+            PathBuf::from(path)
+                .file_name()
+                .and_then(OsStr::to_str)
+                .unwrap_or(path),
         )
     }
 }
