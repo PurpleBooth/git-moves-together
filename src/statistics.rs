@@ -5,6 +5,7 @@ use comfy_table::Table;
 use partial_application::partial;
 
 use crate::repository::interface::{ChangeDelta, ChangedFilePath};
+use std::cmp::Ordering;
 
 #[derive(Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
 pub(crate) struct CouplingKey(ChangedFilePath, ChangedFilePath);
@@ -24,6 +25,16 @@ pub(crate) struct Statistics {
 }
 
 type CouplingCalculation = (f64, usize, usize);
+
+#[allow(clippy::cast_precision_loss)]
+fn coupling_calc_rank(
+    (_, a): &(CouplingKey, CouplingCalculation),
+    (_, b): &(CouplingKey, CouplingCalculation),
+) -> Ordering {
+    (a.0 * (a.2 as f64))
+        .partial_cmp(&(b.0 * (b.2 as f64)))
+        .unwrap()
+}
 
 impl Statistics {
     pub(crate) fn add_delta(self, delta: ChangeDelta) -> Statistics {
@@ -133,8 +144,7 @@ impl Statistics {
 impl Display for Statistics {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut coupling: Vec<_> = self.coupling().into_iter().collect();
-        coupling.sort_by(|(_, a), (_, b)| (*a).partial_cmp(b).unwrap());
-        coupling.reverse();
+        coupling.sort_by(coupling_calc_rank);
 
         let mut table = Table::new();
 
@@ -240,15 +250,15 @@ mod tests {
             "+-------------+-------------+------------+----------+---------+
 | File A      | File B      | Together % | Together | Commits |
 +=============================================================+
-| demo@file_1 | demo@file_2 | 100.00%    | 1        | 1       |
-|-------------+-------------+------------+----------+---------|
-| file_2      | file_3      | 40.00%     | 2        | 5       |
-|-------------+-------------+------------+----------+---------|
-| file_3      | file_5      | 25.00%     | 1        | 4       |
-|-------------+-------------+------------+----------+---------|
 | file_1      | file_2      | 25.00%     | 1        | 4       |
 |-------------+-------------+------------+----------+---------|
 | file_1      | file_3      | 20.00%     | 1        | 5       |
+|-------------+-------------+------------+----------+---------|
+| file_3      | file_5      | 25.00%     | 1        | 4       |
+|-------------+-------------+------------+----------+---------|
+| demo@file_1 | demo@file_2 | 100.00%    | 1        | 1       |
+|-------------+-------------+------------+----------+---------|
+| file_2      | file_3      | 40.00%     | 2        | 5       |
 +-------------+-------------+------------+----------+---------+
 "
         );
