@@ -6,6 +6,7 @@ use crate::repository::errors::Error;
 use crate::repository::interface::{
     ChangeDelta, ChangedFilePath, Repository, Snapshot, SnapshotId, Snapshots,
 };
+use chrono::{TimeZone, Utc};
 
 pub(crate) struct LibGit2 {
     repo: LibGit2Repository,
@@ -43,16 +44,19 @@ impl Repository for LibGit2 {
         walker.set_sorting(Sort::TIME & Sort::TOPOLOGICAL)?;
         walker.push_head()?;
         let mut snapshots = vec![];
-        for reference in walker {
-            let oid = reference?;
-            let patents = self
-                .repo
-                .find_commit(oid)?
+        for commit_id_result in walker {
+            let commit_oid = commit_id_result?;
+            let commit = self.repo.find_commit(commit_oid)?;
+            let patents = commit
                 .parents()
                 .map(|commit| LibGit2::commit_to_snapshot_id(&commit))
                 .collect();
 
-            snapshots.push(Snapshot::new(oid.to_string().into(), patents));
+            snapshots.push(Snapshot::new(
+                commit_oid.to_string().into(),
+                patents,
+                Utc.timestamp(commit.time().seconds(), 0),
+            ));
         }
 
         Ok(snapshots.into())

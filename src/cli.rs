@@ -15,4 +15,12 @@ pub fn app() -> App<'static> {
                 .about("A repository to analyse")
                 .env("GIT_REPO"),
         )
+        .arg(
+            Arg::new("max-days-ago")
+                .short('d')
+                .long("from-days")
+                .takes_value(true)
+                .about("Ignore deltas older than the given days")
+                .env("MAX_DAYS_AGO"),
+        )
 }

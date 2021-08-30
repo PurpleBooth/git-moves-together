@@ -1,4 +1,5 @@
 use crate::repository::errors::Error;
+use chrono::{DateTime, Utc};
 use std::iter::FromIterator;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -25,16 +26,29 @@ impl From<String> for SnapshotId {
 #[derive(Eq, PartialEq, Debug, Clone)]
 pub(crate) struct Snapshot {
     id: SnapshotId,
+    timestamp: DateTime<Utc>,
     parents: Vec<SnapshotId>,
 }
 
 impl Snapshot {
-    pub(crate) fn new(id: SnapshotId, parents: Vec<SnapshotId>) -> Snapshot {
-        Snapshot { id, parents }
+    pub(crate) fn new(
+        id: SnapshotId,
+        parents: Vec<SnapshotId>,
+        timestamp: DateTime<Utc>,
+    ) -> Snapshot {
+        Snapshot {
+            id,
+            timestamp,
+            parents,
+        }
     }
 
     pub(crate) fn id(&self) -> SnapshotId {
         self.id.clone()
+    }
+
+    pub(crate) fn timestamp(&self) -> DateTime<Utc> {
+        self.timestamp
     }
 
     pub(crate) fn parents(&self) -> Vec<SnapshotId> {

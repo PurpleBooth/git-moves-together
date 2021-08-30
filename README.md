@@ -32,7 +32,6 @@ git-moves-together
 If we then make a change to both files in the same commit
 
 ``` shell,script(name="coupling-setup",expected_exit_code=0)
-rm file_1 file_2
 echo "coupling-setup - file_1" > file_1
 echo "coupling-setup - file_2" > file_2
 echo "coupling-setup - file_3" > file_3
@@ -62,6 +61,36 @@ git-moves-together $PWD
 3 files move together
 ```
 
+You can also reduce the commits you're including, by limiting the changes to a specific time period
+
+``` shell,script(name="day-limit-setup",expected_exit_code=0)
+echo "day-limit-setup - file_1" > file_1
+echo "day-limit-setup - file_2" > file_2
+echo "day-limit-setup - file_3" > file_3
+git add .
+GIT_COMMITTER_DATE="2005-04-07T22:13:13" git commit --message "demo: day-limit-setup"
+```
+
+
+``` shell,script(name="day-limit",expected_exit_code=0)
+git-moves-together -d 30 $PWD
+```
+
+``` text,verify(script_name="day-limit",stream=stdout)
++--------+--------+------------+----------+---------+
+| File A | File B | Together % | Together | Commits |
++===================================================+
+| file_1 | file_3 | 100.00%    | 1        | 1       |
+|--------+--------+------------+----------+---------|
+| file_2 | file_3 | 50.00%     | 1        | 2       |
+|--------+--------+------------+----------+---------|
+| file_1 | file_2 | 50.00%     | 1        | 2       |
++--------+--------+------------+----------+---------+
+
+
+3 files move together
+```
+
 ## Usage
 
 ``` shell,script(name="help",expected_exit_code=0)
@@ -76,7 +105,7 @@ Billie Thompson <billie@billiecodes.com>
 Find files that move at the same time in a git repository to identify coupling
 
 USAGE:
-    git-moves-together [git-repo]...
+    git-moves-together [OPTIONS] [git-repo]...
 
 ARGS:
     <git-repo>...    A repository to analyse [env: GIT_REPO=] [default: .]
@@ -84,6 +113,9 @@ ARGS:
 FLAGS:
     -h, --help       Print help information
     -V, --version    Print version information
+
+OPTIONS:
+    -d, --from-days <max-days-ago>    Ignore deltas older than the given days [env: MAX_DAYS_AGO=]
 ```
 
 ## Installing

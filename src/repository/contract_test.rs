@@ -14,9 +14,9 @@ use crate::repository::libgit2::LibGit2;
 fn in_memory_repository() -> InMemory {
     InMemory::new(
         Snapshots::from(vec![
-            Snapshot::new("3".into(), vec!["2".into()]),
-            Snapshot::new("2".into(), vec!["1".into()]),
-            Snapshot::new("1".into(), vec![]),
+            Snapshot::new("3".into(), vec!["2".into()], chrono::offset::Utc::now()),
+            Snapshot::new("2".into(), vec!["1".into()], chrono::offset::Utc::now()),
+            Snapshot::new("1".into(), vec![], chrono::offset::Utc::now()),
         ]),
         vec![
             ("1".into(), "file1".into()),
@@ -96,16 +96,16 @@ fn i_can_get_a_list_of_all_current_commits() {
     for repo in &repos {
         let actual = repo.snapshots_in_current_branch().unwrap();
         let mut iter = actual.iter();
-        let head_id = iter.next().unwrap();
-        let mid_id = iter.next().unwrap();
-        let root_id = iter.next().unwrap();
+        let head = iter.next().unwrap();
+        let mid = iter.next().unwrap();
+        let root = iter.next().unwrap();
 
         assert!(iter.next().is_none());
         assert_eq!(
             Snapshots::from(vec![
-                Snapshot::new(head_id.id(), vec![mid_id.id()]),
-                Snapshot::new(mid_id.id(), vec![root_id.id()]),
-                Snapshot::new(root_id.id(), vec![]),
+                Snapshot::new(head.id(), vec![mid.id()], head.timestamp()),
+                Snapshot::new(mid.id(), vec![root.id()], mid.timestamp()),
+                Snapshot::new(root.id(), vec![], root.timestamp()),
             ]),
             actual
         );
@@ -131,8 +131,12 @@ fn given_a_snapshot_i_can_find_out_what_files_changed_in_it() {
         let expected: ChangeDelta = vec![String::from("file2"), String::from("file3")].into();
         assert_eq!(
             expected,
-            repo.compare_with_parent(&Snapshot::new(head_id, vec![mid_id]))
-                .unwrap()
+            repo.compare_with_parent(&Snapshot::new(
+                head_id,
+                vec![mid_id],
+                chrono::offset::Utc::now()
+            ))
+            .unwrap()
         );
     }
 

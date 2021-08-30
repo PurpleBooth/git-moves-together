@@ -5,9 +5,10 @@ use partial_application::partial;
 use repository::interface::Repository;
 
 use crate::errors::Error;
-use crate::repository::interface::ChangeDelta;
+use crate::repository::interface::{ChangeDelta, Snapshot};
 use crate::repository::libgit2::LibGit2;
 use crate::statistics::Statistics;
+use chrono::Utc;
 
 mod cli;
 mod errors;
@@ -16,10 +17,15 @@ mod statistics;
 
 fn main() -> Result<(), crate::errors::Error> {
     let matches = cli::app().get_matches();
+    let max_days = if let Some(value) = matches.value_of("max-days-ago") {
+        Some(value.parse()?)
+    } else {
+        None
+    };
     let deltas = matches
         .values_of("git-repo")
         .unwrap()
-        .map(read_deltas)
+        .map(partial!(read_deltas => max_days, _))
         .collect::<Result<Vec<Vec<ChangeDelta>>, crate::errors::Error>>()?;
 
     let statistics = deltas
@@ -39,13 +45,22 @@ fn main() -> Result<(), crate::errors::Error> {
     Ok(())
 }
 
-fn read_deltas(path_str: &str) -> Result<Vec<ChangeDelta>, Error> {
+fn read_deltas(max_days: Option<i64>, path_str: &str) -> Result<Vec<ChangeDelta>, Error> {
     let path = PathBuf::from(path_str);
     let repo = LibGit2::new(path)?;
     let delta = repo
         .snapshots_in_current_branch()?
         .iter()
+        .filter(partial!(within_time_limit => max_days, _))
         .map(partial!(Repository::compare_with_parent => &repo, _))
         .collect::<Result<Vec<_>, crate::repository::errors::Error>>()?;
     Ok(delta)
+}
+
+fn within_time_limit(max_days: Option<i64>, snapshot: &Snapshot) -> bool {
+    match max_days {
+        None => true,
+        Some(max_days) => chrono::Duration::days(max_days)
+            .gt(&Utc::now().signed_duration_since(snapshot.timestamp())),
+    }
 }
