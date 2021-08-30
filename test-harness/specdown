@@ -3,7 +3,8 @@
 set -euo pipefail
 
 REPOSITORY_DIR="$PWD"
-TEMPORARY_DIR="$(mktemp -d)"
+TEMPORARY_DIR="$(mktemp -d)/some-repo"
+mkdir -p "$TEMPORARY_DIR"
 
 if [[ -z "$(git config init.defaultBranch)" ]]; then
     git config --global init.defaultBranch main

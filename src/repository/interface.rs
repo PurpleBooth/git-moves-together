@@ -1,5 +1,6 @@
 use crate::repository::errors::Error;
 use chrono::{DateTime, Utc};
+use partial_application::partial;
 use std::iter::FromIterator;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -85,22 +86,42 @@ impl Snapshots {
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Hash, Ord, PartialOrd)]
-pub(crate) struct ChangedFilePath(String);
+pub(crate) struct ChangedFilePath(Option<String>, String);
+
+impl ChangedFilePath {
+    fn add_prefix(&self, prefix: &str) -> ChangedFilePath {
+        ChangedFilePath(Some(prefix.into()), self.1.clone())
+    }
+}
 
 impl From<ChangedFilePath> for String {
     fn from(path: ChangedFilePath) -> Self {
-        path.0
+        match path {
+            ChangedFilePath(None, file) => file,
+            ChangedFilePath(Some(repo), file) => format!("{}@{}", repo, file),
+        }
     }
 }
 
 impl From<&str> for ChangedFilePath {
     fn from(path: &str) -> Self {
-        ChangedFilePath(String::from(path))
+        ChangedFilePath(None, String::from(path))
     }
 }
 
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub(crate) struct ChangeDelta(Vec<ChangedFilePath>);
+
+impl ChangeDelta {
+    pub(crate) fn add_prefix(self, prefix: &str) -> ChangeDelta {
+        ChangeDelta(
+            self.0
+                .iter()
+                .map(partial!(ChangedFilePath::add_prefix => _, prefix))
+                .collect(),
+        )
+    }
+}
 
 impl IntoIterator for &ChangeDelta {
     type Item = ChangedFilePath;
@@ -148,7 +169,7 @@ impl FromIterator<ChangedFilePath> for ChangeDelta {
 
 impl From<String> for ChangedFilePath {
     fn from(item: String) -> Self {
-        ChangedFilePath(item)
+        ChangedFilePath(None, item)
     }
 }
 

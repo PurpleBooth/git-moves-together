@@ -26,12 +26,12 @@ pub(crate) struct Statistics {
 type CouplingCalculation = (f64, usize, usize);
 
 impl Statistics {
-    pub(crate) fn add_delta(self, delta: &ChangeDelta) -> Statistics {
+    pub(crate) fn add_delta(self, delta: ChangeDelta) -> Statistics {
         Statistics {
             change_deltas: self
                 .change_deltas
                 .into_iter()
-                .chain(vec![delta.clone()].into_iter())
+                .chain(vec![delta].into_iter())
                 .collect(),
         }
     }
@@ -169,7 +169,7 @@ mod tests {
     #[test]
     fn adding_one_file_to_statistics_will_give_a_count_of_zero() {
         let statistics = Statistics::default();
-        let actual = statistics.add_delta(&ChangeDelta::from(vec!["file_1"]));
+        let actual = statistics.add_delta(ChangeDelta::from(vec!["file_1"]));
         assert_eq!(actual.coupling(), BTreeMap::new());
     }
 
@@ -177,9 +177,9 @@ mod tests {
     fn a_file_two_files_at_the_same_time_twice_is_full_coupling() {
         let statistics = Statistics::default();
         let actual = statistics
-            .add_delta(&ChangeDelta::from(vec!["file_1", "file_2"]))
-            .add_delta(&ChangeDelta::from(vec!["file_1", "file_2"]))
-            .add_delta(&ChangeDelta::from(vec!["file_1", "file_2"]));
+            .add_delta(ChangeDelta::from(vec!["file_1", "file_2"]))
+            .add_delta(ChangeDelta::from(vec!["file_1", "file_2"]))
+            .add_delta(ChangeDelta::from(vec!["file_1", "file_2"]));
         assert_eq!(
             actual.coupling(),
             vec![(
@@ -195,12 +195,12 @@ mod tests {
     fn more_complex_coupling() {
         let statistics = Statistics::default();
         let actual = statistics
-            .add_delta(&ChangeDelta::from(vec!["file_1", "file_2"]))
-            .add_delta(&ChangeDelta::from(vec!["file_3", "file_2"]))
-            .add_delta(&ChangeDelta::from(vec!["file_3", "file_2"]))
-            .add_delta(&ChangeDelta::from(vec!["file_3", "file_5"]))
-            .add_delta(&ChangeDelta::from(vec!["file_3", "file_1"]))
-            .add_delta(&ChangeDelta::from(vec!["file_1", "file_2"]));
+            .add_delta(ChangeDelta::from(vec!["file_1", "file_2"]))
+            .add_delta(ChangeDelta::from(vec!["file_3", "file_2"]))
+            .add_delta(ChangeDelta::from(vec!["file_3", "file_2"]))
+            .add_delta(ChangeDelta::from(vec!["file_3", "file_5"]))
+            .add_delta(ChangeDelta::from(vec!["file_3", "file_1"]))
+            .add_delta(ChangeDelta::from(vec!["file_1", "file_2"]));
         assert_eq!(
             actual.coupling(),
             vec![
@@ -229,25 +229,27 @@ mod tests {
     #[test]
     fn statistics_render_pretty() {
         let statistics = Statistics::default()
-            .add_delta(&ChangeDelta::from(vec!["file_1", "file_2"]))
-            .add_delta(&ChangeDelta::from(vec!["file_3", "file_2"]))
-            .add_delta(&ChangeDelta::from(vec!["file_3", "file_2"]))
-            .add_delta(&ChangeDelta::from(vec!["file_3", "file_5"]))
-            .add_delta(&ChangeDelta::from(vec!["file_3", "file_1"]))
-            .add_delta(&ChangeDelta::from(vec!["file_1", "file_2"]));
+            .add_delta(ChangeDelta::from(vec!["file_1", "file_2"]))
+            .add_delta(ChangeDelta::from(vec!["file_3", "file_2"]))
+            .add_delta(ChangeDelta::from(vec!["file_3", "file_2"]))
+            .add_delta(ChangeDelta::from(vec!["file_3", "file_5"]))
+            .add_delta(ChangeDelta::from(vec!["file_3", "file_1"]))
+            .add_delta(ChangeDelta::from(vec!["file_1", "file_2"]).add_prefix("demo"));
         assert_eq!(
             format!("{}", statistics),
-            "+--------+--------+------------+----------+---------+
-| File A | File B | Together % | Together | Commits |
-+===================================================+
-| file_1 | file_2 | 40.00%     | 2        | 5       |
-|--------+--------+------------+----------+---------|
-| file_2 | file_3 | 33.33%     | 2        | 6       |
-|--------+--------+------------+----------+---------|
-| file_3 | file_5 | 25.00%     | 1        | 4       |
-|--------+--------+------------+----------+---------|
-| file_1 | file_3 | 16.67%     | 1        | 6       |
-+--------+--------+------------+----------+---------+
+            "+-------------+-------------+------------+----------+---------+
+| File A      | File B      | Together % | Together | Commits |
++=============================================================+
+| demo@file_1 | demo@file_2 | 100.00%    | 1        | 1       |
+|-------------+-------------+------------+----------+---------|
+| file_2      | file_3      | 40.00%     | 2        | 5       |
+|-------------+-------------+------------+----------+---------|
+| file_3      | file_5      | 25.00%     | 1        | 4       |
+|-------------+-------------+------------+----------+---------|
+| file_1      | file_2      | 25.00%     | 1        | 4       |
+|-------------+-------------+------------+----------+---------|
+| file_1      | file_3      | 20.00%     | 1        | 5       |
++-------------+-------------+------------+----------+---------+
 "
         );
     }

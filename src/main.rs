@@ -9,6 +9,7 @@ use crate::repository::interface::{ChangeDelta, Snapshot};
 use crate::repository::libgit2::LibGit2;
 use crate::statistics::Statistics;
 use chrono::Utc;
+use std::ffi::OsStr;
 
 mod cli;
 mod errors;
@@ -30,7 +31,8 @@ fn main() -> Result<(), crate::errors::Error> {
 
     let statistics = deltas
         .iter()
-        .flatten()
+        .zip(matches.values_of("git-repo").unwrap())
+        .flat_map(add_prefix)
         .fold(Statistics::default(), Statistics::add_delta);
 
     let coupling = statistics.coupling();
@@ -43,6 +45,20 @@ fn main() -> Result<(), crate::errors::Error> {
     }
 
     Ok(())
+}
+
+fn add_prefix((delta, prefix): (&Vec<ChangeDelta>, &str)) -> Vec<ChangeDelta> {
+    delta
+        .iter()
+        .map(|x| {
+            x.clone().add_prefix(
+                PathBuf::from(prefix)
+                    .file_name()
+                    .and_then(OsStr::to_str)
+                    .unwrap_or(prefix),
+            )
+        })
+        .collect::<Vec<_>>()
 }
 
 fn read_deltas(max_days: Option<i64>, path_str: &str) -> Result<Vec<ChangeDelta>, Error> {
