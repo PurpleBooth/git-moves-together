@@ -61,7 +61,8 @@ git-moves-together $PWD
 3 files move together
 ```
 
-You can also reduce the commits you're including, by limiting the changes to a specific time period
+You can also reduce the commits you're including, by limiting the
+changes to a specific time period
 
 ``` shell,script(name="day-limit-setup",expected_exit_code=0)
 echo "day-limit-setup - file_1" > file_1
@@ -70,7 +71,6 @@ echo "day-limit-setup - file_3" > file_3
 git add .
 GIT_COMMITTER_DATE="2005-04-07T22:13:13" git commit --message "demo: day-limit-setup"
 ```
-
 
 ``` shell,script(name="day-limit",expected_exit_code=0)
 git-moves-together -d 30 $PWD
