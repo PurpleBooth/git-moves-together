@@ -1,14 +1,20 @@
-use partial_application::partial;
 use std::ffi::OsStr;
 use std::iter::FromIterator;
 use std::path::PathBuf;
 
+use partial_application::partial;
+
 use crate::model::changed_file_path::ChangedFilePath;
+use std::collections::BTreeSet;
 
 #[derive(Debug, Eq, PartialEq, Clone)]
-pub(crate) struct ChangeDelta(Vec<ChangedFilePath>);
+pub(crate) struct ChangeDelta(BTreeSet<ChangedFilePath>);
 
 impl ChangeDelta {
+    pub(crate) fn contains(&self, item: &ChangedFilePath) -> bool {
+        self.0.contains(item)
+    }
+
     pub(crate) fn add_prefix(self, prefix: &str) -> ChangeDelta {
         ChangeDelta(
             self.0
@@ -30,7 +36,7 @@ impl ChangeDelta {
 
 impl IntoIterator for &ChangeDelta {
     type Item = ChangedFilePath;
-    type IntoIter = std::vec::IntoIter<Self::Item>;
+    type IntoIter = std::collections::btree_set::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.clone().into_iter()
@@ -55,19 +61,39 @@ impl From<Vec<ChangedFilePath>> for ChangeDelta {
     }
 }
 
-impl ChangeDelta {
-    pub(crate) fn contains(&self, item: &ChangedFilePath) -> bool {
-        self.0.contains(item)
-    }
-}
-
 impl FromIterator<ChangedFilePath> for ChangeDelta {
     fn from_iter<T: IntoIterator<Item = ChangedFilePath>>(iter: T) -> Self {
-        let mut items = Vec::new();
+        let mut items = BTreeSet::new();
         for item in iter {
-            items.push(item);
+            items.insert(item);
         }
 
         ChangeDelta(items)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::model::change_delta::ChangeDelta;
+
+    #[test]
+    fn can_put_a_prefix_on_everything_in() {
+        let actual: Vec<String> = ChangeDelta::from(vec!["item 1", "item 2", "item 3"])
+            .add_prefix("Something")
+            .into_iter()
+            .map(|x| x.into())
+            .collect();
+
+        assert_eq!(
+            actual,
+            vec!["Something@item 1", "Something@item 2", "Something@item 3"]
+        );
+    }
+    #[test]
+    fn can_tell_if_something_is_in_this_delta() {
+        let actual = ChangeDelta::from(vec!["item 1", "item 2", "item 3"]);
+
+        assert!(actual.contains(&"item 1".into()));
+        assert!(!actual.contains(&"none existing".into()));
     }
 }
