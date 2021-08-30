@@ -1,11 +1,10 @@
 use std::collections::{BTreeMap, BTreeSet};
-use std::ops::Div;
+use std::fmt::{Display, Formatter};
 
+use comfy_table::Table;
 use partial_application::partial;
 
 use crate::repository::interface::{ChangeDelta, ChangedFilePath};
-use comfy_table::Table;
-use std::fmt::{Display, Formatter};
 
 #[derive(Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
 pub(crate) struct CouplingKey(ChangedFilePath, ChangedFilePath);
@@ -24,6 +23,8 @@ pub(crate) struct Statistics {
     change_deltas: Vec<ChangeDelta>,
 }
 
+type CouplingCalculation = (f64, usize, usize);
+
 impl Statistics {
     pub(crate) fn add_delta(self, delta: &ChangeDelta) -> Statistics {
         Statistics {
@@ -35,7 +36,7 @@ impl Statistics {
         }
     }
 
-    pub(crate) fn coupling(&self) -> BTreeMap<CouplingKey, f64> {
+    pub(crate) fn coupling(&self) -> BTreeMap<CouplingKey, CouplingCalculation> {
         return self.files_to_analyse().iter().fold(
             BTreeMap::new(),
             partial!(Statistics::add_statistics_to_hash_map => self, _, _),
@@ -48,46 +49,68 @@ impl Statistics {
 
     fn add_statistics_to_hash_map(
         &self,
-        accumulator: BTreeMap<CouplingKey, f64>,
+        accumulator: BTreeMap<CouplingKey, CouplingCalculation>,
         item: &ChangedFilePath,
-    ) -> BTreeMap<CouplingKey, f64> {
-        let total_changes = self.number_of_deltas_containing(item);
-
+    ) -> BTreeMap<CouplingKey, CouplingCalculation> {
         self.files_to_analyse()
             .iter()
             .filter(partial!(ChangedFilePath::ne => item, _))
-            .map(partial!(Statistics::number_of_deltas_containing_both => self, item, _))
-            .fold(
-                accumulator,
-                partial!(Statistics::hash_map_with_new_coupling_item => total_changes, _, _),
-            )
-    }
-
-    fn hash_map_with_new_coupling_item(
-        total_changes: f64,
-        acc: BTreeMap<CouplingKey, f64>,
-        (coupling_key, count): (CouplingKey, f64),
-    ) -> BTreeMap<CouplingKey, f64> {
-        acc.into_iter()
-            .chain(vec![(coupling_key, (count.div(total_changes)))])
-            .filter(|(_, score)| score > &0.0)
-            .collect::<BTreeMap<_, _>>()
+            .map(partial!(Statistics::number_of_deltas_containing => self, item, _))
+            .fold(accumulator, Statistics::hash_map_with_new_coupling_item)
     }
 
     #[allow(clippy::cast_precision_loss)]
+    fn hash_map_with_new_coupling_item(
+        acc: BTreeMap<CouplingKey, CouplingCalculation>,
+        (coupling_key, count, total_changes): (CouplingKey, usize, usize),
+    ) -> BTreeMap<CouplingKey, CouplingCalculation> {
+        acc.into_iter()
+            .chain(vec![(
+                coupling_key,
+                (
+                    (count as f64) / (total_changes as f64),
+                    count,
+                    total_changes,
+                ),
+            )])
+            .filter(|(_, (score, _, _))| score > &0.0)
+            .collect::<BTreeMap<_, _>>()
+    }
+
+    fn number_of_deltas_containing(
+        &self,
+        item: &ChangedFilePath,
+        other_file: &ChangedFilePath,
+    ) -> (CouplingKey, usize, usize) {
+        (
+            CouplingKey::new(item.clone(), other_file.clone()),
+            self.number_of_deltas_containing_both(item, other_file),
+            self.number_of_deltas_containing_either(item, other_file),
+        )
+    }
+
     fn number_of_deltas_containing_both(
         &self,
         item: &ChangedFilePath,
         other_file: &ChangedFilePath,
-    ) -> (CouplingKey, f64) {
-        (
-            CouplingKey::new(item.clone(), other_file.clone()),
-            self.change_deltas
-                .clone()
-                .into_iter()
-                .filter(partial!(Statistics::contains_both => item, other_file, _))
-                .count() as f64,
-        )
+    ) -> usize {
+        self.change_deltas
+            .clone()
+            .into_iter()
+            .filter(partial!(Statistics::contains_both => item, other_file, _))
+            .count()
+    }
+
+    fn number_of_deltas_containing_either(
+        &self,
+        item: &ChangedFilePath,
+        other_file: &ChangedFilePath,
+    ) -> usize {
+        self.change_deltas
+            .clone()
+            .into_iter()
+            .filter(partial!(Statistics::contains_either => item, other_file, _))
+            .count()
     }
 
     fn contains_both(
@@ -98,12 +121,12 @@ impl Statistics {
         delta.contains(item) && delta.contains(other_file)
     }
 
-    #[allow(clippy::cast_precision_loss)]
-    fn number_of_deltas_containing(&self, item: &ChangedFilePath) -> f64 {
-        self.change_deltas
-            .iter()
-            .filter(|delta| delta.contains(item))
-            .count() as f64
+    fn contains_either(
+        item: &ChangedFilePath,
+        other_file: &ChangedFilePath,
+        delta: &ChangeDelta,
+    ) -> bool {
+        delta.contains(item) || delta.contains(other_file)
     }
 }
 
@@ -115,12 +138,20 @@ impl Display for Statistics {
 
         let mut table = Table::new();
 
-        table.set_header(vec!["File A", "File B", "Moves Together"]);
-        for (key, strength) in coupling {
+        table.set_header(vec![
+            "File A",
+            "File B",
+            "Together %",
+            "Together",
+            "Commits",
+        ]);
+        for (key, (strength, together, total)) in coupling {
             table.add_row(vec![
                 key.0.into(),
                 key.1.into(),
                 format!("{:.2}%", strength * 100.0),
+                format!("{}", together),
+                format!("{}", total),
             ]);
         }
 
@@ -151,9 +182,12 @@ mod tests {
             .add_delta(&ChangeDelta::from(vec!["file_1", "file_2"]));
         assert_eq!(
             actual.coupling(),
-            vec![(CouplingKey::new("file_1".into(), "file_2".into()), 1.0),]
-                .into_iter()
-                .collect()
+            vec![(
+                CouplingKey::new("file_1".into(), "file_2".into()),
+                (1.0, 3, 3)
+            ),]
+            .into_iter()
+            .collect()
         );
     }
 
@@ -170,10 +204,22 @@ mod tests {
         assert_eq!(
             actual.coupling(),
             vec![
-                (CouplingKey::new("file_1".into(), "file_2".into()), 0.5),
-                (CouplingKey::new("file_1".into(), "file_3".into()), 0.25),
-                (CouplingKey::new("file_2".into(), "file_3".into()), 0.5),
-                (CouplingKey::new("file_3".into(), "file_5".into()), 1.0)
+                (
+                    CouplingKey::new("file_1".into(), "file_2".into()),
+                    (0.4, 2, 5)
+                ),
+                (
+                    CouplingKey::new("file_1".into(), "file_3".into()),
+                    (0.166_666_666_666_666_66, 1, 6)
+                ),
+                (
+                    CouplingKey::new("file_2".into(), "file_3".into()),
+                    (0.333_333_333_333_333_3, 2, 6)
+                ),
+                (
+                    CouplingKey::new("file_3".into(), "file_5".into()),
+                    (0.25, 1, 4)
+                ),
             ]
             .into_iter()
             .collect()
@@ -191,17 +237,17 @@ mod tests {
             .add_delta(&ChangeDelta::from(vec!["file_1", "file_2"]));
         assert_eq!(
             format!("{}", statistics),
-            "+--------+--------+----------------+
-| File A | File B | Moves Together |
-+==================================+
-| file_3 | file_5 | 100.00%        |
-|--------+--------+----------------|
-| file_2 | file_3 | 50.00%         |
-|--------+--------+----------------|
-| file_1 | file_2 | 50.00%         |
-|--------+--------+----------------|
-| file_1 | file_3 | 25.00%         |
-+--------+--------+----------------+
+            "+--------+--------+------------+----------+---------+
+| File A | File B | Together % | Together | Commits |
++===================================================+
+| file_1 | file_2 | 40.00%     | 2        | 5       |
+|--------+--------+------------+----------+---------|
+| file_2 | file_3 | 33.33%     | 2        | 6       |
+|--------+--------+------------+----------+---------|
+| file_3 | file_5 | 25.00%     | 1        | 4       |
+|--------+--------+------------+----------+---------|
+| file_1 | file_3 | 16.67%     | 1        | 6       |
++--------+--------+------------+----------+---------+
 "
         );
     }
