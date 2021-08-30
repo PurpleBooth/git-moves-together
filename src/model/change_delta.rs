@@ -17,8 +17,23 @@ pub(crate) struct ChangeDelta {
 }
 
 impl ChangeDelta {
+    pub(crate) fn merge(&self, other: &ChangeDelta) -> ChangeDelta {
+        ChangeDelta {
+            id: self.id(),
+            timestamp: self.timestamp(),
+            changes: self
+                .changes
+                .union(&other.changes)
+                .cloned()
+                .collect::<BTreeSet<_>>(),
+        }
+    }
+
     pub(crate) fn id(&self) -> SnapshotId {
         self.id.clone()
+    }
+    pub(crate) fn timestamp(&self) -> DateTime<Utc> {
+        self.timestamp
     }
     pub(crate) fn new(
         id: SnapshotId,

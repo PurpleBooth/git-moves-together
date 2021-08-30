@@ -8,6 +8,8 @@ use partial_application::partial;
 use crate::model::change_delta::ChangeDelta;
 use crate::model::changed_file_path::ChangedFilePath;
 use crate::model::snapshot_id::SnapshotId;
+use chrono::Duration;
+use chrono::DurationRound;
 
 #[derive(Eq, PartialEq, Hash, Debug, Ord, PartialOrd, Clone)]
 pub(crate) struct CouplingKey(ChangedFilePath, ChangedFilePath);
@@ -39,10 +41,36 @@ fn coupling_calc_rank(
         .unwrap()
 }
 
+pub enum Strategy {
+    Id,
+    CommitTime(Duration),
+}
+
 impl Statistics {
-    pub(crate) fn add_delta(self, delta: ChangeDelta) -> Statistics {
+    pub(crate) fn add_delta(self, delta: &ChangeDelta, strategy: &Strategy) -> Statistics {
+        let mut change_map = self.change_deltas;
+        let (key, new_delta) = match strategy {
+            Strategy::Id => (delta.id(), delta.clone()),
+            Strategy::CommitTime(duration) => {
+                let key: SnapshotId = delta
+                    .timestamp()
+                    .duration_trunc(*duration)
+                    .unwrap()
+                    .to_string()
+                    .into();
+                (
+                    key.clone(),
+                    match change_map.get(&key) {
+                        None => delta.clone(),
+                        Some(existing_delta) => existing_delta.merge(delta),
+                    },
+                )
+            }
+        };
+        change_map.insert(key, new_delta.clone());
+
         let mut map = self.contains;
-        for change in delta.clone() {
+        for change in new_delta {
             let mut current_deltas = match map.get(&change) {
                 None => BTreeSet::new(),
                 Some(set) => set.clone(),
@@ -54,11 +82,7 @@ impl Statistics {
         }
 
         Statistics {
-            change_deltas: self
-                .change_deltas
-                .into_iter()
-                .chain(vec![(delta.id(), delta)].into_iter())
-                .collect(),
+            change_deltas: change_map,
             contains: map,
         }
     }
@@ -175,16 +199,15 @@ mod tests {
     use chrono::Utc;
 
     use crate::model::change_delta::ChangeDelta;
-    use crate::statistics::{CouplingKey, Statistics};
+    use crate::statistics::{CouplingKey, Statistics, Strategy};
 
     #[test]
     fn adding_one_file_to_statistics_will_give_a_count_of_zero() {
         let statistics = Statistics::default();
-        let actual = statistics.add_delta(ChangeDelta::new(
-            "Id".into(),
-            Utc::now(),
-            vec!["file_1".into()],
-        ));
+        let actual = statistics.add_delta(
+            &ChangeDelta::new("Id".into(), Utc::now(), vec!["file_1".into()]),
+            &Strategy::Id,
+        );
         assert_eq!(actual.coupling(), BTreeMap::new());
     }
 
@@ -192,21 +215,30 @@ mod tests {
     fn a_file_two_files_at_the_same_time_twice_is_full_coupling() {
         let statistics = Statistics::default();
         let actual = statistics
-            .add_delta(ChangeDelta::new(
-                "1".into(),
-                Utc::now(),
-                vec!["file_1".into(), "file_2".into()],
-            ))
-            .add_delta(ChangeDelta::new(
-                "2".into(),
-                Utc::now(),
-                vec!["file_1".into(), "file_2".into()],
-            ))
-            .add_delta(ChangeDelta::new(
-                "3".into(),
-                Utc::now(),
-                vec!["file_1".into(), "file_2".into()],
-            ));
+            .add_delta(
+                &ChangeDelta::new(
+                    "1".into(),
+                    Utc::now(),
+                    vec!["file_1".into(), "file_2".into()],
+                ),
+                &Strategy::Id,
+            )
+            .add_delta(
+                &ChangeDelta::new(
+                    "2".into(),
+                    Utc::now(),
+                    vec!["file_1".into(), "file_2".into()],
+                ),
+                &Strategy::Id,
+            )
+            .add_delta(
+                &ChangeDelta::new(
+                    "3".into(),
+                    Utc::now(),
+                    vec!["file_1".into(), "file_2".into()],
+                ),
+                &Strategy::Id,
+            );
         assert_eq!(
             actual.coupling(),
             vec![(
@@ -222,36 +254,54 @@ mod tests {
     fn more_complex_coupling() {
         let statistics = Statistics::default();
         let actual = statistics
-            .add_delta(ChangeDelta::new(
-                "1".into(),
-                Utc::now(),
-                vec!["file_1".into(), "file_2".into()],
-            ))
-            .add_delta(ChangeDelta::new(
-                "2".into(),
-                Utc::now(),
-                vec!["file_3".into(), "file_2".into()],
-            ))
-            .add_delta(ChangeDelta::new(
-                "3".into(),
-                Utc::now(),
-                vec!["file_3".into(), "file_2".into()],
-            ))
-            .add_delta(ChangeDelta::new(
-                "4".into(),
-                Utc::now(),
-                vec!["file_3".into(), "file_5".into()],
-            ))
-            .add_delta(ChangeDelta::new(
-                "5".into(),
-                Utc::now(),
-                vec!["file_3".into(), "file_1".into()],
-            ))
-            .add_delta(ChangeDelta::new(
-                "6".into(),
-                Utc::now(),
-                vec!["file_1".into(), "file_2".into()],
-            ));
+            .add_delta(
+                &ChangeDelta::new(
+                    "1".into(),
+                    Utc::now(),
+                    vec!["file_1".into(), "file_2".into()],
+                ),
+                &Strategy::Id,
+            )
+            .add_delta(
+                &ChangeDelta::new(
+                    "2".into(),
+                    Utc::now(),
+                    vec!["file_3".into(), "file_2".into()],
+                ),
+                &Strategy::Id,
+            )
+            .add_delta(
+                &ChangeDelta::new(
+                    "3".into(),
+                    Utc::now(),
+                    vec!["file_3".into(), "file_2".into()],
+                ),
+                &Strategy::Id,
+            )
+            .add_delta(
+                &ChangeDelta::new(
+                    "4".into(),
+                    Utc::now(),
+                    vec!["file_3".into(), "file_5".into()],
+                ),
+                &Strategy::Id,
+            )
+            .add_delta(
+                &ChangeDelta::new(
+                    "5".into(),
+                    Utc::now(),
+                    vec!["file_3".into(), "file_1".into()],
+                ),
+                &Strategy::Id,
+            )
+            .add_delta(
+                &ChangeDelta::new(
+                    "6".into(),
+                    Utc::now(),
+                    vec!["file_1".into(), "file_2".into()],
+                ),
+                &Strategy::Id,
+            );
         assert_eq!(
             actual.coupling(),
             vec![
@@ -280,38 +330,54 @@ mod tests {
     #[test]
     fn statistics_render_pretty() {
         let statistics = Statistics::default()
-            .add_delta(ChangeDelta::new(
-                "1".into(),
-                Utc::now(),
-                vec!["file_1".into(), "file_2".into()],
-            ))
-            .add_delta(ChangeDelta::new(
-                "2".into(),
-                Utc::now(),
-                vec!["file_3".into(), "file_2".into()],
-            ))
-            .add_delta(ChangeDelta::new(
-                "3".into(),
-                Utc::now(),
-                vec!["file_3".into(), "file_2".into()],
-            ))
-            .add_delta(ChangeDelta::new(
-                "4".into(),
-                Utc::now(),
-                vec!["file_3".into(), "file_5".into()],
-            ))
-            .add_delta(ChangeDelta::new(
-                "5".into(),
-                Utc::now(),
-                vec!["file_3".into(), "file_1".into()],
-            ))
             .add_delta(
-                ChangeDelta::new(
+                &ChangeDelta::new(
+                    "1".into(),
+                    Utc::now(),
+                    vec!["file_1".into(), "file_2".into()],
+                ),
+                &Strategy::Id,
+            )
+            .add_delta(
+                &ChangeDelta::new(
+                    "2".into(),
+                    Utc::now(),
+                    vec!["file_3".into(), "file_2".into()],
+                ),
+                &Strategy::Id,
+            )
+            .add_delta(
+                &ChangeDelta::new(
+                    "3".into(),
+                    Utc::now(),
+                    vec!["file_3".into(), "file_2".into()],
+                ),
+                &Strategy::Id,
+            )
+            .add_delta(
+                &ChangeDelta::new(
+                    "4".into(),
+                    Utc::now(),
+                    vec!["file_3".into(), "file_5".into()],
+                ),
+                &Strategy::Id,
+            )
+            .add_delta(
+                &ChangeDelta::new(
+                    "5".into(),
+                    Utc::now(),
+                    vec!["file_3".into(), "file_1".into()],
+                ),
+                &Strategy::Id,
+            )
+            .add_delta(
+                &ChangeDelta::new(
                     "6".into(),
                     Utc::now(),
                     vec!["file_1".into(), "file_2".into()],
                 )
                 .add_prefix("demo"),
+                &Strategy::Id,
             );
         assert_eq!(
             format!("{}", statistics),

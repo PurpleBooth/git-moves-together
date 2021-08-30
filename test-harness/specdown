@@ -3,8 +3,11 @@
 set -euo pipefail
 
 REPOSITORY_DIR="$PWD"
-TEMPORARY_DIR="$(mktemp -d)/some-repo"
-mkdir -p "$TEMPORARY_DIR"
+TEMPORARY_DIR="$(mktemp -d)"
+MAIN_DIR="$TEMPORARY_DIR/some-repo"
+OTHER_REPO_DIR="$TEMPORARY_DIR/other-repo"
+mkdir -p "$MAIN_DIR"
+mkdir -p "$OTHER_REPO_DIR"
 
 if [[ -z "$(git config init.defaultBranch)" ]]; then
     git config --global init.defaultBranch main
@@ -15,7 +18,10 @@ export GIT_COMMITTER_EMAIL=john@doe.org
 export GIT_AUTHOR_NAME=John Doe
 export GIT_AUTHOR_EMAIL=john@doe.org
 export PATH="$REPOSITORY_DIR/target/release/:$REPOSITORY_DIR/target/debug/:$PATH"
-git -C "$TEMPORARY_DIR" init .
-git -C "$TEMPORARY_DIR" config commit.gpgsign false
-rm "$TEMPORARY_DIR/.git/hooks/"*
-exec specdown run --running-dir "$TEMPORARY_DIR" "${@}"
+git -C "$MAIN_DIR" init .
+git -C "$MAIN_DIR" config commit.gpgsign false
+rm "$MAIN_DIR/.git/hooks/"*
+git -C "$OTHER_REPO_DIR" init .
+git -C "$OTHER_REPO_DIR" config commit.gpgsign false
+rm "$OTHER_REPO_DIR/.git/hooks/"*
+exec specdown run --running-dir "$MAIN_DIR" "${@}"

@@ -23,4 +23,12 @@ pub fn app() -> App<'static> {
                 .about("Ignore deltas older than the given days")
                 .env("MAX_DAYS_AGO"),
         )
+        .arg(
+            Arg::new("time-window-minutes")
+                .short('t')
+                .long("time-window-minutes")
+                .takes_value(true)
+                .about("Group commits by similar time window rather than by commit id")
+                .env("TIME_WINDOW_MINUTES"),
+        )
 }

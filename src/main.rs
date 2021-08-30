@@ -6,7 +6,8 @@ use repository::interface::Repository;
 
 use crate::errors::Error;
 use crate::repository::libgit2::LibGit2;
-use crate::statistics::Statistics;
+use crate::statistics::{Statistics, Strategy};
+use chrono::Duration;
 use model::change_delta::ChangeDelta;
 
 mod cli;
@@ -23,6 +24,11 @@ fn main() -> Result<(), crate::errors::Error> {
     } else {
         None
     };
+    let strategy = if let Some(value) = matches.value_of("time-window-minutes") {
+        Strategy::CommitTime(Duration::minutes(value.parse()?))
+    } else {
+        Strategy::Id
+    };
     let deltas = matches
         .values_of("git-repo")
         .unwrap()
@@ -33,15 +39,15 @@ fn main() -> Result<(), crate::errors::Error> {
         .iter()
         .zip(matches.values_of("git-repo").unwrap())
         .flat_map(add_prefix)
-        .fold(Statistics::default(), Statistics::add_delta);
+        .fold(Statistics::default(), |acc, change_delta| {
+            acc.add_delta(&change_delta, &strategy)
+        });
 
     let coupling = statistics.coupling();
     if coupling.is_empty() {
         println!("0 files move together");
     } else {
-        println!("{}", statistics);
-        println!();
-        println!("{} files move together", coupling.len());
+        print!("{}", statistics);
     }
 
     Ok(())
