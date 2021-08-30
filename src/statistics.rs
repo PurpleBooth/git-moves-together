@@ -50,9 +50,10 @@ impl Statistics {
     }
 
     pub(crate) fn coupling(&self) -> BTreeMap<CouplingKey, CouplingCalculation> {
-        return self.files_to_analyse().iter().fold(
+        let set = self.files_to_analyse();
+        return set.iter().fold(
             BTreeMap::new(),
-            partial!(Statistics::add_statistic => self, _, _),
+            partial!(Statistics::add_statistic => self, &set, _, _),
         );
     }
 
@@ -65,11 +66,11 @@ impl Statistics {
 
     fn add_statistic(
         &self,
+        set: &BTreeSet<ChangedFilePath>,
         accumulator: BTreeMap<CouplingKey, CouplingCalculation>,
         item: &ChangedFilePath,
     ) -> BTreeMap<CouplingKey, CouplingCalculation> {
-        self.files_to_analyse()
-            .iter()
+        set.iter()
             .filter(partial!(ChangedFilePath::ne => item, _))
             .map(partial!(Statistics::number_of_deltas_containing => self, item, _))
             .fold(accumulator, Statistics::hash_map_with_new_coupling_item)
