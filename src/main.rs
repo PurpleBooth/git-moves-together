@@ -4,7 +4,8 @@ use partial_application::partial;
 
 use repository::interface::Repository;
 
-use crate::repository::errors::Error as RepositoryError;
+use crate::errors::Error;
+use crate::repository::interface::ChangeDelta;
 use crate::repository::libgit2::LibGit2;
 use crate::statistics::Statistics;
 
@@ -15,15 +16,15 @@ mod statistics;
 
 fn main() -> Result<(), crate::errors::Error> {
     let matches = cli::app().get_matches();
-    let path = PathBuf::from(matches.value_of("git-repo").unwrap());
+    let deltas = matches
+        .values_of("git-repo")
+        .unwrap()
+        .map(read_deltas)
+        .collect::<Result<Vec<Vec<ChangeDelta>>, crate::errors::Error>>()?;
 
-    let repo = LibGit2::new(path)?;
-    let statistics = repo
-        .snapshots_in_current_branch()?
+    let statistics = deltas
         .iter()
-        .map(partial!(Repository::compare_with_parent => &repo, _))
-        .collect::<Result<Vec<_>, RepositoryError>>()?
-        .iter()
+        .flatten()
         .fold(Statistics::default(), Statistics::add_delta);
 
     let coupling = statistics.coupling();
@@ -36,4 +37,15 @@ fn main() -> Result<(), crate::errors::Error> {
     }
 
     Ok(())
+}
+
+fn read_deltas(path_str: &str) -> Result<Vec<ChangeDelta>, Error> {
+    let path = PathBuf::from(path_str);
+    let repo = LibGit2::new(path)?;
+    let delta = repo
+        .snapshots_in_current_branch()?
+        .iter()
+        .map(partial!(Repository::compare_with_parent => &repo, _))
+        .collect::<Result<Vec<_>, crate::repository::errors::Error>>()?;
+    Ok(delta)
 }

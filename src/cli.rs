@@ -10,7 +10,8 @@ pub fn app() -> App<'static> {
         .arg(
             Arg::new("git-repo")
                 .takes_value(true)
-                .default_value(".")
+                .multiple_values(true)
+                .default_values(&["."])
                 .about("A repository to analyse")
                 .env("GIT_REPO"),
         )

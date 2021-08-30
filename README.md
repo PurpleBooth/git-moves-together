@@ -76,10 +76,10 @@ Billie Thompson <billie@billiecodes.com>
 Find files that move at the same time in a git repository to identify coupling
 
 USAGE:
-    git-moves-together [git-repo]
+    git-moves-together [git-repo]...
 
 ARGS:
-    <git-repo>    A repository to analyse [env: GIT_REPO=] [default: .]
+    <git-repo>...    A repository to analyse [env: GIT_REPO=] [default: .]
 
 FLAGS:
     -h, --help       Print help information
