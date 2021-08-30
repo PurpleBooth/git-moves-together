@@ -1,6 +1,6 @@
 use chrono::Utc;
 
-use crate::repository::interface::Snapshot;
+use crate::model::snapshot::Snapshot;
 
 pub(crate) fn within_time_limit(max_days: Option<i64>, snapshot: &Snapshot) -> bool {
     match max_days {

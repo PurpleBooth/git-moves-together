@@ -5,13 +5,14 @@ use partial_application::partial;
 use repository::interface::Repository;
 
 use crate::errors::Error;
-use crate::repository::interface::ChangeDelta;
 use crate::repository::libgit2::LibGit2;
 use crate::statistics::Statistics;
+use model::change_delta::ChangeDelta;
 
 mod cli;
 mod errors;
 mod filters;
+mod model;
 mod repository;
 mod statistics;
 

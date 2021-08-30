@@ -7,8 +7,11 @@ use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use tempfile::tempdir;
 
+use crate::model::change_delta::ChangeDelta;
+use crate::model::snapshot::Snapshot;
+use crate::model::snapshots::Snapshots;
 use crate::repository::in_memory::InMemory;
-use crate::repository::interface::{ChangeDelta, Repository, Snapshot, Snapshots};
+use crate::repository::interface::Repository;
 use crate::repository::libgit2::LibGit2;
 
 fn in_memory_repository() -> InMemory {
@@ -134,7 +137,7 @@ fn given_a_snapshot_i_can_find_out_what_files_changed_in_it() {
             repo.compare_with_parent(&Snapshot::new(
                 head_id,
                 vec![mid_id],
-                chrono::offset::Utc::now()
+                chrono::offset::Utc::now(),
             ))
             .unwrap()
         );

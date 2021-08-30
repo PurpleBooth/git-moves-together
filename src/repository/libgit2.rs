@@ -1,12 +1,15 @@
 use std::path::PathBuf;
 
+use chrono::{TimeZone, Utc};
 use git2::{Commit, DiffDelta, DiffOptions, Oid, Repository as LibGit2Repository, Sort};
 
+use crate::model::change_delta::ChangeDelta;
+use crate::model::changed_file_path::ChangedFilePath;
+use crate::model::snapshot::Snapshot;
+use crate::model::snapshot_id::SnapshotId;
+use crate::model::snapshots::Snapshots;
 use crate::repository::errors::Error;
-use crate::repository::interface::{
-    ChangeDelta, ChangedFilePath, Repository, Snapshot, SnapshotId, Snapshots,
-};
-use chrono::{TimeZone, Utc};
+use crate::repository::interface::Repository;
 
 pub(crate) struct LibGit2 {
     repo: LibGit2Repository,

@@ -1,10 +1,12 @@
 use partial_application::partial;
 
+use crate::model::change_delta::ChangeDelta;
+use crate::model::changed_file_path::ChangedFilePath;
+use crate::model::snapshot::Snapshot;
+use crate::model::snapshot_id::SnapshotId;
+use crate::model::snapshots::Snapshots;
 use crate::repository::errors::Error;
-
-use crate::repository::interface::{
-    ChangeDelta, ChangedFilePath, Repository, Snapshot, SnapshotId, Snapshots,
-};
+use crate::repository::interface::Repository;
 
 pub(crate) struct InMemory {
     snapshots: Snapshots,

@@ -1,11 +1,12 @@
+use std::cmp::Ordering;
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::{Display, Formatter};
 
 use comfy_table::Table;
 use partial_application::partial;
 
-use crate::repository::interface::{ChangeDelta, ChangedFilePath};
-use std::cmp::Ordering;
+use crate::model::change_delta::ChangeDelta;
+use crate::model::changed_file_path::ChangedFilePath;
 
 #[derive(Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
 pub(crate) struct CouplingKey(ChangedFilePath, ChangedFilePath);
@@ -173,7 +174,7 @@ impl Display for Statistics {
 mod tests {
     use std::collections::BTreeMap;
 
-    use crate::repository::interface::ChangeDelta;
+    use crate::model::change_delta::ChangeDelta;
     use crate::statistics::{CouplingKey, Statistics};
 
     #[test]
