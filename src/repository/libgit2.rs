@@ -86,6 +86,10 @@ impl Repository for LibGit2 {
             );
         }
 
-        Ok(diffs.into_iter().flatten().collect::<Vec<_>>().into())
+        Ok(ChangeDelta::new(
+            snapshot.id(),
+            snapshot.timestamp(),
+            diffs.into_iter().flatten().collect::<Vec<_>>(),
+        ))
     }
 }

@@ -4,7 +4,7 @@ impl From<SnapshotId> for String {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
 pub(crate) struct SnapshotId(String);
 
 impl From<&str> for SnapshotId {

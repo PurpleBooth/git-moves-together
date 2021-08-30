@@ -7,6 +7,7 @@ use partial_application::partial;
 
 use crate::model::change_delta::ChangeDelta;
 use crate::model::changed_file_path::ChangedFilePath;
+use crate::model::snapshot_id::SnapshotId;
 
 #[derive(Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
 pub(crate) struct CouplingKey(ChangedFilePath, ChangedFilePath);
@@ -22,7 +23,7 @@ impl CouplingKey {
 
 #[derive(Default)]
 pub(crate) struct Statistics {
-    change_deltas: Vec<ChangeDelta>,
+    change_deltas: BTreeMap<SnapshotId, ChangeDelta>,
 }
 
 type CouplingCalculation = (f64, usize, usize);
@@ -43,7 +44,7 @@ impl Statistics {
             change_deltas: self
                 .change_deltas
                 .into_iter()
-                .chain(vec![delta].into_iter())
+                .chain(vec![(delta.id(), delta)].into_iter())
                 .collect(),
         }
     }
@@ -51,15 +52,18 @@ impl Statistics {
     pub(crate) fn coupling(&self) -> BTreeMap<CouplingKey, CouplingCalculation> {
         return self.files_to_analyse().iter().fold(
             BTreeMap::new(),
-            partial!(Statistics::add_statistics_to_hash_map => self, _, _),
+            partial!(Statistics::add_statistic => self, _, _),
         );
     }
 
     fn files_to_analyse(&self) -> BTreeSet<ChangedFilePath> {
-        self.change_deltas.iter().flatten().collect()
+        self.change_deltas
+            .iter()
+            .flat_map(|(_, change_delta)| change_delta.clone())
+            .collect()
     }
 
-    fn add_statistics_to_hash_map(
+    fn add_statistic(
         &self,
         accumulator: BTreeMap<CouplingKey, CouplingCalculation>,
         item: &ChangedFilePath,
@@ -109,6 +113,7 @@ impl Statistics {
         self.change_deltas
             .clone()
             .into_iter()
+            .map(|change_delta| change_delta.1)
             .filter(partial!(Statistics::contains_both => item, other_file, _))
             .count()
     }
@@ -121,6 +126,7 @@ impl Statistics {
         self.change_deltas
             .clone()
             .into_iter()
+            .map(|change_delta| change_delta.1)
             .filter(partial!(Statistics::contains_either => item, other_file, _))
             .count()
     }
@@ -176,11 +182,16 @@ mod tests {
 
     use crate::model::change_delta::ChangeDelta;
     use crate::statistics::{CouplingKey, Statistics};
+    use chrono::Utc;
 
     #[test]
     fn adding_one_file_to_statistics_will_give_a_count_of_zero() {
         let statistics = Statistics::default();
-        let actual = statistics.add_delta(ChangeDelta::from(vec!["file_1"]));
+        let actual = statistics.add_delta(ChangeDelta::new(
+            "Id".into(),
+            Utc::now(),
+            vec!["file_1".into()],
+        ));
         assert_eq!(actual.coupling(), BTreeMap::new());
     }
 
@@ -188,9 +199,21 @@ mod tests {
     fn a_file_two_files_at_the_same_time_twice_is_full_coupling() {
         let statistics = Statistics::default();
         let actual = statistics
-            .add_delta(ChangeDelta::from(vec!["file_1", "file_2"]))
-            .add_delta(ChangeDelta::from(vec!["file_1", "file_2"]))
-            .add_delta(ChangeDelta::from(vec!["file_1", "file_2"]));
+            .add_delta(ChangeDelta::new(
+                "1".into(),
+                Utc::now(),
+                vec!["file_1".into(), "file_2".into()],
+            ))
+            .add_delta(ChangeDelta::new(
+                "2".into(),
+                Utc::now(),
+                vec!["file_1".into(), "file_2".into()],
+            ))
+            .add_delta(ChangeDelta::new(
+                "3".into(),
+                Utc::now(),
+                vec!["file_1".into(), "file_2".into()],
+            ));
         assert_eq!(
             actual.coupling(),
             vec![(
@@ -206,12 +229,36 @@ mod tests {
     fn more_complex_coupling() {
         let statistics = Statistics::default();
         let actual = statistics
-            .add_delta(ChangeDelta::from(vec!["file_1", "file_2"]))
-            .add_delta(ChangeDelta::from(vec!["file_3", "file_2"]))
-            .add_delta(ChangeDelta::from(vec!["file_3", "file_2"]))
-            .add_delta(ChangeDelta::from(vec!["file_3", "file_5"]))
-            .add_delta(ChangeDelta::from(vec!["file_3", "file_1"]))
-            .add_delta(ChangeDelta::from(vec!["file_1", "file_2"]));
+            .add_delta(ChangeDelta::new(
+                "1".into(),
+                Utc::now(),
+                vec!["file_1".into(), "file_2".into()],
+            ))
+            .add_delta(ChangeDelta::new(
+                "2".into(),
+                Utc::now(),
+                vec!["file_3".into(), "file_2".into()],
+            ))
+            .add_delta(ChangeDelta::new(
+                "3".into(),
+                Utc::now(),
+                vec!["file_3".into(), "file_2".into()],
+            ))
+            .add_delta(ChangeDelta::new(
+                "4".into(),
+                Utc::now(),
+                vec!["file_3".into(), "file_5".into()],
+            ))
+            .add_delta(ChangeDelta::new(
+                "5".into(),
+                Utc::now(),
+                vec!["file_3".into(), "file_1".into()],
+            ))
+            .add_delta(ChangeDelta::new(
+                "6".into(),
+                Utc::now(),
+                vec!["file_1".into(), "file_2".into()],
+            ));
         assert_eq!(
             actual.coupling(),
             vec![
@@ -240,12 +287,39 @@ mod tests {
     #[test]
     fn statistics_render_pretty() {
         let statistics = Statistics::default()
-            .add_delta(ChangeDelta::from(vec!["file_1", "file_2"]))
-            .add_delta(ChangeDelta::from(vec!["file_3", "file_2"]))
-            .add_delta(ChangeDelta::from(vec!["file_3", "file_2"]))
-            .add_delta(ChangeDelta::from(vec!["file_3", "file_5"]))
-            .add_delta(ChangeDelta::from(vec!["file_3", "file_1"]))
-            .add_delta(ChangeDelta::from(vec!["file_1", "file_2"]).add_prefix("demo"));
+            .add_delta(ChangeDelta::new(
+                "1".into(),
+                Utc::now(),
+                vec!["file_1".into(), "file_2".into()],
+            ))
+            .add_delta(ChangeDelta::new(
+                "2".into(),
+                Utc::now(),
+                vec!["file_3".into(), "file_2".into()],
+            ))
+            .add_delta(ChangeDelta::new(
+                "3".into(),
+                Utc::now(),
+                vec!["file_3".into(), "file_2".into()],
+            ))
+            .add_delta(ChangeDelta::new(
+                "4".into(),
+                Utc::now(),
+                vec!["file_3".into(), "file_5".into()],
+            ))
+            .add_delta(ChangeDelta::new(
+                "5".into(),
+                Utc::now(),
+                vec!["file_3".into(), "file_1".into()],
+            ))
+            .add_delta(
+                ChangeDelta::new(
+                    "6".into(),
+                    Utc::now(),
+                    vec!["file_1".into(), "file_2".into()],
+                )
+                .add_prefix("demo"),
+            );
         assert_eq!(
             format!("{}", statistics),
             "+-------------+-------------+------------+----------+---------+

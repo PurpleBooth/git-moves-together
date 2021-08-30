@@ -44,11 +44,14 @@ impl Repository for InMemory {
     }
 
     fn compare_with_parent(&self, snapshot: &Snapshot) -> Result<ChangeDelta, Error> {
-        Ok(self
-            .changed_filenames
-            .clone()
-            .into_iter()
-            .filter_map(partial!(InMemory::take_file_if_id_matches => snapshot, _))
-            .collect())
+        Ok(ChangeDelta::new(
+            snapshot.id(),
+            snapshot.timestamp(),
+            self.changed_filenames
+                .clone()
+                .into_iter()
+                .filter_map(partial!(InMemory::take_file_if_id_matches => snapshot, _))
+                .collect(),
+        ))
     }
 }

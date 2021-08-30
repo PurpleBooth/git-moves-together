@@ -126,20 +126,20 @@ fn given_a_snapshot_i_can_find_out_what_files_changed_in_it() {
     for repo in &repos {
         let actual = repo.snapshots_in_current_branch().unwrap();
         let mut iter = actual.iter();
-        let head_id = iter.next().unwrap().id();
-        let mid_id = iter.next().unwrap().id();
+        let head = iter.next().unwrap();
+        let mid = iter.next().unwrap();
         iter.next().unwrap();
 
         assert!(iter.next().is_none());
-        let expected: ChangeDelta = vec![String::from("file2"), String::from("file3")].into();
+        let expected: ChangeDelta = ChangeDelta::new(
+            head.id(),
+            head.timestamp(),
+            vec!["file2".into(), "file3".into()],
+        );
         assert_eq!(
             expected,
-            repo.compare_with_parent(&Snapshot::new(
-                head_id,
-                vec![mid_id],
-                chrono::offset::Utc::now(),
-            ))
-            .unwrap()
+            repo.compare_with_parent(&Snapshot::new(head.id(), vec![mid.id()], head.timestamp(),))
+                .unwrap()
         );
     }
 
