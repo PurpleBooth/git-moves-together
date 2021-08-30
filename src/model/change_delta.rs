@@ -9,7 +9,7 @@ use partial_application::partial;
 use crate::model::changed_file_path::ChangedFilePath;
 use crate::model::snapshot_id::SnapshotId;
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Eq, PartialEq, Clone, Ord, PartialOrd)]
 pub(crate) struct ChangeDelta {
     changes: BTreeSet<ChangedFilePath>,
     timestamp: DateTime<Utc>,
@@ -30,10 +30,6 @@ impl ChangeDelta {
             timestamp,
             id,
         }
-    }
-
-    pub(crate) fn contains(&self, item: &ChangedFilePath) -> bool {
-        self.changes.contains(item)
     }
 
     pub(crate) fn add_prefix(self, prefix: &str) -> ChangeDelta {
@@ -89,16 +85,5 @@ mod tests {
             actual,
             vec!["Something@item 1", "Something@item 2", "Something@item 3"]
         );
-    }
-    #[test]
-    fn can_tell_if_something_is_in_this_delta() {
-        let actual = ChangeDelta::new(
-            "sample-id".into(),
-            Utc::now(),
-            vec!["item 1".into(), "item 2".into(), "item 3".into()],
-        );
-
-        assert!(actual.contains(&"item 1".into()));
-        assert!(!actual.contains(&"none existing".into()));
     }
 }

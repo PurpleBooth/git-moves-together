@@ -9,7 +9,7 @@ use crate::model::change_delta::ChangeDelta;
 use crate::model::changed_file_path::ChangedFilePath;
 use crate::model::snapshot_id::SnapshotId;
 
-#[derive(Eq, PartialEq, Hash, Debug, Ord, PartialOrd)]
+#[derive(Eq, PartialEq, Hash, Debug, Ord, PartialOrd, Clone)]
 pub(crate) struct CouplingKey(ChangedFilePath, ChangedFilePath);
 
 impl CouplingKey {
@@ -24,6 +24,7 @@ impl CouplingKey {
 #[derive(Default)]
 pub(crate) struct Statistics {
     change_deltas: BTreeMap<SnapshotId, ChangeDelta>,
+    contains: BTreeMap<ChangedFilePath, BTreeSet<ChangeDelta>>,
 }
 
 type CouplingCalculation = (f64, usize, usize);
@@ -40,12 +41,25 @@ fn coupling_calc_rank(
 
 impl Statistics {
     pub(crate) fn add_delta(self, delta: ChangeDelta) -> Statistics {
+        let mut map = self.contains.clone();
+        for change in delta.clone() {
+            let mut current_deltas = match map.get(&change) {
+                None => BTreeSet::new(),
+                Some(set) => set.clone(),
+            };
+
+            current_deltas.insert(delta.clone());
+
+            map.insert(change, current_deltas);
+        }
+
         Statistics {
             change_deltas: self
                 .change_deltas
                 .into_iter()
                 .chain(vec![(delta.id(), delta)].into_iter())
                 .collect(),
+            contains: map,
         }
     }
 
@@ -73,25 +87,22 @@ impl Statistics {
         set.iter()
             .filter(partial!(ChangedFilePath::ne => item, _))
             .map(partial!(Statistics::number_of_deltas_containing => self, item, _))
-            .fold(accumulator, Statistics::hash_map_with_new_coupling_item)
+            .fold(accumulator, Statistics::insert_with_new_coupling_item)
     }
 
     #[allow(clippy::cast_precision_loss)]
-    fn hash_map_with_new_coupling_item(
+    fn insert_with_new_coupling_item(
         acc: BTreeMap<CouplingKey, CouplingCalculation>,
         (coupling_key, count, total_changes): (CouplingKey, usize, usize),
     ) -> BTreeMap<CouplingKey, CouplingCalculation> {
-        acc.into_iter()
-            .chain(vec![(
-                coupling_key,
-                (
-                    (count as f64) / (total_changes as f64),
-                    count,
-                    total_changes,
-                ),
-            )])
-            .filter(|(_, (score, _, _))| score > &0.0)
-            .collect::<BTreeMap<_, _>>()
+        let mut new = acc;
+        let score = (count as f64) / (total_changes as f64);
+
+        if score > 0.0 {
+            new.insert(coupling_key, (score, count, total_changes));
+        }
+
+        new
     }
 
     fn number_of_deltas_containing(
@@ -111,12 +122,10 @@ impl Statistics {
         item: &ChangedFilePath,
         other_file: &ChangedFilePath,
     ) -> usize {
-        self.change_deltas
-            .clone()
-            .into_iter()
-            .map(|change_delta| change_delta.1)
-            .filter(partial!(Statistics::contains_both => item, other_file, _))
-            .count()
+        self.contains
+            .get(item)
+            .zip(self.contains.get(other_file))
+            .map_or(0, |(left, right)| left.intersection(right).count())
     }
 
     fn number_of_deltas_containing_either(
@@ -124,28 +133,10 @@ impl Statistics {
         item: &ChangedFilePath,
         other_file: &ChangedFilePath,
     ) -> usize {
-        self.change_deltas
-            .clone()
-            .into_iter()
-            .map(|change_delta| change_delta.1)
-            .filter(partial!(Statistics::contains_either => item, other_file, _))
-            .count()
-    }
-
-    fn contains_both(
-        item: &ChangedFilePath,
-        other_file: &ChangedFilePath,
-        delta: &ChangeDelta,
-    ) -> bool {
-        delta.contains(item) && delta.contains(other_file)
-    }
-
-    fn contains_either(
-        item: &ChangedFilePath,
-        other_file: &ChangedFilePath,
-        delta: &ChangeDelta,
-    ) -> bool {
-        delta.contains(item) || delta.contains(other_file)
+        self.contains
+            .get(item)
+            .zip(self.contains.get(other_file))
+            .map_or(0, |(left, right)| left.union(right).count())
     }
 }
 
@@ -181,9 +172,10 @@ impl Display for Statistics {
 mod tests {
     use std::collections::BTreeMap;
 
+    use chrono::Utc;
+
     use crate::model::change_delta::ChangeDelta;
     use crate::statistics::{CouplingKey, Statistics};
-    use chrono::Utc;
 
     #[test]
     fn adding_one_file_to_statistics_will_give_a_count_of_zero() {
