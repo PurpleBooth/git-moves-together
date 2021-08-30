@@ -41,7 +41,7 @@ fn coupling_calc_rank(
 
 impl Statistics {
     pub(crate) fn add_delta(self, delta: ChangeDelta) -> Statistics {
-        let mut map = self.contains.clone();
+        let mut map = self.contains;
         for change in delta.clone() {
             let mut current_deltas = match map.get(&change) {
                 None => BTreeSet::new(),
