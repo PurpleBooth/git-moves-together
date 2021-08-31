@@ -47,7 +47,7 @@ pub enum Strategy {
 }
 
 impl Statistics {
-    pub(crate) fn add_delta(self, delta: &ChangeDelta, strategy: &Strategy) -> Statistics {
+    pub(crate) async fn add_delta(self, delta: ChangeDelta, strategy: &Strategy) -> Statistics {
         let mut change_map = self.change_deltas;
         let (key, new_delta) = match strategy {
             Strategy::Id => (delta.id(), delta.clone()),
@@ -62,7 +62,7 @@ impl Statistics {
                     key.clone(),
                     match change_map.get(&key) {
                         None => delta.clone(),
-                        Some(existing_delta) => existing_delta.merge(delta),
+                        Some(existing_delta) => existing_delta.merge(&delta),
                     },
                 )
             }
@@ -202,38 +202,40 @@ mod tests {
     use crate::model::change_delta::ChangeDelta;
     use crate::statistics::{CouplingKey, Statistics, Strategy};
 
-    #[test]
-    fn adding_one_file_to_statistics_will_give_a_count_of_zero() {
+    #[tokio::test]
+    async fn adding_one_file_to_statistics_will_give_a_count_of_zero() {
         let statistics = Statistics::default();
         let actual = statistics.add_delta(
-            &ChangeDelta::new("Id".into(), Utc::now(), vec!["file_1".into()]),
+            ChangeDelta::new("Id".into(), Utc::now(), vec!["file_1".into()]),
             &Strategy::Id,
         );
-        assert_eq!(actual.coupling(), BTreeMap::new());
+        assert_eq!(actual.await.coupling(), BTreeMap::new());
     }
 
-    #[test]
-    fn a_file_two_files_at_the_same_time_twice_is_full_coupling() {
+    #[tokio::test]
+    async fn a_file_two_files_at_the_same_time_twice_is_full_coupling() {
         let statistics = Statistics::default();
         let actual = statistics
             .add_delta(
-                &ChangeDelta::new(
+                ChangeDelta::new(
                     "1".into(),
                     Utc::now(),
                     vec!["file_1".into(), "file_2".into()],
                 ),
                 &Strategy::Id,
             )
+            .await
             .add_delta(
-                &ChangeDelta::new(
+                ChangeDelta::new(
                     "2".into(),
                     Utc::now(),
                     vec!["file_1".into(), "file_2".into()],
                 ),
                 &Strategy::Id,
             )
+            .await
             .add_delta(
-                &ChangeDelta::new(
+                ChangeDelta::new(
                     "3".into(),
                     Utc::now(),
                     vec!["file_1".into(), "file_2".into()],
@@ -241,7 +243,7 @@ mod tests {
                 &Strategy::Id,
             );
         assert_eq!(
-            actual.coupling(),
+            actual.await.coupling(),
             vec![(
                 CouplingKey::new("file_1".into(), "file_2".into()),
                 (1.0, 3, 3)
@@ -251,52 +253,57 @@ mod tests {
         );
     }
 
-    #[test]
-    fn more_complex_coupling() {
+    #[tokio::test]
+    async fn more_complex_coupling() {
         let statistics = Statistics::default();
         let actual = statistics
             .add_delta(
-                &ChangeDelta::new(
+                ChangeDelta::new(
                     "1".into(),
                     Utc::now(),
                     vec!["file_1".into(), "file_2".into()],
                 ),
                 &Strategy::Id,
             )
+            .await
             .add_delta(
-                &ChangeDelta::new(
+                ChangeDelta::new(
                     "2".into(),
                     Utc::now(),
                     vec!["file_3".into(), "file_2".into()],
                 ),
                 &Strategy::Id,
             )
+            .await
             .add_delta(
-                &ChangeDelta::new(
+                ChangeDelta::new(
                     "3".into(),
                     Utc::now(),
                     vec!["file_3".into(), "file_2".into()],
                 ),
                 &Strategy::Id,
             )
+            .await
             .add_delta(
-                &ChangeDelta::new(
+                ChangeDelta::new(
                     "4".into(),
                     Utc::now(),
                     vec!["file_3".into(), "file_5".into()],
                 ),
                 &Strategy::Id,
             )
+            .await
             .add_delta(
-                &ChangeDelta::new(
+                ChangeDelta::new(
                     "5".into(),
                     Utc::now(),
                     vec!["file_3".into(), "file_1".into()],
                 ),
                 &Strategy::Id,
             )
+            .await
             .add_delta(
-                &ChangeDelta::new(
+                ChangeDelta::new(
                     "6".into(),
                     Utc::now(),
                     vec!["file_1".into(), "file_2".into()],
@@ -304,7 +311,7 @@ mod tests {
                 &Strategy::Id,
             );
         assert_eq!(
-            actual.coupling(),
+            actual.await.coupling(),
             vec![
                 (
                     CouplingKey::new("file_1".into(), "file_2".into()),
@@ -328,51 +335,56 @@ mod tests {
         );
     }
 
-    #[test]
-    fn statistics_render_pretty() {
+    #[tokio::test]
+    async fn statistics_render_pretty() {
         let statistics = Statistics::default()
             .add_delta(
-                &ChangeDelta::new(
+                ChangeDelta::new(
                     "1".into(),
                     Utc::now(),
                     vec!["file_1".into(), "file_2".into()],
                 ),
                 &Strategy::Id,
             )
+            .await
             .add_delta(
-                &ChangeDelta::new(
+                ChangeDelta::new(
                     "2".into(),
                     Utc::now(),
                     vec!["file_3".into(), "file_2".into()],
                 ),
                 &Strategy::Id,
             )
+            .await
             .add_delta(
-                &ChangeDelta::new(
+                ChangeDelta::new(
                     "3".into(),
                     Utc::now(),
                     vec!["file_3".into(), "file_2".into()],
                 ),
                 &Strategy::Id,
             )
+            .await
             .add_delta(
-                &ChangeDelta::new(
+                ChangeDelta::new(
                     "4".into(),
                     Utc::now(),
                     vec!["file_3".into(), "file_5".into()],
                 ),
                 &Strategy::Id,
             )
+            .await
             .add_delta(
-                &ChangeDelta::new(
+                ChangeDelta::new(
                     "5".into(),
                     Utc::now(),
                     vec!["file_3".into(), "file_1".into()],
                 ),
                 &Strategy::Id,
             )
+            .await
             .add_delta(
-                &ChangeDelta::new(
+                ChangeDelta::new(
                     "6".into(),
                     Utc::now(),
                     vec!["file_1".into(), "file_2".into()],
@@ -381,7 +393,7 @@ mod tests {
                 &Strategy::Id,
             );
         assert_eq!(
-            format!("{}", statistics),
+            format!("{}", statistics.await),
             "+-------------+-------------+------------+----------+---------+
 | File A      | File B      | Together % | Together | Commits |
 +=============================================================+

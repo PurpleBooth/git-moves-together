@@ -44,8 +44,8 @@ async fn main() -> Result<(), crate::errors::Error> {
     let statistics = stream::iter(deltas)
         .zip(stream::iter(git_repo_args))
         .flat_map(|(delta, prefix)| stream::iter(add_prefix((&delta, prefix))))
-        .fold(Statistics::default(), |acc, change_delta| async move {
-            acc.add_delta(&change_delta, &strategy)
+        .fold(Statistics::default(), |acc, change_delta| {
+            acc.add_delta(change_delta, &strategy)
         })
         .await;
 
