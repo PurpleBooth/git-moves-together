@@ -1,11 +1,14 @@
-use repository::interface::Repository;
 use std::path::PathBuf;
+
+use chrono::Duration;
+use futures::{stream, StreamExt, TryStreamExt};
+
+use model::change_delta::ChangeDelta;
+use repository::interface::Repository;
 
 use crate::errors::Error;
 use crate::repository::libgit2::LibGit2;
 use crate::statistics::{Statistics, Strategy};
-use chrono::Duration;
-use model::change_delta::ChangeDelta;
 
 mod cli;
 mod errors;
@@ -14,31 +17,37 @@ mod model;
 mod repository;
 mod statistics;
 
-fn main() -> Result<(), crate::errors::Error> {
+#[tokio::main]
+async fn main() -> Result<(), crate::errors::Error> {
     let matches = cli::app().get_matches();
-    let max_days = if let Some(value) = matches.value_of("max-days-ago") {
+
+    let max_days_arg = matches.value_of("max-days-ago");
+    let time_window_arg = matches.value_of("time-window-minutes");
+    let git_repo_args = matches.values_of("git-repo").unwrap();
+
+    let max_days = if let Some(value) = max_days_arg {
         Some(value.parse()?)
     } else {
         None
     };
-    let strategy = if let Some(value) = matches.value_of("time-window-minutes") {
+    let strategy = if let Some(value) = time_window_arg {
         Strategy::CommitTime(Duration::minutes(value.parse()?))
     } else {
         Strategy::Id
     };
-    let deltas = matches
-        .values_of("git-repo")
-        .unwrap()
-        .map(|path_str| read_deltas(max_days, path_str))
-        .collect::<Result<Vec<Vec<ChangeDelta>>, crate::errors::Error>>()?;
 
-    let statistics = deltas
-        .iter()
-        .zip(matches.values_of("git-repo").unwrap())
-        .flat_map(add_prefix)
-        .fold(Statistics::default(), |acc, change_delta| {
+    let deltas: Vec<Vec<ChangeDelta>> = stream::iter(git_repo_args.clone())
+        .map(|path_str| read_deltas(max_days, path_str))
+        .try_collect()
+        .await?;
+
+    let statistics = stream::iter(deltas)
+        .zip(stream::iter(git_repo_args))
+        .flat_map(|(delta, prefix)| stream::iter(add_prefix((&delta, prefix))))
+        .fold(Statistics::default(), |acc, change_delta| async move {
             acc.add_delta(&change_delta, &strategy)
-        });
+        })
+        .await;
 
     let coupling = statistics.coupling();
     if coupling.is_empty() {

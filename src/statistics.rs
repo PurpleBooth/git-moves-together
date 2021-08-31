@@ -40,6 +40,7 @@ fn coupling_calc_rank(
         .unwrap()
 }
 
+#[derive(Copy, Clone)]
 pub enum Strategy {
     Id,
     CommitTime(Duration),
