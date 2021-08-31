@@ -13,7 +13,6 @@ authors = ["Billie Thompson <billie@billiecodes.com>"]
 
 [dependencies]
 git2 = "0.13"
-partial_application = "0.2.1"
 thiserror = "1.0.28"
 chrono = "0.4"
 clap = "3.0.0-beta.4"

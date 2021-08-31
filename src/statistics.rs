@@ -3,7 +3,6 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::{Display, Formatter};
 
 use comfy_table::Table;
-use partial_application::partial;
 
 use crate::model::change_delta::ChangeDelta;
 use crate::model::changed_file_path::ChangedFilePath;
@@ -89,10 +88,9 @@ impl Statistics {
 
     pub(crate) fn coupling(&self) -> BTreeMap<CouplingKey, CouplingCalculation> {
         let set = self.files_to_analyse();
-        return set.iter().fold(
-            BTreeMap::new(),
-            partial!(Statistics::add_statistic => self, &set, _, _),
-        );
+        return set.iter().fold(BTreeMap::new(), |acc, item| {
+            self.add_statistic(&set, acc, item)
+        });
     }
 
     fn files_to_analyse(&self) -> BTreeSet<ChangedFilePath> {
@@ -109,9 +107,11 @@ impl Statistics {
         item: &ChangedFilePath,
     ) -> BTreeMap<CouplingKey, CouplingCalculation> {
         set.iter()
-            .filter(partial!(ChangedFilePath::ne => item, _))
-            .map(partial!(Statistics::number_of_deltas_containing => self, item, _))
-            .fold(accumulator, Statistics::insert_with_new_coupling_item)
+            .filter(|other| &item != other)
+            .map(|other| self.number_of_deltas_containing(item, other))
+            .fold(accumulator, |acc, key_count_and_total| {
+                Statistics::insert_with_new_coupling_item(acc, key_count_and_total)
+            })
     }
 
     #[allow(clippy::cast_precision_loss)]

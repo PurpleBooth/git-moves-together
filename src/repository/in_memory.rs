@@ -1,5 +1,3 @@
-use partial_application::partial;
-
 use crate::model::change_delta::ChangeDelta;
 use crate::model::changed_file_path::ChangedFilePath;
 use crate::model::snapshot::Snapshot;
@@ -50,7 +48,7 @@ impl Repository for InMemory {
             self.changed_filenames
                 .clone()
                 .into_iter()
-                .filter_map(partial!(InMemory::take_file_if_id_matches => snapshot, _))
+                .filter_map(|id_and_path| InMemory::take_file_if_id_matches(snapshot, id_and_path))
                 .collect(),
         ))
     }

@@ -4,7 +4,6 @@ use std::ffi::OsStr;
 use std::path::PathBuf;
 
 use chrono::{DateTime, Utc};
-use partial_application::partial;
 
 use crate::model::changed_file_path::ChangedFilePath;
 use crate::model::snapshot_id::SnapshotId;
@@ -52,7 +51,7 @@ impl ChangeDelta {
             changes: self
                 .changes
                 .iter()
-                .map(partial!(ChangedFilePath::add_prefix => _, prefix))
+                .map(|path| path.add_prefix(prefix))
                 .collect(),
             timestamp: self.timestamp,
             id: self.id,

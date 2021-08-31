@@ -1,8 +1,5 @@
-use std::path::PathBuf;
-
-use partial_application::partial;
-
 use repository::interface::Repository;
+use std::path::PathBuf;
 
 use crate::errors::Error;
 use crate::repository::libgit2::LibGit2;
@@ -32,7 +29,7 @@ fn main() -> Result<(), crate::errors::Error> {
     let deltas = matches
         .values_of("git-repo")
         .unwrap()
-        .map(partial!(read_deltas => max_days, _))
+        .map(|path_str| read_deltas(max_days, path_str))
         .collect::<Result<Vec<Vec<ChangeDelta>>, crate::errors::Error>>()?;
 
     let statistics = deltas
@@ -56,7 +53,7 @@ fn main() -> Result<(), crate::errors::Error> {
 fn add_prefix((delta, prefix): (&Vec<ChangeDelta>, &str)) -> Vec<ChangeDelta> {
     delta
         .iter()
-        .map(partial!(ChangeDelta::add_prefix_from_filename=> _, prefix))
+        .map(|delta| delta.add_prefix_from_filename(prefix))
         .collect::<Vec<_>>()
 }
 
@@ -66,8 +63,8 @@ fn read_deltas(max_days: Option<i64>, path_str: &str) -> Result<Vec<ChangeDelta>
     let delta = repo
         .snapshots_in_current_branch()?
         .iter()
-        .filter(partial!(filters::within_time_limit => max_days, _))
-        .map(partial!(Repository::compare_with_parent => &repo, _))
+        .filter(|snapshot| filters::within_time_limit(max_days, snapshot))
+        .map(|snapshot| repo.compare_with_parent(snapshot))
         .collect::<Result<Vec<_>, crate::repository::errors::Error>>()?;
     Ok(delta)
 }
