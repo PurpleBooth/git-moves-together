@@ -202,6 +202,7 @@ mod tests {
     use crate::model::change_delta::ChangeDelta;
     use crate::statistics::{CouplingKey, Statistics, Strategy};
 
+    #[allow(clippy::semicolon_if_nothing_returned)]
     #[tokio::test]
     async fn adding_one_file_to_statistics_will_give_a_count_of_zero() {
         let statistics = Statistics::default();
@@ -212,6 +213,7 @@ mod tests {
         assert_eq!(actual.await.coupling(), BTreeMap::new());
     }
 
+    #[allow(clippy::semicolon_if_nothing_returned)]
     #[tokio::test]
     async fn a_file_two_files_at_the_same_time_twice_is_full_coupling() {
         let statistics = Statistics::default();
@@ -253,6 +255,7 @@ mod tests {
         );
     }
 
+    #[allow(clippy::semicolon_if_nothing_returned)]
     #[tokio::test]
     async fn more_complex_coupling() {
         let statistics = Statistics::default();
@@ -335,6 +338,7 @@ mod tests {
         );
     }
 
+    #[allow(clippy::semicolon_if_nothing_returned)]
     #[tokio::test]
     async fn statistics_render_pretty() {
         let statistics = Statistics::default()
