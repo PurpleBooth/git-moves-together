@@ -1,6 +1,7 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, TimeZone, Utc};
 
 use crate::model::snapshot_id::SnapshotId;
+use git2::Commit;
 
 #[derive(Eq, PartialEq, Debug, Clone)]
 pub(crate) struct Snapshot {
@@ -36,5 +37,18 @@ impl Snapshot {
 
     pub(crate) fn has_id(&self, id: &SnapshotId) -> bool {
         &(self.id) == id
+    }
+}
+
+impl From<Commit<'_>> for Snapshot {
+    fn from(commit: Commit) -> Self {
+        Snapshot::new(
+            commit.id().into(),
+            commit
+                .parents()
+                .map(|parent_commit| parent_commit.id().into())
+                .collect(),
+            Utc.timestamp(commit.time().seconds(), 0),
+        )
     }
 }

@@ -1,7 +1,7 @@
+use std::convert::TryInto;
 use std::path::PathBuf;
 
-use chrono::{TimeZone, Utc};
-use git2::{Commit, DiffDelta, DiffOptions, Oid, Repository as LibGit2Repository, Sort};
+use git2::{Oid, Repository as LibGit2Repository, Sort, Tree};
 
 use crate::model::change_delta::ChangeDelta;
 use crate::model::changed_file_path::ChangedFilePath;
@@ -22,22 +22,24 @@ impl LibGit2 {
         Ok(LibGit2 { repo })
     }
 
-    fn path_of_changed_file(x: &DiffDelta) -> Option<ChangedFilePath> {
-        DiffDelta::new_file(x)
-            .path()
-            .and_then(std::path::Path::to_str)
-            .map(ChangedFilePath::from)
+    fn diff_with_parent(
+        &self,
+        snapshot_tree: &Tree,
+        parent: SnapshotId,
+    ) -> Result<Vec<ChangedFilePath>, Error> {
+        let parent_id = parent.try_into()?;
+        let parent_tree = self.repo.find_commit(parent_id)?.tree()?;
+        let diff_to_parent =
+            self.repo
+                .diff_tree_to_tree(Some(&parent_tree), Some(snapshot_tree), None)?;
+        Ok(diff_to_parent.deltas().map(|delta| delta.into()).collect())
     }
 
-    fn commit_to_snapshot_id(parent: &Commit) -> SnapshotId {
-        parent.id().to_string().into()
-    }
-
-    fn oid_from_snapshot(snapshot: &Snapshot) -> Result<Oid, Error> {
-        Oid::from_str(&String::from(snapshot.id())).map_err(Error::from)
-    }
-    fn oid_from_snapshot_id(snapshot: SnapshotId) -> Result<Oid, Error> {
-        Oid::from_str(&String::from(snapshot)).map_err(Error::from)
+    fn to_snapshot_id(&self, commit_oid: Oid) -> Result<Snapshot, Error> {
+        self.repo
+            .find_commit(commit_oid)
+            .map(Snapshot::from)
+            .map_err(Error::from)
     }
 }
 
@@ -46,50 +48,46 @@ impl Repository for LibGit2 {
         let mut walker = self.repo.revwalk()?;
         walker.set_sorting(Sort::TIME & Sort::TOPOLOGICAL)?;
         walker.push_head()?;
-        let mut snapshots = vec![];
-        for commit_id_result in walker {
-            let commit_oid = commit_id_result?;
-            let commit = self.repo.find_commit(commit_oid)?;
-            let patents = commit
-                .parents()
-                .map(|commit| LibGit2::commit_to_snapshot_id(&commit))
-                .collect();
 
-            snapshots.push(Snapshot::new(
-                commit_oid.to_string().into(),
-                patents,
-                Utc.timestamp(commit.time().seconds(), 0),
-            ));
-        }
-
-        Ok(snapshots.into())
+        walker
+            .into_iter()
+            .map(|commit_id_result| {
+                commit_id_result
+                    .map_err(Error::from)
+                    .and_then(|commit_id_result| self.to_snapshot_id(commit_id_result))
+            })
+            .collect::<Result<Vec<Snapshot>, Error>>()
+            .map(Snapshots::from)
     }
 
     fn compare_with_parent(&self, snapshot: &Snapshot) -> Result<ChangeDelta, Error> {
-        let mut diffs: Vec<Vec<ChangedFilePath>> = vec![];
-        let commit_id = LibGit2::oid_from_snapshot(snapshot)?;
-        let snapshot_tree = self.repo.find_commit(commit_id)?.tree()?;
+        let snapshot_tree = snapshot
+            .id()
+            .try_into()
+            .and_then(|oid| self.repo.find_commit(oid))
+            .and_then(|commit| commit.tree())?;
 
-        for parent in snapshot.parents() {
-            let parent_id = LibGit2::oid_from_snapshot_id(parent)?;
-            let parent_tree = self.repo.find_commit(parent_id)?.tree()?;
-            let diff_to_parent = self.repo.diff_tree_to_tree(
-                Some(&parent_tree),
-                Some(&snapshot_tree),
-                Some(&mut DiffOptions::new()),
-            )?;
-            let deltas = diff_to_parent.deltas();
-            diffs.push(
-                deltas
-                    .filter_map(|delta| LibGit2::path_of_changed_file(&delta))
-                    .collect(),
-            );
-        }
+        let changes = snapshot
+            .parents()
+            .into_iter()
+            .map(|parent| self.diff_with_parent(&snapshot_tree, parent))
+            .reduce(flatten_or_first_err)
+            .unwrap_or_else(|| Ok(vec![]));
 
         Ok(ChangeDelta::new(
             snapshot.id(),
             snapshot.timestamp(),
-            diffs.into_iter().flatten().collect::<Vec<_>>(),
+            changes?,
         ))
+    }
+}
+
+fn flatten_or_first_err(
+    acc: Result<Vec<ChangedFilePath>, Error>,
+    item: Result<Vec<ChangedFilePath>, Error>,
+) -> Result<Vec<ChangedFilePath>, Error> {
+    match (acc, item) {
+        (Ok(acc), Ok(item)) => Ok([acc, item].concat()),
+        (Err(err), _) | (_, Err(err)) => Err(err),
     }
 }

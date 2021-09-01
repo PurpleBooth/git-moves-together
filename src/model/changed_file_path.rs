@@ -1,3 +1,5 @@
+use git2::DiffDelta;
+
 #[derive(Debug, Eq, PartialEq, Clone, Hash, Ord, PartialOrd)]
 pub(crate) struct ChangedFilePath(Option<String>, String);
 
@@ -25,5 +27,15 @@ impl From<ChangedFilePath> for String {
             ChangedFilePath(None, file) => file,
             ChangedFilePath(Some(repo), file) => format!("{}@{}", repo, file),
         }
+    }
+}
+
+impl From<DiffDelta<'_>> for ChangedFilePath {
+    fn from(delta: DiffDelta) -> Self {
+        delta
+            .new_file()
+            .path()
+            .and_then(std::path::Path::to_str)
+            .map_or_else(|| ChangedFilePath::from("?"), ChangedFilePath::from)
     }
 }
