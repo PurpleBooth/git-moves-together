@@ -1,54 +1,43 @@
-use crate::model::change_delta::ChangeDelta;
-use crate::model::changed_file_path::ChangedFilePath;
-use crate::model::snapshot::Snapshot;
-use crate::model::snapshot_id::SnapshotId;
-use crate::model::snapshots::Snapshots;
+use crate::model::changed_file::ChangedFile;
+use crate::model::commit::Commit;
+use crate::model::commits::Commits;
+use crate::model::delta::Delta;
+use crate::model::hash::Hash;
 use crate::repository::errors::Error;
 use crate::repository::interface::Repository;
 
 pub(crate) struct InMemory {
-    snapshots: Snapshots,
-    changed_filenames: Vec<(SnapshotId, ChangedFilePath)>,
+    commits: Commits,
+    changes: Vec<(Hash, ChangedFile)>,
 }
 
 impl InMemory {
     // Note, this is not actually dead, but rather proof that we can swap out our git provider
     #[allow(dead_code)]
-    pub(crate) fn new(
-        snapshots: Snapshots,
-        changed_filenames: Vec<(SnapshotId, ChangedFilePath)>,
-    ) -> InMemory {
-        InMemory {
-            snapshots,
-            changed_filenames,
-        }
-    }
-
-    fn take_file_if_id_matches(
-        snapshot: &Snapshot,
-        (id, file): (SnapshotId, ChangedFilePath),
-    ) -> Option<ChangedFilePath> {
-        if snapshot.has_id(&id) {
-            Some(file)
-        } else {
-            None
-        }
+    pub(crate) fn new(commits: Commits, changes: Vec<(Hash, ChangedFile)>) -> InMemory {
+        InMemory { commits, changes }
     }
 }
 
 impl Repository for InMemory {
-    fn snapshots_in_current_branch(&self) -> Result<Snapshots, Error> {
-        Ok(self.snapshots.clone())
+    fn commits_in_current_branch(&self) -> Result<Commits, Error> {
+        Ok(self.commits.clone())
     }
 
-    fn compare_with_parent(&self, snapshot: &Snapshot) -> Result<ChangeDelta, Error> {
-        Ok(ChangeDelta::new(
-            snapshot.id(),
-            snapshot.timestamp(),
-            self.changed_filenames
+    fn compare_with_parent(&self, commit: &Commit) -> Result<Delta, Error> {
+        Ok(Delta::new(
+            commit.hash(),
+            commit.timestamp(),
+            self.changes
                 .clone()
                 .into_iter()
-                .filter_map(|id_and_path| InMemory::take_file_if_id_matches(snapshot, id_and_path))
+                .filter_map(|(hash, change)| {
+                    if commit.hash() == hash {
+                        Some(change)
+                    } else {
+                        None
+                    }
+                })
                 .collect(),
         ))
     }

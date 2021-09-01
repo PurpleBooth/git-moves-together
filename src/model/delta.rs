@@ -5,20 +5,20 @@ use std::path::PathBuf;
 
 use chrono::{DateTime, Utc};
 
-use crate::model::changed_file_path::ChangedFilePath;
-use crate::model::snapshot_id::SnapshotId;
+use crate::model::changed_file::ChangedFile;
+use crate::model::hash::Hash;
 
 #[derive(Debug, Eq, PartialEq, Clone, Ord, PartialOrd)]
-pub(crate) struct ChangeDelta {
-    changes: BTreeSet<ChangedFilePath>,
+pub(crate) struct Delta {
+    changes: BTreeSet<ChangedFile>,
     timestamp: DateTime<Utc>,
-    id: SnapshotId,
+    hash: Hash,
 }
 
-impl ChangeDelta {
-    pub(crate) fn merge(&self, other: &ChangeDelta) -> ChangeDelta {
-        ChangeDelta {
-            id: self.id(),
+impl Delta {
+    pub(crate) fn merge(&self, other: &Delta) -> Delta {
+        Delta {
+            hash: self.hash(),
             timestamp: self.timestamp(),
             changes: self
                 .changes
@@ -28,38 +28,34 @@ impl ChangeDelta {
         }
     }
 
-    pub(crate) fn id(&self) -> SnapshotId {
-        self.id.clone()
+    pub(crate) fn hash(&self) -> Hash {
+        self.hash.clone()
     }
     pub(crate) fn timestamp(&self) -> DateTime<Utc> {
         self.timestamp
     }
-    pub(crate) fn new(
-        id: SnapshotId,
-        timestamp: DateTime<Utc>,
-        changes: Vec<ChangedFilePath>,
-    ) -> ChangeDelta {
-        ChangeDelta {
+    pub(crate) fn new(hash: Hash, timestamp: DateTime<Utc>, changes: Vec<ChangedFile>) -> Delta {
+        Delta {
             changes: changes.into_iter().collect(),
             timestamp,
-            id,
+            hash,
         }
     }
 
-    pub(crate) fn add_prefix(self, prefix: &str) -> ChangeDelta {
-        ChangeDelta {
+    pub(crate) fn add_str_prefix(self, prefix: &str) -> Delta {
+        Delta {
             changes: self
                 .changes
                 .iter()
                 .map(|path| path.add_prefix(prefix))
                 .collect(),
             timestamp: self.timestamp,
-            id: self.id,
+            hash: self.hash,
         }
     }
 
-    pub(crate) fn add_prefix_from_filename(&self, path: &str) -> ChangeDelta {
-        self.clone().add_prefix(
+    pub(crate) fn add_prefix(&self, path: &str) -> Delta {
+        self.clone().add_str_prefix(
             PathBuf::from(path)
                 .file_name()
                 .and_then(OsStr::to_str)
@@ -68,8 +64,8 @@ impl ChangeDelta {
     }
 }
 
-impl IntoIterator for ChangeDelta {
-    type Item = ChangedFilePath;
+impl IntoIterator for Delta {
+    type Item = ChangedFile;
     type IntoIter = std::collections::btree_set::IntoIter<Self::Item>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -81,16 +77,16 @@ impl IntoIterator for ChangeDelta {
 mod tests {
     use chrono::Utc;
 
-    use crate::model::change_delta::ChangeDelta;
+    use crate::model::delta::Delta;
 
     #[test]
     fn can_put_a_prefix_on_everything_in() {
-        let actual: Vec<String> = ChangeDelta::new(
+        let actual: Vec<String> = Delta::new(
             "sample-id".into(),
             Utc::now(),
             vec!["item 1".into(), "item 2".into(), "item 3".into()],
         )
-        .add_prefix("Something")
+        .add_str_prefix("Something")
         .into_iter()
         .map(|x| x.into())
         .collect();

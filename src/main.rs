@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use chrono::Duration;
 use futures::{future, stream, StreamExt, TryStreamExt};
 
-use model::change_delta::ChangeDelta;
+use model::delta::Delta;
 use repository::interface::Repository;
 
 use crate::errors::Error;
@@ -33,10 +33,10 @@ async fn main() -> Result<(), crate::errors::Error> {
     let strategy = if let Some(value) = time_window_arg {
         Strategy::CommitTime(Duration::minutes(value.parse()?))
     } else {
-        Strategy::Id
+        Strategy::Hash
     };
 
-    let deltas: Vec<Vec<ChangeDelta>> = stream::iter(git_repo_args.clone())
+    let deltas: Vec<Vec<Delta>> = stream::iter(git_repo_args.clone())
         .then(|path_str| read_deltas(max_days, path_str))
         .try_collect()
         .await?;
@@ -59,19 +59,19 @@ async fn main() -> Result<(), crate::errors::Error> {
     Ok(())
 }
 
-fn add_prefix((delta, prefix): (&Vec<ChangeDelta>, &str)) -> Vec<ChangeDelta> {
+fn add_prefix((delta, prefix): (&Vec<Delta>, &str)) -> Vec<Delta> {
     delta
         .iter()
-        .map(|delta| delta.add_prefix_from_filename(prefix))
+        .map(|delta| delta.add_prefix(prefix))
         .collect::<Vec<_>>()
 }
 
-async fn read_deltas(max_days: Option<i64>, path_str: &str) -> Result<Vec<ChangeDelta>, Error> {
+async fn read_deltas(max_days: Option<i64>, path_str: &str) -> Result<Vec<Delta>, Error> {
     let path = PathBuf::from(path_str);
     let repo = LibGit2::new(path)?;
-    stream::iter(repo.snapshots_in_current_branch()?.iter())
-        .filter(|snapshot| future::ready(filters::within_time_limit(max_days, snapshot)))
-        .map(|snapshot| repo.compare_with_parent(snapshot))
+    stream::iter(repo.commits_in_current_branch()?.iter())
+        .filter(|commit| future::ready(filters::within_time_limit(max_days, commit)))
+        .map(|commit| repo.compare_with_parent(commit))
         .try_collect()
         .await
         .map_err(Error::from)

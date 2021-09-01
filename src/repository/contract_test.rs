@@ -7,19 +7,19 @@ use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use tempfile::tempdir;
 
-use crate::model::change_delta::ChangeDelta;
-use crate::model::snapshot::Snapshot;
-use crate::model::snapshots::Snapshots;
+use crate::model::commit::Commit;
+use crate::model::commits::Commits;
+use crate::model::delta::Delta;
 use crate::repository::in_memory::InMemory;
 use crate::repository::interface::Repository;
 use crate::repository::libgit2::LibGit2;
 
 fn in_memory_repository() -> InMemory {
     InMemory::new(
-        Snapshots::from(vec![
-            Snapshot::new("3".into(), vec!["2".into()], chrono::offset::Utc::now()),
-            Snapshot::new("2".into(), vec!["1".into()], chrono::offset::Utc::now()),
-            Snapshot::new("1".into(), vec![], chrono::offset::Utc::now()),
+        Commits::from(vec![
+            Commit::new("3".into(), vec!["2".into()], chrono::offset::Utc::now()),
+            Commit::new("2".into(), vec!["1".into()], chrono::offset::Utc::now()),
+            Commit::new("1".into(), vec![], chrono::offset::Utc::now()),
         ]),
         vec![
             ("1".into(), "file1".into()),
@@ -97,7 +97,7 @@ fn i_can_get_a_list_of_all_current_commits() {
         Box::from(in_memory_repository()),
     ];
     for repo in &repos {
-        let actual = repo.snapshots_in_current_branch().unwrap();
+        let actual = repo.commits_in_current_branch().unwrap();
         let mut iter = actual.iter();
         let head = iter.next().unwrap();
         let mid = iter.next().unwrap();
@@ -105,10 +105,10 @@ fn i_can_get_a_list_of_all_current_commits() {
 
         assert!(iter.next().is_none());
         assert_eq!(
-            Snapshots::from(vec![
-                Snapshot::new(head.id(), vec![mid.id()], head.timestamp()),
-                Snapshot::new(mid.id(), vec![root.id()], mid.timestamp()),
-                Snapshot::new(root.id(), vec![], root.timestamp()),
+            Commits::from(vec![
+                Commit::new(head.hash(), vec![mid.hash()], head.timestamp()),
+                Commit::new(mid.hash(), vec![root.hash()], mid.timestamp()),
+                Commit::new(root.hash(), vec![], root.timestamp()),
             ]),
             actual
         );
@@ -116,7 +116,7 @@ fn i_can_get_a_list_of_all_current_commits() {
 }
 
 #[test]
-fn given_a_snapshot_i_can_find_out_what_files_changed_in_it() {
+fn given_a_commit_i_can_find_out_what_files_changed_in_it() {
     let tempdir = tempdir().unwrap();
     let path = tempdir.path();
     let repos: Vec<Box<dyn Repository>> = vec![
@@ -124,22 +124,26 @@ fn given_a_snapshot_i_can_find_out_what_files_changed_in_it() {
         Box::from(libgit2_repository(path.to_path_buf())),
     ];
     for repo in &repos {
-        let actual = repo.snapshots_in_current_branch().unwrap();
+        let actual = repo.commits_in_current_branch().unwrap();
         let mut iter = actual.iter();
         let head = iter.next().unwrap();
         let mid = iter.next().unwrap();
         iter.next().unwrap();
 
         assert!(iter.next().is_none());
-        let expected: ChangeDelta = ChangeDelta::new(
-            head.id(),
+        let expected: Delta = Delta::new(
+            head.hash(),
             head.timestamp(),
             vec!["file2".into(), "file3".into()],
         );
         assert_eq!(
             expected,
-            repo.compare_with_parent(&Snapshot::new(head.id(), vec![mid.id()], head.timestamp(),))
-                .unwrap()
+            repo.compare_with_parent(&Commit::new(
+                head.hash(),
+                vec![mid.hash()],
+                head.timestamp(),
+            ))
+            .unwrap()
         );
     }
 
