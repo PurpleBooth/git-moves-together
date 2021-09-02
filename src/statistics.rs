@@ -55,11 +55,10 @@ impl Statistics {
         let (key, grouped_delta) = match strategy {
             Strategy::Hash => (delta.hash(), delta.clone()),
             Strategy::CommitTime(duration) => {
-                let key: Hash = delta
+                let key: Hash = (&delta)
                     .timestamp()
                     .duration_trunc(*duration)
                     .unwrap()
-                    .to_string()
                     .into();
                 (
                     key.clone(),

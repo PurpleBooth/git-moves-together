@@ -33,10 +33,13 @@ impl From<String> for ChangedFile {
 impl From<ChangedFile> for String {
     fn from(change: ChangedFile) -> Self {
         match change {
-            ChangedFile { prefix: None, path } => path,
+            ChangedFile {
+                prefix: None, path, ..
+            } => path,
             ChangedFile {
                 prefix: Some(repo),
                 path,
+                ..
             } => format!("{}@{}", repo, path),
         }
     }

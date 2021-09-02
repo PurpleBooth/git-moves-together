@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use git2::Oid;
 use std::convert::TryFrom;
 
@@ -30,6 +31,14 @@ impl From<Oid> for Hash {
     fn from(oid: Oid) -> Self {
         Hash {
             hash: oid.to_string(),
+        }
+    }
+}
+
+impl From<DateTime<Utc>> for Hash {
+    fn from(datetime: DateTime<Utc>) -> Self {
+        Hash {
+            hash: datetime.to_string(),
         }
     }
 }

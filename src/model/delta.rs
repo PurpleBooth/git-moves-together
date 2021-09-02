@@ -42,7 +42,7 @@ impl Delta {
         }
     }
 
-    pub(crate) fn add_str_prefix(self, prefix: &str) -> Delta {
+    pub(crate) fn add_str_prefix(&self, prefix: &str) -> Delta {
         Delta {
             changes: self
                 .changes
@@ -50,7 +50,7 @@ impl Delta {
                 .map(|path| path.add_prefix(prefix))
                 .collect(),
             timestamp: self.timestamp,
-            hash: self.hash,
+            hash: self.hash.clone(),
         }
     }
 
