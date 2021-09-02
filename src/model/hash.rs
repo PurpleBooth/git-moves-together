@@ -41,3 +41,11 @@ impl TryFrom<Hash> for Oid {
         Oid::from_str(&String::from(hash))
     }
 }
+
+impl TryFrom<&Hash> for Oid {
+    type Error = git2::Error;
+
+    fn try_from(hash: &Hash) -> Result<Self, Self::Error> {
+        Oid::from_str(hash.hash.as_str())
+    }
+}

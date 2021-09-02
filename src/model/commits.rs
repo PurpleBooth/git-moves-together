@@ -7,9 +7,7 @@ pub(crate) struct Commits {
 
 impl From<Vec<Commit>> for Commits {
     fn from(commits: Vec<Commit>) -> Self {
-        Commits {
-            commits: commits.into_iter().collect(),
-        }
+        Commits { commits }
     }
 }
 

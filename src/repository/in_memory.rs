@@ -30,10 +30,10 @@ impl Repository for InMemory {
             commit.timestamp(),
             self.changes
                 .clone()
-                .into_iter()
+                .iter()
                 .filter_map(|(hash, change)| {
-                    if commit.hash() == hash {
-                        Some(change)
+                    if &commit.hash() == hash {
+                        Some(change.clone())
                     } else {
                         None
                     }

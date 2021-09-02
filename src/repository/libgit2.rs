@@ -22,7 +22,7 @@ impl LibGit2 {
         Ok(LibGit2 { repo })
     }
 
-    fn diff_with_parent(&self, tree: &Tree, parent: Hash) -> Result<Vec<ChangedFile>, Error> {
+    fn diff_with_parent(&self, tree: &Tree, parent: &Hash) -> Result<Vec<ChangedFile>, Error> {
         let tree1 = parent
             .try_into()
             .and_then(|oid| self.repo.find_commit(oid))
@@ -65,7 +65,7 @@ impl Repository for LibGit2 {
 
         let changes = commit
             .parents()
-            .into_iter()
+            .iter()
             .map(|parent| self.diff_with_parent(&tree, parent))
             .reduce(flatten_or_first_err)
             .unwrap_or_else(|| Ok(vec![]));

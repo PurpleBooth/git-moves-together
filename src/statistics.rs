@@ -140,27 +140,19 @@ impl Statistics {
     ) -> (Key, usize, usize) {
         (
             Key::new(item.clone(), other_file.clone()),
-            self.number_of_deltas_containing_both(item, other_file),
-            self.number_of_deltas_containing_either(item, other_file),
+            self.deltas_containing_both(item, other_file),
+            self.deltas_containing_either(item, other_file),
         )
     }
 
-    fn number_of_deltas_containing_both(
-        &self,
-        item: &ChangedFile,
-        other_file: &ChangedFile,
-    ) -> usize {
+    fn deltas_containing_both(&self, item: &ChangedFile, other_file: &ChangedFile) -> usize {
         self.change_to_delta
             .get(item)
             .zip(self.change_to_delta.get(other_file))
             .map_or(0, |(left, right)| left.intersection(right).count())
     }
 
-    fn number_of_deltas_containing_either(
-        &self,
-        item: &ChangedFile,
-        other_file: &ChangedFile,
-    ) -> usize {
+    fn deltas_containing_either(&self, item: &ChangedFile, other_file: &ChangedFile) -> usize {
         self.change_to_delta
             .get(item)
             .zip(self.change_to_delta.get(other_file))
@@ -169,7 +161,7 @@ impl Statistics {
 }
 
 impl Display for Statistics {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
         let mut coupling: Vec<_> = self.coupling().into_iter().collect();
         coupling.sort_by(display_order);
 
@@ -192,7 +184,7 @@ impl Display for Statistics {
             ]);
         }
 
-        writeln!(f, "{}", table)
+        writeln!(formatter, "{}", table)
     }
 }
 
