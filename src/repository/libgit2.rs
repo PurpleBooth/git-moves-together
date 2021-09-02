@@ -23,12 +23,13 @@ impl LibGit2 {
     }
 
     fn diff_with_parent(&self, tree: &Tree, parent: Hash) -> Result<Vec<ChangedFile>, Error> {
-        let parent_oid = parent.try_into()?;
-        let parent_tree = self.repo.find_commit(parent_oid)?.tree()?;
-        let diff_with_parent = self
+        let tree1 = parent
+            .try_into()
+            .and_then(|oid| self.repo.find_commit(oid))
+            .and_then(|commit| commit.tree())?;
+        Ok(self
             .repo
-            .diff_tree_to_tree(Some(&parent_tree), Some(tree), None)?;
-        Ok(diff_with_parent
+            .diff_tree_to_tree(Some(&tree1), tree.into(), None)?
             .deltas()
             .map(|delta| delta.into())
             .collect())
@@ -50,11 +51,7 @@ impl Repository for LibGit2 {
 
         walker
             .into_iter()
-            .map(|oid_result| {
-                oid_result
-                    .map_err(Error::from)
-                    .and_then(|oid| self.to_commit(oid))
-            })
+            .map(|oid| self.to_commit(oid?))
             .collect::<Result<Vec<Commit>, Error>>()
             .map(Commits::from)
     }
