@@ -28,6 +28,16 @@ impl Key {
     }
 }
 
+pub(crate) struct CouplingResult {
+    result: Vec<(Key, Calculation)>,
+}
+
+impl CouplingResult {
+    pub(crate) fn is_empty(&self) -> bool {
+        self.result.is_empty()
+    }
+}
+
 #[derive(Default)]
 pub(crate) struct Statistics {
     hash_to_delta: BTreeMap<Hash, Delta>,
@@ -88,11 +98,17 @@ impl Statistics {
         }
     }
 
-    pub(crate) fn coupling(&self) -> BTreeMap<Key, Calculation> {
+    pub(crate) fn coupling(&self) -> CouplingResult {
         let changes = self.changed_files();
-        return changes.iter().fold(BTreeMap::new(), |total, change| {
-            self.add_statistic(&changes, total, change)
-        });
+        return CouplingResult {
+            result: changes
+                .iter()
+                .fold(BTreeMap::new(), |total, change| {
+                    self.add_statistic(&changes, total, change)
+                })
+                .into_iter()
+                .collect(),
+        };
     }
 
     fn changed_files(&self) -> BTreeSet<ChangedFile> {
@@ -159,9 +175,9 @@ impl Statistics {
     }
 }
 
-impl Display for Statistics {
+impl Display for CouplingResult {
     fn fmt(&self, formatter: &mut Formatter<'_>) -> std::fmt::Result {
-        let mut coupling: Vec<_> = self.coupling().into_iter().collect();
+        let mut coupling: Vec<_> = self.result.clone();
         coupling.sort_by(display_order);
 
         let mut table = Table::new();
@@ -175,8 +191,8 @@ impl Display for Statistics {
         ]);
         for (key, (strength, together, total)) in coupling {
             table.add_row(vec![
-                key.left.into(),
-                key.right.into(),
+                key.left.clone().into(),
+                key.right.clone().into(),
                 format!("{:.2}%", strength * 100.0),
                 format!("{}", together),
                 format!("{}", total),
@@ -189,7 +205,6 @@ impl Display for Statistics {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::BTreeMap;
 
     use chrono::Utc;
 
@@ -204,7 +219,7 @@ mod tests {
             Delta::new("Id".into(), Utc::now(), vec!["file_1".into()]),
             &Strategy::Hash,
         );
-        assert_eq!(actual.await.coupling(), BTreeMap::new());
+        assert_eq!(actual.await.coupling().result, Vec::new());
     }
 
     #[allow(clippy::semicolon_if_nothing_returned)]
@@ -239,10 +254,8 @@ mod tests {
                 &Strategy::Hash,
             );
         assert_eq!(
-            actual.await.coupling(),
+            actual.await.coupling().result,
             vec![(Key::new("file_1".into(), "file_2".into()), (1.0, 3, 3)),]
-                .into_iter()
-                .collect()
         );
     }
 
@@ -305,7 +318,7 @@ mod tests {
                 &Strategy::Hash,
             );
         assert_eq!(
-            actual.await.coupling(),
+            actual.await.coupling().result,
             vec![
                 (Key::new("file_1".into(), "file_2".into()), (0.4, 2, 5)),
                 (
@@ -318,8 +331,6 @@ mod tests {
                 ),
                 (Key::new("file_3".into(), "file_5".into()), (0.25, 1, 4)),
             ]
-            .into_iter()
-            .collect()
         );
     }
 
@@ -382,7 +393,7 @@ mod tests {
                 &Strategy::Hash,
             );
         assert_eq!(
-            format!("{}", statistics.await),
+            format!("{}", statistics.await.coupling()),
             "+-------------+-------------+------------+----------+---------+
 | File A      | File B      | Together % | Together | Commits |
 +=============================================================+

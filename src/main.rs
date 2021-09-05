@@ -53,7 +53,7 @@ async fn main() -> Result<(), crate::errors::Error> {
     if coupling.is_empty() {
         println!("0 files move together");
     } else {
-        print!("{}", statistics);
+        print!("{}", coupling);
     }
 
     Ok(())
