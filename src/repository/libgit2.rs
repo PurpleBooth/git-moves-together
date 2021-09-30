@@ -31,7 +31,7 @@ impl LibGit2 {
             .repo
             .diff_tree_to_tree(Some(&tree1), tree.into(), None)?
             .deltas()
-            .map(|delta| delta.into())
+            .map(std::convert::Into::into)
             .collect())
     }
 

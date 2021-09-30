@@ -88,7 +88,7 @@ mod tests {
         )
         .add_str_prefix("Something")
         .into_iter()
-        .map(|x| x.into())
+        .map(std::convert::Into::into)
         .collect();
 
         assert_eq!(
