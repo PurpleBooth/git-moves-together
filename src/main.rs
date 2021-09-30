@@ -2,13 +2,14 @@ use std::path::PathBuf;
 
 use chrono::Duration;
 use futures::{future, stream, StreamExt, TryStreamExt};
-
 use model::delta::Delta;
 use repository::interface::Repository;
 
-use crate::errors::Error;
-use crate::repository::libgit2::LibGit2;
-use crate::statistics::{Statistics, Strategy};
+use crate::{
+    errors::Error,
+    repository::libgit2::LibGit2,
+    statistics::{Statistics, Strategy},
+};
 
 mod cli;
 mod errors;

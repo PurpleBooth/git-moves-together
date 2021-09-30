@@ -1,10 +1,13 @@
-use crate::model::changed_file::ChangedFile;
-use crate::model::commit::Commit;
-use crate::model::commits::Commits;
-use crate::model::delta::Delta;
-use crate::model::hash::Hash;
-use crate::repository::errors::Error;
-use crate::repository::interface::Repository;
+use crate::{
+    model::{
+        changed_file::ChangedFile,
+        commit::Commit,
+        commits::Commits,
+        delta::Delta,
+        hash::Hash,
+    },
+    repository::{errors::Error, interface::Repository},
+};
 
 pub(crate) struct InMemory {
     commits: Commits,
@@ -12,7 +15,8 @@ pub(crate) struct InMemory {
 }
 
 impl InMemory {
-    // Note, this is not actually dead, but rather proof that we can swap out our git provider
+    // Note, this is not actually dead, but rather proof that we can swap out our
+    // git provider
     #[allow(dead_code)]
     pub(crate) fn new(commits: Commits, changes: Vec<(Hash, ChangedFile)>) -> InMemory {
         InMemory { commits, changes }

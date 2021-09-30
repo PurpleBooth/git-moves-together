@@ -1,6 +1,7 @@
+use std::convert::TryFrom;
+
 use chrono::{DateTime, Utc};
 use git2::Oid;
-use std::convert::TryFrom;
 
 impl From<Hash> for String {
     fn from(hash: Hash) -> Self {

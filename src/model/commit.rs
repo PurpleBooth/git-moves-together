@@ -1,7 +1,7 @@
 use chrono::{DateTime, TimeZone, Utc};
+use git2::Commit as Git2Commit;
 
 use crate::model::hash::Hash;
-use git2::Commit as Git2Commit;
 
 #[derive(Eq, PartialEq, Debug, Clone)]
 pub(crate) struct Commit {

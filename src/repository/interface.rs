@@ -1,7 +1,7 @@
-use crate::model::commit::Commit;
-use crate::model::commits::Commits;
-use crate::model::delta::Delta;
-use crate::repository::errors::Error;
+use crate::{
+    model::{commit::Commit, commits::Commits, delta::Delta},
+    repository::errors::Error,
+};
 
 pub(crate) trait Repository {
     fn commits_in_current_branch(&self) -> Result<Commits, Error>;

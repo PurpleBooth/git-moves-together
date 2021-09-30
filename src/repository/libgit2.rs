@@ -1,15 +1,17 @@
-use std::convert::TryInto;
-use std::path::PathBuf;
+use std::{convert::TryInto, path::PathBuf};
 
 use git2::{Oid, Repository as LibGit2Repository, Sort, Tree};
 
-use crate::model::changed_file::ChangedFile;
-use crate::model::commit::Commit;
-use crate::model::commits::Commits;
-use crate::model::delta::Delta;
-use crate::model::hash::Hash;
-use crate::repository::errors::Error;
-use crate::repository::interface::Repository;
+use crate::{
+    model::{
+        changed_file::ChangedFile,
+        commit::Commit,
+        commits::Commits,
+        delta::Delta,
+        hash::Hash,
+    },
+    repository::{errors::Error, interface::Repository},
+};
 
 pub(crate) struct LibGit2 {
     repo: LibGit2Repository,

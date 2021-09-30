@@ -1,5 +1,6 @@
-use clap::{crate_authors, crate_version, App, Arg};
 use std::env;
+
+use clap::{crate_authors, crate_version, App, Arg};
 
 pub fn app() -> App<'static> {
     App::new(String::from(env!("CARGO_PKG_NAME")))

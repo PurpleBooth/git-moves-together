@@ -1,18 +1,17 @@
-use std::fs::File;
-use std::io::Write;
-use std::path::{Path, PathBuf};
-use std::process::Command;
+use std::{
+    fs::File,
+    io::Write,
+    path::{Path, PathBuf},
+    process::Command,
+};
 
-use rand::distributions::Alphanumeric;
-use rand::{thread_rng, Rng};
+use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use tempfile::tempdir;
 
-use crate::model::commit::Commit;
-use crate::model::commits::Commits;
-use crate::model::delta::Delta;
-use crate::repository::in_memory::InMemory;
-use crate::repository::interface::Repository;
-use crate::repository::libgit2::LibGit2;
+use crate::{
+    model::{commit::Commit, commits::Commits, delta::Delta},
+    repository::{in_memory::InMemory, interface::Repository, libgit2::LibGit2},
+};
 
 fn in_memory_repository() -> InMemory {
     InMemory::new(

@@ -1,16 +1,13 @@
-use std::cmp::Ordering;
-use std::collections::{BTreeMap, BTreeSet};
-use std::fmt::{Display, Formatter};
+use std::{
+    cmp::Ordering,
+    collections::{BTreeMap, BTreeSet},
+    fmt::{Display, Formatter},
+};
 
-use comfy_table::{ContentArrangement, Table};
+use chrono::{Duration, DurationRound};
+use comfy_table::{modifiers::UTF8_ROUND_CORNERS, presets::UTF8_FULL, ContentArrangement, Table};
 
-use crate::model::changed_file::ChangedFile;
-use crate::model::delta::Delta;
-use crate::model::hash::Hash;
-use chrono::Duration;
-use chrono::DurationRound;
-use comfy_table::modifiers::UTF8_ROUND_CORNERS;
-use comfy_table::presets::UTF8_FULL;
+use crate::model::{changed_file::ChangedFile, delta::Delta, hash::Hash};
 
 #[derive(Eq, PartialEq, Hash, Debug, Ord, PartialOrd, Clone)]
 pub(crate) struct Key {
@@ -213,8 +210,10 @@ mod tests {
 
     use chrono::Utc;
 
-    use crate::model::delta::Delta;
-    use crate::statistics::{Key, Statistics, Strategy};
+    use crate::{
+        model::delta::Delta,
+        statistics::{Key, Statistics, Strategy},
+    };
 
     #[allow(clippy::semicolon_if_nothing_returned)]
     #[tokio::test]

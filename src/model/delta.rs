@@ -1,12 +1,8 @@
-use std::collections::BTreeSet;
-use std::ffi::OsStr;
-
-use std::path::PathBuf;
+use std::{collections::BTreeSet, ffi::OsStr, path::PathBuf};
 
 use chrono::{DateTime, Utc};
 
-use crate::model::changed_file::ChangedFile;
-use crate::model::hash::Hash;
+use crate::model::{changed_file::ChangedFile, hash::Hash};
 
 #[derive(Debug, Eq, PartialEq, Clone, Ord, PartialOrd)]
 pub(crate) struct Delta {
@@ -31,9 +27,11 @@ impl Delta {
     pub(crate) fn hash(&self) -> Hash {
         self.hash.clone()
     }
+
     pub(crate) fn timestamp(&self) -> DateTime<Utc> {
         self.timestamp
     }
+
     pub(crate) fn new(hash: Hash, timestamp: DateTime<Utc>, changes: Vec<ChangedFile>) -> Delta {
         Delta {
             changes: changes.into_iter().collect(),
@@ -65,8 +63,8 @@ impl Delta {
 }
 
 impl IntoIterator for Delta {
-    type Item = ChangedFile;
     type IntoIter = std::collections::btree_set::IntoIter<Self::Item>;
+    type Item = ChangedFile;
 
     fn into_iter(self) -> Self::IntoIter {
         self.changes.into_iter()

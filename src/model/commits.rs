@@ -12,8 +12,8 @@ impl From<Vec<Commit>> for Commits {
 }
 
 impl IntoIterator for Commits {
-    type Item = Commit;
     type IntoIter = std::vec::IntoIter<Self::Item>;
+    type Item = Commit;
 
     fn into_iter(self) -> Self::IntoIter {
         self.commits.into_iter()
