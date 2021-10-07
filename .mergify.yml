@@ -2,8 +2,7 @@ queue_rules:
 - name: default
   conditions:
   - check-success~=^commit-checks /
-  - check-success=specdown (ubuntu-latest)
-  - check-success=specdown (macos-latest)
+  - check-success~=^specdown /
   - check-success~=^lint-markdown /
   - check-success~=^rust-checks /
 
@@ -19,8 +18,7 @@ pull_request_rules:
 - name: automatic rebase for dependencies
   conditions:
   - check-success~=^commit-checks /
-  - check-success=specdown (ubuntu-latest)
-  - check-success=specdown (macos-latest)
+  - check-success~=^specdown /
   - check-success~=^lint-markdown /
   - check-success~=^rust-checks /
   - base=main
