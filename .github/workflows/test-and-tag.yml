@@ -6,14 +6,8 @@ on:
   pull_request:
   workflow_dispatch:
 jobs:
-  lint-markdown-new:
-    uses: PurpleBooth/common-pipelines/.github/workflows/markdown-check.yml@main
-
   lint-markdown:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - uses: PurpleBooth/gfmfmt-action@v1.0.5
+    uses: PurpleBooth/common-pipelines/.github/workflows/markdown-check.yml@main
 
   specdown:
     runs-on: ${{ matrix.os }}

@@ -9,7 +9,7 @@ queue_rules:
   - status-success=specdown (ubuntu-latest)
   - status-success=specdown (macos-latest)
   - status-success=lints
-  - status-success=lint-markdown
+  - status-success=lint-markdown / lint-markdown
 
 pull_request_rules:
 - name: request review on external contributor
@@ -30,7 +30,7 @@ pull_request_rules:
   - status-success=specdown (ubuntu-latest)
   - status-success=specdown (macos-latest)
   - status-success=lints
-  - status-success=lint-markdown
+  - status-success=lint-markdown / lint-markdown
   - base=main
   - author~=^dependabot(|-preview)\[bot\]$
   actions:
