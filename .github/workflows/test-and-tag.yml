@@ -9,6 +9,9 @@ jobs:
   lint-markdown:
     uses: PurpleBooth/common-pipelines/.github/workflows/markdown-check.yml@main
 
+  rust-checks-ng:
+    uses: PurpleBooth/common-pipelines/.github/workflows/rust-check.yml@main
+
   specdown:
     runs-on: ${{ matrix.os }}
     strategy:
