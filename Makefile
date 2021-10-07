@@ -39,8 +39,8 @@ lint:
 .PHONY: fmt
 ## Format what can be formatted
 fmt:
-	cargo +nightly fix --allow-dirty
-	cargo +nightly clippy --allow-dirty --fix -Z unstable-options --all-features -- -D warnings -Dclippy::all -D clippy::pedantic
+	cargo +nightly fix --allow-dirty --allow-staged
+	cargo +nightly clippy --allow-dirty --allow-staged --fix -Z unstable-options --all-features -- -D warnings -Dclippy::all -D clippy::pedantic
 	cargo +nightly fmt --all
 	yamlfmt -w .github/*.yml .github/workflows/*.yml .*.yml
 
