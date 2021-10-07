@@ -9,6 +9,9 @@ jobs:
   lint-markdown:
     uses: PurpleBooth/common-pipelines/.github/workflows/markdown-check.yml@main
 
+  commit-checks:
+    uses: PurpleBooth/common-pipelines/.github/workflows/commit-check.yml@main
+
   rust-checks:
     uses: PurpleBooth/common-pipelines/.github/workflows/rust-check.yml@main
     with:
