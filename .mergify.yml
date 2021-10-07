@@ -1,15 +1,18 @@
 queue_rules:
 - name: default
   conditions:
-  - status-success=security-audit
-  - status-success=check
   - status-success=version
-  - status-success=test (macos-latest)
-  - status-success=test (ubuntu-latest)
   - status-success=specdown (ubuntu-latest)
   - status-success=specdown (macos-latest)
-  - status-success=lints
   - status-success=lint-markdown / lint-markdown
+  - status-success=rust-checks / check
+  - status-success=rust-checks / test (macos-latest)
+  - status-success=rust-checks / test (ubuntu-latest)
+  - status-success=rust-checks / test (windows-latest)
+  - status-success=rust-checks / lints (macos-latest)
+  - status-success=rust-checks / lints (ubuntu-latest)
+  - status-success=rust-checks / lints (windows-latest)
+  - status-success=rust-checks / security-audit
 
 pull_request_rules:
 - name: request review on external contributor
@@ -22,15 +25,18 @@ pull_request_rules:
 
 - name: automatic rebase for dependencies
   conditions:
-  - status-success=security-audit
-  - status-success=check
   - status-success=version
-  - status-success=test (macos-latest)
-  - status-success=test (ubuntu-latest)
   - status-success=specdown (ubuntu-latest)
   - status-success=specdown (macos-latest)
-  - status-success=lints
   - status-success=lint-markdown / lint-markdown
+  - status-success=rust-checks / check
+  - status-success=rust-checks / test (macos-latest)
+  - status-success=rust-checks / test (ubuntu-latest)
+  - status-success=rust-checks / test (windows-latest)
+  - status-success=rust-checks / lints (macos-latest)
+  - status-success=rust-checks / lints (ubuntu-latest)
+  - status-success=rust-checks / lints (windows-latest)
+  - status-success=rust-checks / security-audit
   - base=main
   - author~=^dependabot(|-preview)\[bot\]$
   actions:

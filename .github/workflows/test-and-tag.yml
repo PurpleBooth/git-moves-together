@@ -9,10 +9,11 @@ jobs:
   lint-markdown:
     uses: PurpleBooth/common-pipelines/.github/workflows/markdown-check.yml@main
 
-  rust-checks-ng:
+  rust-checks:
     uses: PurpleBooth/common-pipelines/.github/workflows/rust-check.yml@main
     with:
       run_on_windows: false
+
   specdown:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -39,25 +40,6 @@ jobs:
         toolchain: stable
         default: true
     - run: make specdown
-  security-audit:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2.3.4
-      name: Checkout the repository
-    - uses: actions/cache@v2.1.6
-      name: Cache cargo
-      with:
-        path: |
-          .cache
-          ~/.cargo/registry
-          ~/.cargo/git
-          ~/.cargo/bin
-          target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-    - uses: actions-rs/audit-check@v1.2.0
-      name: Audit check cargo packages
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
   version:
     runs-on: ubuntu-latest
     steps:
@@ -79,83 +61,6 @@ jobs:
         GITHUB_USER: ${{ github.actor }}
         RUST_LOG: versio=trace
         RUST_BACKTRACE: 1
-  check:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2.3.4
-    - uses: actions/cache@v2.1.6
-      with:
-        path: |
-          .cache
-          ~/.cargo/registry
-          ~/.cargo/git
-          ~/.cargo/bin
-          target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-    - uses: actions-rs/toolchain@v1.0.7
-      with:
-        profile: minimal
-        toolchain: stable
-        default: true
-    - uses: actions-rs/cargo@v1.0.3
-      with:
-        command: check
-  test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        include:
-        - os: macos-latest
-        - os: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2.3.4
-    - uses: actions/cache@v2.1.6
-      with:
-        path: |
-          .cache
-          ~/.cargo/registry
-          ~/.cargo/git
-          ~/.cargo/bin
-          target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-    - uses: actions-rs/toolchain@v1.0.7
-      with:
-        profile: minimal
-        toolchain: stable
-        default: true
-    - uses: actions-rs/cargo@v1.0.3
-      with:
-        args: ' --locked'
-        command: test
-  lints:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2.3.4
-    - uses: actions/cache@v2.1.6
-      with:
-        path: |
-          .cache
-          ~/.cargo/registry
-          ~/.cargo/git
-          ~/.cargo/bin
-          target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-    - uses: actions-rs/toolchain@v1.0.7
-      with:
-        profile: minimal
-        toolchain: nightly
-        default: true
-        components: rustfmt, clippy
-    - uses: actions-rs/cargo@v1.0.3
-      with:
-        command: fmt
-        args: --all -- --check
-    - uses: actions-rs/cargo@v1.0.3
-      with:
-        command: clippy
-        args: --all-targets --all-features -- -D warnings -Dclippy::all -D clippy::pedantic
-          -D clippy::cargo
-    - uses: gaurav-nelson/github-action-markdown-link-check@1.0.13
 
   release:
     if: github.ref == 'refs/heads/main'
@@ -165,11 +70,8 @@ jobs:
     needs:
     - version
     - specdown
-    - test
-    - lints
     - lint-markdown
-    - check
-    - security-audit
+    - rust-checks
     outputs:
       version_bump: ${{ steps.version_bump.outputs.version_bump }}
       current_version: ${{ steps.current_version.outputs.current_version }}
