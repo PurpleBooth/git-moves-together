@@ -11,7 +11,8 @@ jobs:
 
   rust-checks-ng:
     uses: PurpleBooth/common-pipelines/.github/workflows/rust-check.yml@main
-
+    with:
+      run_on_windows: false
   specdown:
     runs-on: ${{ matrix.os }}
     strategy:
