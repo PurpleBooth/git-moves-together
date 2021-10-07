@@ -8,10 +8,8 @@ on:
 jobs:
   lint-markdown:
     uses: PurpleBooth/common-pipelines/.github/workflows/markdown-check.yml@main
-
   commit-checks:
     uses: PurpleBooth/common-pipelines/.github/workflows/commit-check.yml@main
-
   rust-checks:
     uses: PurpleBooth/common-pipelines/.github/workflows/rust-check.yml@main
     with:
@@ -43,35 +41,13 @@ jobs:
         toolchain: stable
         default: true
     - run: make specdown
-  version:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2.3.4
-      with:
-        fetch-depth: 0
-    - uses: chaaz/versio-actions/install@v1.2
-      name: Install versio
-    - name: Check projects
-      run: versio check
-      env:
-        RUST_LOG: versio=trace
-        RUST_BACKTRACE: 1
-    - name: Print changes
-      run: versio plan
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GITHUB_USER: ${{ github.actor }}
-        RUST_LOG: versio=trace
-        RUST_BACKTRACE: 1
-
   release:
     if: github.ref == 'refs/heads/main'
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GITHUB_USER: ${{ github.actor }}
     needs:
-    - version
+    - commit-checks
     - specdown
     - lint-markdown
     - rust-checks
