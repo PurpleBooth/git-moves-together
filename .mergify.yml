@@ -1,11 +1,11 @@
 queue_rules:
 - name: default
   conditions:
-  - status-success~=^commit-checks /
-  - status-success=specdown (ubuntu-latest)
-  - status-success=specdown (macos-latest)
-  - status-success~=^lint-markdown /
-  - status-success~=^rust-checks /
+  - check-success~=^commit-checks /
+  - check-success=specdown (ubuntu-latest)
+  - check-success=specdown (macos-latest)
+  - check-success~=^lint-markdown /
+  - check-success~=^rust-checks /
 
 pull_request_rules:
 - name: request review on external contributor
@@ -18,11 +18,11 @@ pull_request_rules:
 
 - name: automatic rebase for dependencies
   conditions:
-  - status-success~=^commit-checks /
-  - status-success=specdown (ubuntu-latest)
-  - status-success=specdown (macos-latest)
-  - status-success~=^lint-markdown /
-  - status-success~=^rust-checks /
+  - check-success~=^commit-checks /
+  - check-success=specdown (ubuntu-latest)
+  - check-success=specdown (macos-latest)
+  - check-success~=^lint-markdown /
+  - check-success~=^rust-checks /
   - base=main
   - author~=^dependabot(|-preview)\[bot\]$
   actions:
