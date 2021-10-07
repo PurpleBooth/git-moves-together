@@ -6,6 +6,9 @@ on:
   pull_request:
   workflow_dispatch:
 jobs:
+  lint-markdown-new:
+    uses: PurpleBooth/common-pipelines/.github/workflows/markdown-check.yml@main
+
   lint-markdown:
     runs-on: ubuntu-latest
     steps:
