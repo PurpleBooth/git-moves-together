@@ -1,4 +1,4 @@
-use std::{convert::TryInto, path::PathBuf};
+use std::{convert::TryInto, path::PathBuf, sync::Arc};
 
 use git2::{Oid, Repository as LibGit2Repository, Sort, Tree};
 
@@ -13,15 +13,16 @@ use crate::{
     repository::{errors::Error, interface::Repository},
 };
 
-pub(crate) struct LibGit2 {
-    repo: LibGit2Repository,
+#[derive(Clone)]
+pub struct LibGit2 {
+    repo: Arc<LibGit2Repository>,
 }
 
 impl LibGit2 {
-    pub(crate) fn new(path: PathBuf) -> Result<LibGit2, Error> {
+    pub(crate) fn new(path: PathBuf) -> Result<Self, Error> {
         let repo = git2::Repository::open(path)?;
 
-        Ok(LibGit2 { repo })
+        Ok(Self { repo: repo.into() })
     }
 
     fn diff_with_parent(&self, tree: &Tree, parent: &Hash) -> Result<Vec<ChangedFile>, Error> {
@@ -31,6 +32,7 @@ impl LibGit2 {
             .and_then(|commit| commit.tree())?;
         Ok(self
             .repo
+            .clone()
             .diff_tree_to_tree(Some(&tree1), tree.into(), None)?
             .deltas()
             .map(std::convert::Into::into)

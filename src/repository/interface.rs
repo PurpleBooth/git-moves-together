@@ -3,7 +3,7 @@ use crate::{
     repository::errors::Error,
 };
 
-pub(crate) trait Repository {
+pub trait Repository {
     fn commits_in_current_branch(&self) -> Result<Commits, Error>;
     fn compare_with_parent(&self, _: &Commit) -> Result<Delta, Error>;
 }

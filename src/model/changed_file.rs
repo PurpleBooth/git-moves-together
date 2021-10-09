@@ -1,14 +1,14 @@
 use git2::DiffDelta;
 
 #[derive(Debug, Eq, PartialEq, Clone, Hash, Ord, PartialOrd)]
-pub(crate) struct ChangedFile {
+pub struct ChangedFile {
     prefix: Option<String>,
     path: String,
 }
 
 impl ChangedFile {
-    pub(crate) fn add_prefix(&self, prefix: &str) -> ChangedFile {
-        ChangedFile {
+    pub(crate) fn add_prefix(&self, prefix: &str) -> Self {
+        Self {
             prefix: Some(prefix.into()),
             path: self.path.clone(),
         }
@@ -17,7 +17,7 @@ impl ChangedFile {
 
 impl From<&str> for ChangedFile {
     fn from(path: &str) -> Self {
-        ChangedFile {
+        Self {
             prefix: None,
             path: path.to_string(),
         }
@@ -26,7 +26,7 @@ impl From<&str> for ChangedFile {
 
 impl From<String> for ChangedFile {
     fn from(path: String) -> Self {
-        ChangedFile { prefix: None, path }
+        Self { prefix: None, path }
     }
 }
 
@@ -51,6 +51,6 @@ impl From<DiffDelta<'_>> for ChangedFile {
             .new_file()
             .path()
             .and_then(std::path::Path::to_str)
-            .map_or_else(|| ChangedFile::from("?"), ChangedFile::from)
+            .map_or_else(|| Self::from("?"), Self::from)
     }
 }

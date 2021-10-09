@@ -1,13 +1,13 @@
 use crate::model::commit::Commit;
 
 #[derive(Debug, Clone, Eq, PartialEq)]
-pub(crate) struct Commits {
+pub struct Commits {
     commits: Vec<Commit>,
 }
 
 impl From<Vec<Commit>> for Commits {
     fn from(commits: Vec<Commit>) -> Self {
-        Commits { commits }
+        Self { commits }
     }
 }
 

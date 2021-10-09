@@ -5,15 +5,15 @@ use chrono::{DateTime, Utc};
 use crate::model::{changed_file::ChangedFile, hash::Hash};
 
 #[derive(Debug, Eq, PartialEq, Clone, Ord, PartialOrd)]
-pub(crate) struct Delta {
+pub struct Delta {
     changes: BTreeSet<ChangedFile>,
     timestamp: DateTime<Utc>,
     hash: Hash,
 }
 
 impl Delta {
-    pub(crate) fn merge(&self, other: &Delta) -> Delta {
-        Delta {
+    pub(crate) fn merge(&self, other: &Self) -> Self {
+        Self {
             hash: self.hash(),
             timestamp: self.timestamp(),
             changes: self
@@ -28,20 +28,20 @@ impl Delta {
         self.hash.clone()
     }
 
-    pub(crate) fn timestamp(&self) -> DateTime<Utc> {
+    pub(crate) const fn timestamp(&self) -> DateTime<Utc> {
         self.timestamp
     }
 
-    pub(crate) fn new(hash: Hash, timestamp: DateTime<Utc>, changes: Vec<ChangedFile>) -> Delta {
-        Delta {
+    pub(crate) fn new(hash: Hash, timestamp: DateTime<Utc>, changes: Vec<ChangedFile>) -> Self {
+        Self {
             changes: changes.into_iter().collect(),
             timestamp,
             hash,
         }
     }
 
-    pub(crate) fn add_str_prefix(&self, prefix: &str) -> Delta {
-        Delta {
+    pub(crate) fn add_str_prefix(&self, prefix: &str) -> Self {
+        Self {
             changes: self
                 .changes
                 .iter()
@@ -52,7 +52,7 @@ impl Delta {
         }
     }
 
-    pub(crate) fn add_prefix(&self, path: &str) -> Delta {
+    pub(crate) fn add_prefix(&self, path: &str) -> Self {
         self.clone().add_str_prefix(
             PathBuf::from(path)
                 .file_name()

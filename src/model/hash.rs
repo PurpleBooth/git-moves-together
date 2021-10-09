@@ -10,13 +10,13 @@ impl From<Hash> for String {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd)]
-pub(crate) struct Hash {
+pub struct Hash {
     hash: String,
 }
 
 impl From<&str> for Hash {
     fn from(hash: &str) -> Self {
-        Hash {
+        Self {
             hash: String::from(hash),
         }
     }
@@ -24,13 +24,13 @@ impl From<&str> for Hash {
 
 impl From<String> for Hash {
     fn from(hash: String) -> Self {
-        Hash { hash }
+        Self { hash }
     }
 }
 
 impl From<Oid> for Hash {
     fn from(oid: Oid) -> Self {
-        Hash {
+        Self {
             hash: oid.to_string(),
         }
     }
@@ -38,7 +38,7 @@ impl From<Oid> for Hash {
 
 impl From<DateTime<Utc>> for Hash {
     fn from(datetime: DateTime<Utc>) -> Self {
-        Hash {
+        Self {
             hash: datetime.to_string(),
         }
     }
@@ -48,7 +48,7 @@ impl TryFrom<Hash> for Oid {
     type Error = git2::Error;
 
     fn try_from(hash: Hash) -> Result<Self, Self::Error> {
-        Oid::from_str(&String::from(hash))
+        Self::from_str(&String::from(hash))
     }
 }
 
@@ -56,6 +56,6 @@ impl TryFrom<&Hash> for Oid {
     type Error = git2::Error;
 
     fn try_from(hash: &Hash) -> Result<Self, Self::Error> {
-        Oid::from_str(hash.hash.as_str())
+        Self::from_str(hash.hash.as_str())
     }
 }

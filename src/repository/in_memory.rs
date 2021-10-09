@@ -9,7 +9,7 @@ use crate::{
     repository::{errors::Error, interface::Repository},
 };
 
-pub(crate) struct InMemory {
+pub struct InMemory {
     commits: Commits,
     changes: Vec<(Hash, ChangedFile)>,
 }
@@ -18,8 +18,8 @@ impl InMemory {
     // Note, this is not actually dead, but rather proof that we can swap out our
     // git provider
     #[allow(dead_code)]
-    pub(crate) fn new(commits: Commits, changes: Vec<(Hash, ChangedFile)>) -> InMemory {
-        InMemory { commits, changes }
+    pub(crate) fn new(commits: Commits, changes: Vec<(Hash, ChangedFile)>) -> Self {
+        Self { commits, changes }
     }
 }
 

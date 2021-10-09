@@ -10,24 +10,24 @@ use comfy_table::{modifiers::UTF8_ROUND_CORNERS, presets::UTF8_FULL, ContentArra
 use crate::model::{changed_file::ChangedFile, delta::Delta, hash::Hash};
 
 #[derive(Eq, PartialEq, Hash, Debug, Ord, PartialOrd, Clone)]
-pub(crate) struct Key {
+pub struct Key {
     left: ChangedFile,
     right: ChangedFile,
 }
 
 impl Key {
-    fn new(left: ChangedFile, right: ChangedFile) -> Key {
+    fn new(left: ChangedFile, right: ChangedFile) -> Self {
         let mut keys = [left, right];
         keys.sort();
 
-        Key {
+        Self {
             left: keys.get(0).unwrap().clone(),
             right: keys.get(1).unwrap().clone(),
         }
     }
 }
 
-pub(crate) struct CouplingResult {
+pub struct CouplingResult {
     result: Vec<(Key, Calculation)>,
 }
 
@@ -38,7 +38,7 @@ impl CouplingResult {
 }
 
 #[derive(Default)]
-pub(crate) struct Statistics {
+pub struct Statistics {
     hash_to_delta: BTreeMap<Hash, Delta>,
     change_to_delta: BTreeMap<ChangedFile, BTreeSet<Delta>>,
 }
@@ -59,7 +59,7 @@ pub enum Strategy {
 }
 
 impl Statistics {
-    pub(crate) async fn add_delta(self, delta: Delta, strategy: &Strategy) -> Statistics {
+    pub(crate) async fn add_delta(self, delta: Delta, strategy: &Strategy) -> Self {
         let mut hash_to_delta = self.hash_to_delta;
         let (key, grouped_delta) = match strategy {
             Strategy::Hash => (delta.hash(), delta.clone()),
@@ -91,7 +91,7 @@ impl Statistics {
             change_to_delta.insert(change, coupled_deltas);
         }
 
-        Statistics {
+        Self {
             hash_to_delta,
             change_to_delta,
         }
@@ -128,7 +128,7 @@ impl Statistics {
             .filter(|other| &change != other)
             .map(|other| self.deltas_containing(change, other))
             .fold(total, |acc, count_and_total| {
-                Statistics::insert_with_new_coupling_item(acc, count_and_total)
+                Self::insert_with_new_coupling_item(acc, count_and_total)
             })
     }
 

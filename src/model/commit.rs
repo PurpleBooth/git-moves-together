@@ -4,15 +4,15 @@ use git2::Commit as Git2Commit;
 use crate::model::hash::Hash;
 
 #[derive(Eq, PartialEq, Debug, Clone)]
-pub(crate) struct Commit {
+pub struct Commit {
     hash: Hash,
     timestamp: DateTime<Utc>,
     parents: Vec<Hash>,
 }
 
 impl Commit {
-    pub(crate) fn new(hash: Hash, parents: Vec<Hash>, timestamp: DateTime<Utc>) -> Commit {
-        Commit {
+    pub(crate) fn new(hash: Hash, parents: Vec<Hash>, timestamp: DateTime<Utc>) -> Self {
+        Self {
             hash,
             timestamp,
             parents,
@@ -23,7 +23,7 @@ impl Commit {
         self.hash.clone()
     }
 
-    pub(crate) fn timestamp(&self) -> DateTime<Utc> {
+    pub(crate) const fn timestamp(&self) -> DateTime<Utc> {
         self.timestamp
     }
 
@@ -34,7 +34,7 @@ impl Commit {
 
 impl From<Git2Commit<'_>> for Commit {
     fn from(commit: Git2Commit) -> Self {
-        Commit::new(
+        Self::new(
             commit.id().into(),
             commit.parents().map(|parent| parent.id().into()).collect(),
             Utc.timestamp(commit.time().seconds(), 0),

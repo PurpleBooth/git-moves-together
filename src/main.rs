@@ -69,10 +69,10 @@ fn add_prefix((delta, prefix): (&Vec<Delta>, &str)) -> Vec<Delta> {
 
 async fn read_deltas(max_days: Option<i64>, path_str: &str) -> Result<Vec<Delta>, Error> {
     let path = PathBuf::from(path_str);
-    let repo = LibGit2::new(path)?;
-    stream::iter(repo.commits_in_current_branch()?.iter())
+    let commits = LibGit2::new(path.clone())?.commits_in_current_branch()?;
+    stream::iter(commits.iter())
         .filter(|commit| future::ready(filters::within_time_limit(max_days, commit)))
-        .map(|commit| repo.compare_with_parent(commit))
+        .map(|commit| LibGit2::new(path.clone())?.compare_with_parent(commit))
         .try_collect()
         .await
         .map_err(Error::from)
