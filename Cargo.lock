@@ -289,7 +289,7 @@ checksum = "f0a01e0497841a3b2db4f8afa483cce65f7e96a3498bd6c541734792aeac8fe7"
 
 [[package]]
 name = "git-moves-together"
-version = "2.4.4"
+version = "2.5.0"
 dependencies = [
  "chrono",
  "clap",
