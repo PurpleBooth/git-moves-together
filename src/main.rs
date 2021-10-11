@@ -1,3 +1,10 @@
+mod cli;
+mod errors;
+mod filters;
+mod model;
+mod repository;
+mod statistics;
+
 use std::path::PathBuf;
 
 use chrono::Duration;
@@ -11,15 +18,9 @@ use crate::{
     statistics::{Statistics, Strategy},
 };
 
-mod cli;
-mod errors;
-mod filters;
-mod model;
-mod repository;
-mod statistics;
-
 #[tokio::main]
 async fn main() -> Result<(), crate::errors::Error> {
+    miette::set_panic_hook();
     let matches = cli::app().get_matches();
 
     let max_days_arg = matches.value_of("max-days-ago");
