@@ -7,21 +7,21 @@ on:
   workflow_dispatch:
 jobs:
   lint-markdown:
-    uses: PurpleBooth/common-pipelines/.github/workflows/markdown-check.yml@main
+    uses: PurpleBooth/common-pipelines/.github/workflows/markdown-check.yml@v0.2.0
   commit-checks:
-    uses: PurpleBooth/common-pipelines/.github/workflows/commit-check.yml@main
+    uses: PurpleBooth/common-pipelines/.github/workflows/commit-check.yml@v0.2.0
   rust-checks:
-    uses: PurpleBooth/common-pipelines/.github/workflows/rust-check.yml@main
+    uses: PurpleBooth/common-pipelines/.github/workflows/rust-check.yml@v0.2.0
     with:
       run_on_windows: false
 
   specdown:
-    uses: PurpleBooth/common-pipelines/.github/workflows/specdown-check.yml@main
+    uses: PurpleBooth/common-pipelines/.github/workflows/specdown-check.yml@v0.2.0
     with:
       run_on_windows: false
 
   release:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/v0.2.0'
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GITHUB_USER: ${{ github.actor }}
@@ -59,7 +59,7 @@ jobs:
     if: needs.release.outputs.version_bump
     needs:
     - release
-    uses: PurpleBooth/common-pipelines/.github/workflows/release-rust-binary.yml@main
+    uses: PurpleBooth/common-pipelines/.github/workflows/release-rust-binary.yml@v0.2.0
     with:
       current_version: ${{ needs.release.outputs.current_version }}
       previous_version: ${{ needs.release.outputs.previous_version }}
