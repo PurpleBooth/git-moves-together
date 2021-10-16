@@ -21,7 +21,7 @@ jobs:
       run_on_windows: false
 
   release:
-    if: github.ref == 'refs/heads/v0.2.0'
+    if: github.ref == 'refs/heads/main'
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GITHUB_USER: ${{ github.actor }}
