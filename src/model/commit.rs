@@ -1,17 +1,17 @@
-use chrono::{DateTime, TimeZone, Utc};
 use git2::Commit as Git2Commit;
+use time::OffsetDateTime;
 
 use crate::model::hash::Hash;
 
 #[derive(Eq, PartialEq, Debug, Clone)]
 pub struct Commit {
     hash: Hash,
-    timestamp: DateTime<Utc>,
+    timestamp: OffsetDateTime,
     parents: Vec<Hash>,
 }
 
 impl Commit {
-    pub(crate) fn new(hash: Hash, parents: Vec<Hash>, timestamp: DateTime<Utc>) -> Self {
+    pub(crate) fn new(hash: Hash, parents: Vec<Hash>, timestamp: OffsetDateTime) -> Self {
         Self {
             hash,
             timestamp,
@@ -23,7 +23,7 @@ impl Commit {
         self.hash.clone()
     }
 
-    pub(crate) const fn timestamp(&self) -> DateTime<Utc> {
+    pub(crate) const fn timestamp(&self) -> OffsetDateTime {
         self.timestamp
     }
 
@@ -37,7 +37,8 @@ impl From<Git2Commit<'_>> for Commit {
         Self::new(
             commit.id().into(),
             commit.parents().map(|parent| parent.id().into()).collect(),
-            Utc.timestamp(commit.time().seconds(), 0),
+            OffsetDateTime::from_unix_timestamp(commit.time().seconds())
+                .expect("Timestamp would overflow integer"),
         )
     }
 }

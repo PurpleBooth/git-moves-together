@@ -16,9 +16,17 @@ use crate::{
 fn in_memory_repository() -> InMemory {
     InMemory::new(
         Commits::from(vec![
-            Commit::new("3".into(), vec!["2".into()], chrono::offset::Utc::now()),
-            Commit::new("2".into(), vec!["1".into()], chrono::offset::Utc::now()),
-            Commit::new("1".into(), vec![], chrono::offset::Utc::now()),
+            Commit::new(
+                "3".into(),
+                vec!["2".into()],
+                time::OffsetDateTime::now_utc(),
+            ),
+            Commit::new(
+                "2".into(),
+                vec!["1".into()],
+                time::OffsetDateTime::now_utc(),
+            ),
+            Commit::new("1".into(), vec![], time::OffsetDateTime::now_utc()),
         ]),
         vec![
             ("1".into(), "file1".into()),

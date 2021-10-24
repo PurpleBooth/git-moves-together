@@ -165,17 +165,19 @@ USAGE:
 ARGS:
     <git-repo>...    A repository to analyse [env: GIT_REPO=] [default: .]
 
-FLAGS:
-    -h, --help       Print help information
-    -V, --version    Print version information
-
 OPTIONS:
     -d, --from-days <max-days-ago>
             Ignore deltas older than the given days [env: MAX_DAYS_AGO=]
 
+    -h, --help
+            Print help information
+
     -t, --time-window-minutes <time-window-minutes>
             Group commits by similar time window rather than by commit id [env:
             TIME_WINDOW_MINUTES=]
+
+    -V, --version
+            Print version information
 ```
 
 ## Installing

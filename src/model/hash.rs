@@ -1,7 +1,7 @@
 use std::convert::TryFrom;
 
-use chrono::{DateTime, Utc};
 use git2::Oid;
+use time::OffsetDateTime;
 
 impl From<Hash> for String {
     fn from(hash: Hash) -> Self {
@@ -36,8 +36,8 @@ impl From<Oid> for Hash {
     }
 }
 
-impl From<DateTime<Utc>> for Hash {
-    fn from(datetime: DateTime<Utc>) -> Self {
+impl From<OffsetDateTime> for Hash {
+    fn from(datetime: OffsetDateTime) -> Self {
         Self {
             hash: datetime.to_string(),
         }

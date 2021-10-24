@@ -1,13 +1,13 @@
 use std::{collections::BTreeSet, ffi::OsStr, path::PathBuf};
 
-use chrono::{DateTime, Utc};
+use time::OffsetDateTime;
 
 use crate::model::{changed_file::ChangedFile, hash::Hash};
 
 #[derive(Debug, Eq, PartialEq, Clone, Ord, PartialOrd)]
 pub struct Delta {
     changes: BTreeSet<ChangedFile>,
-    timestamp: DateTime<Utc>,
+    timestamp: OffsetDateTime,
     hash: Hash,
 }
 
@@ -28,11 +28,11 @@ impl Delta {
         self.hash.clone()
     }
 
-    pub(crate) const fn timestamp(&self) -> DateTime<Utc> {
+    pub(crate) const fn timestamp(&self) -> OffsetDateTime {
         self.timestamp
     }
 
-    pub(crate) fn new(hash: Hash, timestamp: DateTime<Utc>, changes: Vec<ChangedFile>) -> Self {
+    pub(crate) fn new(hash: Hash, timestamp: OffsetDateTime, changes: Vec<ChangedFile>) -> Self {
         Self {
             changes: changes.into_iter().collect(),
             timestamp,
@@ -73,7 +73,7 @@ impl IntoIterator for Delta {
 
 #[cfg(test)]
 mod tests {
-    use chrono::Utc;
+    use time::OffsetDateTime;
 
     use crate::model::delta::Delta;
 
@@ -81,7 +81,7 @@ mod tests {
     fn can_put_a_prefix_on_everything_in() {
         let actual: Vec<String> = Delta::new(
             "sample-id".into(),
-            Utc::now(),
+            OffsetDateTime::now_utc(),
             vec!["item 1".into(), "item 2".into(), "item 3".into()],
         )
         .add_str_prefix("Something")

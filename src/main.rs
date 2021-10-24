@@ -7,10 +7,10 @@ mod statistics;
 
 use std::path::PathBuf;
 
-use chrono::Duration;
 use futures::{future, stream, StreamExt, TryStreamExt};
 use model::delta::Delta;
 use repository::interface::Repository;
+use time::Duration;
 
 use crate::{
     errors::Error,

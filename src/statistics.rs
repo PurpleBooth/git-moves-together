@@ -4,8 +4,8 @@ use std::{
     fmt::{Display, Formatter},
 };
 
-use chrono::{Duration, DurationRound};
 use comfy_table::{modifiers::UTF8_ROUND_CORNERS, presets::UTF8_FULL, ContentArrangement, Table};
+use time::{Duration, OffsetDateTime};
 
 use crate::model::{changed_file::ChangedFile, delta::Delta, hash::Hash};
 
@@ -64,11 +64,12 @@ impl Statistics {
         let (key, grouped_delta) = match strategy {
             Strategy::Hash => (delta.hash(), delta.clone()),
             Strategy::CommitTime(duration) => {
-                let key: Hash = (&delta)
-                    .timestamp()
-                    .duration_trunc(*duration)
-                    .unwrap()
-                    .into();
+                let key: Hash = OffsetDateTime::from_unix_timestamp(
+                    duration.whole_seconds()
+                        * ((&delta).timestamp().unix_timestamp() / duration.whole_seconds()),
+                )
+                .expect("Timestamp would overflow integer")
+                .into();
                 (
                     key.clone(),
                     match hash_to_delta.get(&key) {
@@ -207,8 +208,7 @@ impl Display for CouplingResult {
 
 #[cfg(test)]
 mod tests {
-
-    use chrono::Utc;
+    use time::OffsetDateTime;
 
     use crate::{
         model::delta::Delta,
@@ -220,7 +220,11 @@ mod tests {
     async fn adding_one_file_to_statistics_will_give_a_count_of_zero() {
         let statistics = Statistics::default();
         let actual = statistics.add_delta(
-            Delta::new("Id".into(), Utc::now(), vec!["file_1".into()]),
+            Delta::new(
+                "Id".into(),
+                OffsetDateTime::now_utc(),
+                vec!["file_1".into()],
+            ),
             &Strategy::Hash,
         );
         assert_eq!(actual.await.coupling().result, Vec::new());
@@ -234,7 +238,7 @@ mod tests {
             .add_delta(
                 Delta::new(
                     "1".into(),
-                    Utc::now(),
+                    OffsetDateTime::now_utc(),
                     vec!["file_1".into(), "file_2".into()],
                 ),
                 &Strategy::Hash,
@@ -243,7 +247,7 @@ mod tests {
             .add_delta(
                 Delta::new(
                     "2".into(),
-                    Utc::now(),
+                    OffsetDateTime::now_utc(),
                     vec!["file_1".into(), "file_2".into()],
                 ),
                 &Strategy::Hash,
@@ -252,7 +256,7 @@ mod tests {
             .add_delta(
                 Delta::new(
                     "3".into(),
-                    Utc::now(),
+                    OffsetDateTime::now_utc(),
                     vec!["file_1".into(), "file_2".into()],
                 ),
                 &Strategy::Hash,
@@ -271,7 +275,7 @@ mod tests {
             .add_delta(
                 Delta::new(
                     "1".into(),
-                    Utc::now(),
+                    OffsetDateTime::now_utc(),
                     vec!["file_1".into(), "file_2".into()],
                 ),
                 &Strategy::Hash,
@@ -280,7 +284,7 @@ mod tests {
             .add_delta(
                 Delta::new(
                     "2".into(),
-                    Utc::now(),
+                    OffsetDateTime::now_utc(),
                     vec!["file_3".into(), "file_2".into()],
                 ),
                 &Strategy::Hash,
@@ -289,7 +293,7 @@ mod tests {
             .add_delta(
                 Delta::new(
                     "3".into(),
-                    Utc::now(),
+                    OffsetDateTime::now_utc(),
                     vec!["file_3".into(), "file_2".into()],
                 ),
                 &Strategy::Hash,
@@ -298,7 +302,7 @@ mod tests {
             .add_delta(
                 Delta::new(
                     "4".into(),
-                    Utc::now(),
+                    OffsetDateTime::now_utc(),
                     vec!["file_3".into(), "file_5".into()],
                 ),
                 &Strategy::Hash,
@@ -307,7 +311,7 @@ mod tests {
             .add_delta(
                 Delta::new(
                     "5".into(),
-                    Utc::now(),
+                    OffsetDateTime::now_utc(),
                     vec!["file_3".into(), "file_1".into()],
                 ),
                 &Strategy::Hash,
@@ -316,7 +320,7 @@ mod tests {
             .add_delta(
                 Delta::new(
                     "6".into(),
-                    Utc::now(),
+                    OffsetDateTime::now_utc(),
                     vec!["file_1".into(), "file_2".into()],
                 ),
                 &Strategy::Hash,
@@ -345,7 +349,7 @@ mod tests {
             .add_delta(
                 Delta::new(
                     "1".into(),
-                    Utc::now(),
+                    OffsetDateTime::now_utc(),
                     vec!["file_1".into(), "file_2".into()],
                 ),
                 &Strategy::Hash,
@@ -354,7 +358,7 @@ mod tests {
             .add_delta(
                 Delta::new(
                     "2".into(),
-                    Utc::now(),
+                    OffsetDateTime::now_utc(),
                     vec!["file_3".into(), "file_2".into()],
                 ),
                 &Strategy::Hash,
@@ -363,7 +367,7 @@ mod tests {
             .add_delta(
                 Delta::new(
                     "3".into(),
-                    Utc::now(),
+                    OffsetDateTime::now_utc(),
                     vec!["file_3".into(), "file_2".into()],
                 ),
                 &Strategy::Hash,
@@ -372,7 +376,7 @@ mod tests {
             .add_delta(
                 Delta::new(
                     "4".into(),
-                    Utc::now(),
+                    OffsetDateTime::now_utc(),
                     vec!["file_3".into(), "file_5".into()],
                 ),
                 &Strategy::Hash,
@@ -381,7 +385,7 @@ mod tests {
             .add_delta(
                 Delta::new(
                     "5".into(),
-                    Utc::now(),
+                    OffsetDateTime::now_utc(),
                     vec!["file_3".into(), "file_1".into()],
                 ),
                 &Strategy::Hash,
@@ -390,7 +394,7 @@ mod tests {
             .add_delta(
                 Delta::new(
                     "6".into(),
-                    Utc::now(),
+                    OffsetDateTime::now_utc(),
                     vec!["file_1".into(), "file_2".into()],
                 )
                 .add_str_prefix("demo"),
