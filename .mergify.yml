@@ -7,6 +7,8 @@ queue_rules:
   - check-success~=^specdown /
   - check-success~=^lint-markdown /
   - check-success~=^rust-checks /
+  - "#check-pending=0"
+  - "#check-success>4"
 
 pull_request_rules:
 - name: request review on external contributor
@@ -23,6 +25,8 @@ pull_request_rules:
   - check-success~=^specdown /
   - check-success~=^lint-markdown /
   - check-success~=^rust-checks /
+  - "#check-pending=0"
+  - "#check-success>4"
   - base=main
   - author~=^dependabot(|-preview)\[bot\]$
   actions:
