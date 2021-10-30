@@ -24,4 +24,4 @@ rm "$MAIN_DIR/.git/hooks/"*
 git -C "$OTHER_REPO_DIR" init .
 git -C "$OTHER_REPO_DIR" config commit.gpgsign false
 rm "$OTHER_REPO_DIR/.git/hooks/"*
-exec specdown run --running-dir "$MAIN_DIR" "${@}"
+exec specdown run --working-dir "$MAIN_DIR" "${@}"
