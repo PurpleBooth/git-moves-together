@@ -1,3 +1,16 @@
+//! Find files that commonly appear in the same time slice or commit
+
+#![warn(
+    rust_2018_idioms,
+    unused,
+    rust_2021_compatibility,
+    nonstandard_style,
+    future_incompatible,
+    missing_copy_implementations,
+    missing_debug_implementations,
+    missing_docs
+)]
+
 mod cli;
 mod errors;
 mod filters;

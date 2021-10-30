@@ -21,7 +21,7 @@ impl IntoIterator for Commits {
 }
 
 impl Commits {
-    pub(crate) fn iter(&self) -> std::slice::Iter<Commit> {
+    pub(crate) fn iter(&self) -> std::slice::Iter<'_, Commit> {
         self.commits.iter()
     }
 }

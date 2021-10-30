@@ -33,7 +33,7 @@ impl Commit {
 }
 
 impl From<Git2Commit<'_>> for Commit {
-    fn from(commit: Git2Commit) -> Self {
+    fn from(commit: Git2Commit<'_>) -> Self {
         Self::new(
             commit.id().into(),
             commit.parents().map(|parent| parent.id().into()).collect(),

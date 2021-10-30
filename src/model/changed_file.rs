@@ -46,7 +46,7 @@ impl From<ChangedFile> for String {
 }
 
 impl From<DiffDelta<'_>> for ChangedFile {
-    fn from(delta: DiffDelta) -> Self {
+    fn from(delta: DiffDelta<'_>) -> Self {
         delta
             .new_file()
             .path()
