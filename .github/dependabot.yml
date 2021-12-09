@@ -6,7 +6,7 @@ updates:
     interval: daily
   commit-message:
     prefix: ci
-    include: "scope"
+    include: scope
 - package-ecosystem: cargo
   directory: /
   schedule:
@@ -14,4 +14,4 @@ updates:
   commit-message:
     prefix: fix
     prefix-development: build
-    include: "scope"
+    include: scope

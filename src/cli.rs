@@ -13,7 +13,7 @@ pub fn app() -> App<'static> {
                 .takes_value(true)
                 .multiple_values(true)
                 .default_values(&["."])
-                .about("A repository to analyse")
+                .help("A repository to analyse")
                 .env("GIT_REPO"),
         )
         .arg(
@@ -21,7 +21,7 @@ pub fn app() -> App<'static> {
                 .short('d')
                 .long("from-days")
                 .takes_value(true)
-                .about("Ignore deltas older than the given days")
+                .help("Ignore deltas older than the given days")
                 .env("MAX_DAYS_AGO"),
         )
         .arg(
@@ -29,7 +29,7 @@ pub fn app() -> App<'static> {
                 .short('t')
                 .long("time-window-minutes")
                 .takes_value(true)
-                .about("Group commits by similar time window rather than by commit id")
+                .help("Group commits by similar time window rather than by commit id")
                 .env("TIME_WINDOW_MINUTES"),
         )
 }
