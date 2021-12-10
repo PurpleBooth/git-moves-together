@@ -153,7 +153,7 @@ git-moves-together -h
 ```
 
 ``` text,verify(script_name="help",stream=stdout)
-git-moves-together 2.5.11
+git-moves-together 2.5.12
 
 Billie Thompson <billie@billiecodes.com>
 
