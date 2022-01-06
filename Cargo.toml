@@ -1,6 +1,6 @@
 [package]
 name = "git-moves-together"
-version = "2.5.14"
+version = "2.5.15"
 edition = "2018"
 categories = ["development-tools", "command-line-utilities"]
 keywords = ["git", "coupling"]
