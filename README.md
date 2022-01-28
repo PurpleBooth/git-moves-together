@@ -153,7 +153,7 @@ git-moves-together -h
 ```
 
 ``` text,verify(script_name="help",stream=stdout)
-git-moves-together 2.5.20
+git-moves-together 2.5.21
 Billie Thompson <billie@billiecodes.com>
 Find files that move at the same time in a git repository to identify coupling
 
