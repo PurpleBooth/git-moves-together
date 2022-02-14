@@ -22,6 +22,6 @@ miette = { version = "3.3.0", features = ["fancy"] }
 time = "0.3.7"
 [dev-dependencies]
 tempfile = "3.3.0"
-rand = "0.8.4"
+rand = "0.8.5"
 
 [features]
