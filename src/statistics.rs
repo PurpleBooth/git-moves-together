@@ -66,7 +66,7 @@ impl Statistics {
             Strategy::CommitTime(duration) => {
                 let key: Hash = OffsetDateTime::from_unix_timestamp(
                     duration.whole_seconds()
-                        * ((&delta).timestamp().unix_timestamp() / duration.whole_seconds()),
+                        * (delta.timestamp().unix_timestamp() / duration.whole_seconds()),
                 )
                 .expect("Timestamp would overflow integer")
                 .into();
