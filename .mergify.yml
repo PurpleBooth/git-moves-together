@@ -3,12 +3,23 @@ queue_rules:
   speculative_checks: 20
   batch_size: 20
   conditions:
-  - check-success~=^commit-checks /
-  - check-success~=^specdown /
-  - check-success~=^lint-markdown /
-  - check-success~=^rust-checks /
-  - '#check-pending<=1'
-  - '#check-success>4'
+  - check-success=lint-markdown / lint-markdown
+  - check-success=commit-checks / version
+  - check-success=rust-checks / check
+  - check-success=rust-checks / test (macos-latest)
+  - check-success=rust-checks / test (ubuntu-latest)
+  - check-success=rust-checks / test (windows-latest)
+  - check-success=rust-checks / lints (macos-latest)
+  - check-success=rust-checks / lints (ubuntu-latest)
+  - check-success=rust-checks / lints (windows-latest)
+  - check-success=rust-checks / security-audit
+  - check-success=rust-checks / bench (macos-latest)
+  - check-success=rust-checks / bench (ubuntu-latest)
+  - check-success=rust-checks / bench (windows-latest)
+  - check-success=specdown / specdown (macos-latest)
+  - check-success=specdown / specdown (ubuntu-latest)
+  - check-success=specdown / specdown (windows-latest)
+  - base=main
 
 pull_request_rules:
 - name: request review on external contributor
@@ -21,12 +32,22 @@ pull_request_rules:
 
 - name: automatic rebase for dependencies
   conditions:
-  - check-success~=^commit-checks /
-  - check-success~=^specdown /
-  - check-success~=^lint-markdown /
-  - check-success~=^rust-checks /
-  - '#check-pending<=1'
-  - '#check-success>4'
+  - check-success=lint-markdown / lint-markdown
+  - check-success=commit-checks / version
+  - check-success=rust-checks / check
+  - check-success=rust-checks / test (macos-latest)
+  - check-success=rust-checks / test (ubuntu-latest)
+  - check-success=rust-checks / test (windows-latest)
+  - check-success=rust-checks / lints (macos-latest)
+  - check-success=rust-checks / lints (ubuntu-latest)
+  - check-success=rust-checks / lints (windows-latest)
+  - check-success=rust-checks / security-audit
+  - check-success=rust-checks / bench (macos-latest)
+  - check-success=rust-checks / bench (ubuntu-latest)
+  - check-success=rust-checks / bench (windows-latest)
+  - check-success=specdown / specdown (macos-latest)
+  - check-success=specdown / specdown (ubuntu-latest)
+  - check-success=specdown / specdown (windows-latest)
   - base=main
   - author~=^dependabot(|-preview)\[bot\]$
   actions:
