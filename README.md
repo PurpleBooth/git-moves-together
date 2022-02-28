@@ -158,19 +158,19 @@ Billie Thompson <billie@billiecodes.com>
 Find files that move at the same time in a git repository to identify coupling
 
 USAGE:
-    git-moves-together [OPTIONS] [git-repo]...
+    git-moves-together [OPTIONS] [GIT_REPO]...
 
 ARGS:
-    <git-repo>...    A repository to analyse [env: GIT_REPO=] [default: .]
+    <GIT_REPO>...    A repository to analyse [env: GIT_REPO=] [default: .]
 
 OPTIONS:
-    -d, --from-days <max-days-ago>
+    -d, --from-days <MAX_DAYS_AGO>
             Ignore deltas older than the given days [env: MAX_DAYS_AGO=]
 
     -h, --help
             Print help information
 
-    -t, --time-window-minutes <time-window-minutes>
+    -t, --time-window-minutes <TIME_WINDOW_MINUTES>
             Group commits by similar time window rather than by commit id [env:
             TIME_WINDOW_MINUTES=]
 

@@ -1,35 +1,15 @@
-use std::env;
+use clap::Parser;
 
-use clap::{crate_authors, crate_version, Arg, Command};
-
-pub fn app() -> Command<'static> {
-    Command::new(String::from(env!("CARGO_PKG_NAME")))
-        .bin_name(String::from(env!("CARGO_PKG_NAME")))
-        .version(crate_version!())
-        .author(crate_authors!())
-        .about(env!("CARGO_PKG_DESCRIPTION"))
-        .arg(
-            Arg::new("git-repo")
-                .takes_value(true)
-                .multiple_values(true)
-                .default_values(&["."])
-                .help("A repository to analyse")
-                .env("GIT_REPO"),
-        )
-        .arg(
-            Arg::new("max-days-ago")
-                .short('d')
-                .long("from-days")
-                .takes_value(true)
-                .help("Ignore deltas older than the given days")
-                .env("MAX_DAYS_AGO"),
-        )
-        .arg(
-            Arg::new("time-window-minutes")
-                .short('t')
-                .long("time-window-minutes")
-                .takes_value(true)
-                .help("Group commits by similar time window rather than by commit id")
-                .env("TIME_WINDOW_MINUTES"),
-        )
+#[derive(Parser, Debug)]
+#[clap(author, version, about)]
+pub struct Args {
+    /// A repository to analyse
+    #[clap(env, default_values = &["."])]
+    pub git_repo: Vec<String>,
+    /// Ignore deltas older than the given days
+    #[clap(short = 'd', long = "from-days", env = "MAX_DAYS_AGO")]
+    pub max_days_ago: Option<i64>,
+    /// Group commits by similar time window rather than by commit id
+    #[clap(short = 't', long = "time-window-minutes", env = "TIME_WINDOW_MINUTES")]
+    pub time_window_minutes: Option<i64>,
 }

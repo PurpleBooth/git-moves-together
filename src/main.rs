@@ -11,6 +11,7 @@
     missing_docs
 )]
 
+use clap::Parser;
 mod cli;
 mod errors;
 mod filters;
@@ -26,6 +27,7 @@ use repository::interface::Repository;
 use time::Duration;
 
 use crate::{
+    cli::Args,
     errors::Error,
     repository::libgit2::LibGit2,
     statistics::{Statistics, Strategy},
@@ -34,31 +36,20 @@ use crate::{
 #[tokio::main]
 async fn main() -> Result<(), crate::errors::Error> {
     miette::set_panic_hook();
-    let matches = cli::app().get_matches();
+    let args = Args::parse();
 
-    let max_days_arg = matches.value_of("max-days-ago");
-    let time_window_arg = matches.value_of("time-window-minutes");
-    let git_repo_args = matches.values_of("git-repo").unwrap();
+    let strategy = args.time_window_minutes.map_or(Strategy::Hash, |value| {
+        Strategy::CommitTime(Duration::minutes(value))
+    });
 
-    let max_days = if let Some(value) = max_days_arg {
-        Some(value.parse()?)
-    } else {
-        None
-    };
-    let strategy = if let Some(value) = time_window_arg {
-        Strategy::CommitTime(Duration::minutes(value.parse()?))
-    } else {
-        Strategy::Hash
-    };
-
-    let deltas: Vec<Vec<Delta>> = stream::iter(git_repo_args.clone())
-        .then(|path_str| read_deltas(max_days, path_str))
+    let deltas: Vec<Vec<Delta>> = stream::iter(args.git_repo.iter())
+        .then(|path_str| read_deltas(args.max_days_ago, path_str))
         .try_collect()
         .await?;
 
     let statistics = stream::iter(deltas)
-        .zip(stream::iter(git_repo_args))
-        .flat_map(|(delta, prefix)| stream::iter(add_prefix((&delta, prefix))))
+        .zip(stream::iter(args.git_repo))
+        .flat_map(|(delta, prefix)| stream::iter(add_prefix((&delta, &prefix))))
         .fold(Statistics::default(), |statistics, change_delta| {
             statistics.add_delta(change_delta, &strategy)
         })
