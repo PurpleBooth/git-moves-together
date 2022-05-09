@@ -18,7 +18,7 @@ clap = { version = "3.1.17", features = ["derive", "cargo", "wrap_help", "yaml",
 comfy-table = "5.0.1"
 tokio = { version = "1.18.2", features = ["full"] }
 futures = "0.3.21"
-miette = { version = "4.6.0", features = ["fancy"] }
+miette = { version = "4.7.0", features = ["fancy"] }
 time = "0.3.9"
 [dev-dependencies]
 tempfile = "3.3.0"
