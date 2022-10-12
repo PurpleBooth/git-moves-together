@@ -82,8 +82,5 @@ fn flatten_or_first_err(
     acc: Result<Vec<ChangedFile>, Error>,
     item: Result<Vec<ChangedFile>, Error>,
 ) -> Result<Vec<ChangedFile>, Error> {
-    match (acc, item) {
-        (Ok(acc), Ok(item)) => Ok([acc, item].concat()),
-        (Err(err), _) | (_, Err(err)) => Err(err),
-    }
+    acc.and_then(|acc| Ok([acc, item?].concat()))
 }

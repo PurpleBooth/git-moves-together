@@ -40,7 +40,7 @@ impl From<ChangedFile> for String {
                 prefix: Some(repo),
                 path,
                 ..
-            } => format!("{}@{}", repo, path),
+            } => format!("{repo}@{path}"),
         }
     }
 }

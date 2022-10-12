@@ -59,7 +59,7 @@ pub enum Strategy {
 }
 
 impl Statistics {
-    pub(crate) async fn add_delta(self, delta: Delta, strategy: &Strategy) -> Self {
+    pub(crate) fn add_delta(self, delta: &Delta, strategy: &Strategy) -> Self {
         let mut hash_to_delta = self.hash_to_delta;
         let (key, grouped_delta) = match strategy {
             Strategy::Hash => (delta.hash(), delta.clone()),
@@ -72,10 +72,10 @@ impl Statistics {
                 .into();
                 (
                     key.clone(),
-                    match hash_to_delta.get(&key) {
-                        None => delta.clone(),
-                        Some(existing_delta) => existing_delta.merge(&delta),
-                    },
+                    hash_to_delta.get(&key).map_or_else(
+                        || delta.clone(),
+                        |existing_delta| existing_delta.merge(delta),
+                    ),
                 )
             }
         };
@@ -83,10 +83,9 @@ impl Statistics {
 
         let mut change_to_delta = self.change_to_delta;
         for change in grouped_delta {
-            let mut coupled_deltas = match change_to_delta.get(&change) {
-                None => BTreeSet::new(),
-                Some(coupled_delta) => coupled_delta.clone(),
-            };
+            let mut coupled_deltas = change_to_delta
+                .get(&change)
+                .map_or_else(BTreeSet::new, std::clone::Clone::clone);
 
             coupled_deltas.insert(delta.clone());
             change_to_delta.insert(change, coupled_deltas);
@@ -197,12 +196,12 @@ impl Display for CouplingResult {
                 key.left.clone().into(),
                 key.right.clone().into(),
                 format!("{:.2}%", strength * 100.0),
-                format!("{}", together),
-                format!("{}", total),
+                format!("{together}"),
+                format!("{total}"),
             ]);
         }
 
-        writeln!(formatter, "{}", table)
+        writeln!(formatter, "{table}")
     }
 }
 
@@ -220,14 +219,14 @@ mod tests {
     async fn adding_one_file_to_statistics_will_give_a_count_of_zero() {
         let statistics = Statistics::default();
         let actual = statistics.add_delta(
-            Delta::new(
+            &Delta::new(
                 "Id".into(),
                 OffsetDateTime::now_utc(),
                 vec!["file_1".into()],
             ),
             &Strategy::Hash,
         );
-        assert_eq!(actual.await.coupling().result, Vec::new());
+        assert_eq!(actual.coupling().result, Vec::new());
     }
 
     #[allow(clippy::semicolon_if_nothing_returned)]
@@ -236,25 +235,23 @@ mod tests {
         let statistics = Statistics::default();
         let actual = statistics
             .add_delta(
-                Delta::new(
+                &Delta::new(
                     "1".into(),
                     OffsetDateTime::now_utc(),
                     vec!["file_1".into(), "file_2".into()],
                 ),
                 &Strategy::Hash,
             )
-            .await
             .add_delta(
-                Delta::new(
+                &Delta::new(
                     "2".into(),
                     OffsetDateTime::now_utc(),
                     vec!["file_1".into(), "file_2".into()],
                 ),
                 &Strategy::Hash,
             )
-            .await
             .add_delta(
-                Delta::new(
+                &Delta::new(
                     "3".into(),
                     OffsetDateTime::now_utc(),
                     vec!["file_1".into(), "file_2".into()],
@@ -262,7 +259,7 @@ mod tests {
                 &Strategy::Hash,
             );
         assert_eq!(
-            actual.await.coupling().result,
+            actual.coupling().result,
             vec![(Key::new("file_1".into(), "file_2".into()), (1.0, 3, 3)),]
         );
     }
@@ -273,52 +270,47 @@ mod tests {
         let statistics = Statistics::default();
         let actual = statistics
             .add_delta(
-                Delta::new(
+                &Delta::new(
                     "1".into(),
                     OffsetDateTime::now_utc(),
                     vec!["file_1".into(), "file_2".into()],
                 ),
                 &Strategy::Hash,
             )
-            .await
             .add_delta(
-                Delta::new(
+                &Delta::new(
                     "2".into(),
                     OffsetDateTime::now_utc(),
                     vec!["file_3".into(), "file_2".into()],
                 ),
                 &Strategy::Hash,
             )
-            .await
             .add_delta(
-                Delta::new(
+                &Delta::new(
                     "3".into(),
                     OffsetDateTime::now_utc(),
                     vec!["file_3".into(), "file_2".into()],
                 ),
                 &Strategy::Hash,
             )
-            .await
             .add_delta(
-                Delta::new(
+                &Delta::new(
                     "4".into(),
                     OffsetDateTime::now_utc(),
                     vec!["file_3".into(), "file_5".into()],
                 ),
                 &Strategy::Hash,
             )
-            .await
             .add_delta(
-                Delta::new(
+                &Delta::new(
                     "5".into(),
                     OffsetDateTime::now_utc(),
                     vec!["file_3".into(), "file_1".into()],
                 ),
                 &Strategy::Hash,
             )
-            .await
             .add_delta(
-                Delta::new(
+                &Delta::new(
                     "6".into(),
                     OffsetDateTime::now_utc(),
                     vec!["file_1".into(), "file_2".into()],
@@ -326,7 +318,7 @@ mod tests {
                 &Strategy::Hash,
             );
         assert_eq!(
-            actual.await.coupling().result,
+            actual.coupling().result,
             vec![
                 (Key::new("file_1".into(), "file_2".into()), (0.4, 2, 5)),
                 (
@@ -347,52 +339,47 @@ mod tests {
     async fn statistics_render_pretty() {
         let statistics = Statistics::default()
             .add_delta(
-                Delta::new(
+                &Delta::new(
                     "1".into(),
                     OffsetDateTime::now_utc(),
                     vec!["file_1".into(), "file_2".into()],
                 ),
                 &Strategy::Hash,
             )
-            .await
             .add_delta(
-                Delta::new(
+                &Delta::new(
                     "2".into(),
                     OffsetDateTime::now_utc(),
                     vec!["file_3".into(), "file_2".into()],
                 ),
                 &Strategy::Hash,
             )
-            .await
             .add_delta(
-                Delta::new(
+                &Delta::new(
                     "3".into(),
                     OffsetDateTime::now_utc(),
                     vec!["file_3".into(), "file_2".into()],
                 ),
                 &Strategy::Hash,
             )
-            .await
             .add_delta(
-                Delta::new(
+                &Delta::new(
                     "4".into(),
                     OffsetDateTime::now_utc(),
                     vec!["file_3".into(), "file_5".into()],
                 ),
                 &Strategy::Hash,
             )
-            .await
             .add_delta(
-                Delta::new(
+                &Delta::new(
                     "5".into(),
                     OffsetDateTime::now_utc(),
                     vec!["file_3".into(), "file_1".into()],
                 ),
                 &Strategy::Hash,
             )
-            .await
             .add_delta(
-                Delta::new(
+                &Delta::new(
                     "6".into(),
                     OffsetDateTime::now_utc(),
                     vec!["file_1".into(), "file_2".into()],
@@ -401,7 +388,7 @@ mod tests {
                 &Strategy::Hash,
             );
         assert_eq!(
-            format!("{}", statistics.await.coupling()),
+            format!("{}", statistics.coupling()),
             "\u{256d}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{252c}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{256e}\n\u{2502} File A      \u{2506} File B      \u{2506} Together % \u{2506} Together \u{2506} Commits \u{2502}\n\u{255e}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{256a}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{256a}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{256a}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{256a}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2550}\u{2561}\n\u{2502} file_1      \u{2506} file_2      \u{2506} 25.00%     \u{2506} 1        \u{2506} 4       \u{2502}\n\u{251c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{253c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{253c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{253c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{253c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{2524}\n\u{2502} file_1      \u{2506} file_3      \u{2506} 20.00%     \u{2506} 1        \u{2506} 5       \u{2502}\n\u{251c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{253c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{253c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{253c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{253c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{2524}\n\u{2502} file_3      \u{2506} file_5      \u{2506} 25.00%     \u{2506} 1        \u{2506} 4       \u{2502}\n\u{251c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{253c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{253c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{253c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{253c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{2524}\n\u{2502} demo@file_1 \u{2506} demo@file_2 \u{2506} 100.00%    \u{2506} 1        \u{2506} 1       \u{2502}\n\u{251c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{253c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{253c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{253c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{253c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{254c}\u{2524}\n\u{2502} file_2      \u{2506} file_3      \u{2506} 40.00%     \u{2506} 2        \u{2506} 5       \u{2502}\n\u{2570}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2534}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2534}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2534}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2534}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{2500}\u{256f}\n"
         );
     }

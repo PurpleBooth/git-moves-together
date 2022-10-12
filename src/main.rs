@@ -47,19 +47,19 @@ async fn main() -> Result<(), crate::errors::Error> {
         .try_collect()
         .await?;
 
-    let statistics = stream::iter(deltas)
-        .zip(stream::iter(args.git_repo))
-        .flat_map(|(delta, prefix)| stream::iter(add_prefix((&delta, &prefix))))
+    let statistics = deltas
+        .into_iter()
+        .zip(args.git_repo)
+        .flat_map(|(delta, prefix)| add_prefix((&delta, &prefix)))
         .fold(Statistics::default(), |statistics, change_delta| {
-            statistics.add_delta(change_delta, &strategy)
-        })
-        .await;
+            statistics.add_delta(&change_delta, &strategy)
+        });
 
     let coupling = statistics.coupling();
     if coupling.is_empty() {
         println!("0 files move together");
     } else {
-        print!("{}", coupling);
+        print!("{coupling}");
     }
 
     Ok(())
