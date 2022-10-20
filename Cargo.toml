@@ -17,7 +17,7 @@ thiserror = "1.0.31"
 clap = { version = "3.1.18", features = ["derive", "cargo", "wrap_help", "yaml", "env", "unicode", "debug" ] }
 comfy-table = "6.1.1"
 tokio = { version = "1.18.2", features = ["full"] }
-futures = "0.3.21"
+futures = "0.3.25"
 miette = { version = "5.3.0", features = ["fancy"] }
 time = "0.3.9"
 [dev-dependencies]
