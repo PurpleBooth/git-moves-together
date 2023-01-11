@@ -12,7 +12,7 @@ authors = ["Billie Thompson <billie@billiecodes.com>"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-git2 = "0.15.0"
+git2 = "0.16.0"
 thiserror = "1.0.38"
 clap = { version = "3.2.23", features = ["derive", "cargo", "wrap_help", "yaml", "env", "unicode", "debug" ] }
 comfy-table = "6.1.3"
