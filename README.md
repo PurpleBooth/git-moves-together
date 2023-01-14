@@ -174,8 +174,8 @@ Options:
 ## Installing
 
 See the [releases
-page](https://github.com/PurpleBooth/git-moves-together/releases/latest) we build
-for linux and mac (all x86_64), alternatively use brew
+page](https://github.com/PurpleBooth/git-moves-together/releases/latest)
+we build for linux and mac (all x86_64), alternatively use brew
 
 ``` shell,skip()
 brew install PurpleBooth/repo/git-moves-together
