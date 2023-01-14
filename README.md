@@ -153,35 +153,28 @@ git-moves-together -h
 ```
 
 ``` text,verify(script_name="help",stream=stdout)
-git-moves-together 2.5.47
-Billie Thompson <billie@billiecodes.com>
 Find files that move at the same time in a git repository to identify coupling
 
-USAGE:
-    git-moves-together [OPTIONS] [GIT_REPO]...
+Usage: git-moves-together [OPTIONS] [GIT_REPO]...
 
-ARGS:
-    <GIT_REPO>...    A repository to analyse [env: GIT_REPO=] [default: .]
+Arguments:
+  [GIT_REPO]...  A repository to analyse [env: GIT_REPO=] [default: .]
 
-OPTIONS:
-    -d, --from-days <MAX_DAYS_AGO>
-            Ignore deltas older than the given days [env: MAX_DAYS_AGO=]
-
-    -h, --help
-            Print help information
-
-    -t, --time-window-minutes <TIME_WINDOW_MINUTES>
-            Group commits by similar time window rather than by commit id [env:
-            TIME_WINDOW_MINUTES=]
-
-    -V, --version
-            Print version information
+Options:
+  -d, --from-days <MAX_DAYS_AGO>
+          Ignore deltas older than the given days [env: MAX_DAYS_AGO=]
+  -t, --time-window-minutes <TIME_WINDOW_MINUTES>
+          Group commits by similar time window rather than by commit id [env: TIME_WINDOW_MINUTES=]
+  -h, --help
+          Print help
+  -V, --version
+          Print version
 ```
 
 ## Installing
 
 See the [releases
-page](https://github.com/PurpleBooth/ellipsis/releases/latest) we build
+page](https://github.com/PurpleBooth/git-moves-together/releases/latest) we build
 for linux and mac (all x86_64), alternatively use brew
 
 ``` shell,skip()

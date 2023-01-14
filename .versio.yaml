@@ -9,9 +9,6 @@ projects:
   version:
     file: Cargo.toml
     toml: package.version
-  also:
-  - file: README.md
-    pattern: git-moves-together (\d+\.\d+\.\d+)
   hooks:
     post_write: cargo fetch
 

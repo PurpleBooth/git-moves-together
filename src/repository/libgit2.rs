@@ -54,7 +54,6 @@ impl Repository for LibGit2 {
         walker.push_head()?;
 
         walker
-            .into_iter()
             .map(|oid| self.to_commit(oid?))
             .collect::<Result<Vec<Commit>, Error>>()
             .map(Commits::from)
