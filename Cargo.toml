@@ -19,7 +19,7 @@ comfy-table = "6.1.4"
 tokio = { version = "1.25.0", features = ["full"] }
 futures = "0.3.26"
 miette = { version = "5.5.0", features = ["fancy"] }
-time = "0.3.19"
+time = "0.3.20"
 [dev-dependencies]
 tempfile = "3.4.0"
 rand = "0.8.5"
