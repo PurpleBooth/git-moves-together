@@ -321,7 +321,7 @@ checksum = "dec7af912d60cdbd3677c1af9352ebae6fb8394d165568a2234df0fa00f87793"
 
 [[package]]
 name = "git-moves-together"
-version = "2.5.60"
+version = "2.5.61"
 dependencies = [
  "clap",
  "comfy-table",
