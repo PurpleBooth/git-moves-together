@@ -12,16 +12,16 @@ authors = ["Billie Thompson <billie@billiecodes.com>"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-git2 = "0.16.1"
-thiserror = "1.0.39"
-clap = { version = "4.1.8", features = ["derive", "cargo", "wrap_help", "env", "unicode", "debug" ] }
+git2 = "0.17.1"
+thiserror = "1.0.40"
+clap = { version = "4.2.4", features = ["derive", "cargo", "wrap_help", "env", "unicode", "debug" ] }
 comfy-table = "6.1.4"
-tokio = { version = "1.26.0", features = ["full"] }
-futures = "0.3.27"
-miette = { version = "5.6.0", features = ["fancy"] }
+tokio = { version = "1.28.0", features = ["full"] }
+futures = "0.3.28"
+miette = { version = "5.8.0", features = ["fancy"] }
 time = "0.3.20"
 [dev-dependencies]
-tempfile = "3.4.0"
+tempfile = "3.5.0"
 rand = "0.8.5"
 
 [features]
