@@ -14,7 +14,7 @@ authors = ["Billie Thompson <billie@billiecodes.com>"]
 [dependencies]
 git2 = "0.17.1"
 thiserror = "1.0.40"
-clap = { version = "4.2.4", features = ["derive", "cargo", "wrap_help", "env", "unicode", "debug" ] }
+clap = { version = "4.3.3", features = ["derive", "cargo", "wrap_help", "env", "unicode", "debug" ] }
 comfy-table = "6.1.4"
 tokio = { version = "1.28.0", features = ["full"] }
 futures = "0.3.28"
