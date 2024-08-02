@@ -23,10 +23,10 @@ jobs:
   release:
     if: github.ref == 'refs/heads/main'
     needs:
-      - docker-build
       - specdown
       - lint-markdown
       - rust-checks
+      - commit-checks
     outputs:
       version_bump: ${{ steps.current_version.outputs.current_version != steps.previous_version.outputs.previous_version
         }}
