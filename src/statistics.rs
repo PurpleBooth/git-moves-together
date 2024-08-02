@@ -21,7 +21,7 @@ impl Key {
         keys.sort();
 
         Self {
-            left: keys.get(0).unwrap().clone(),
+            left: keys.first().unwrap().clone(),
             right: keys.get(1).unwrap().clone(),
         }
     }

@@ -11,7 +11,7 @@ pub struct Commit {
 }
 
 impl Commit {
-    pub(crate) fn new(hash: Hash, parents: Vec<Hash>, timestamp: OffsetDateTime) -> Self {
+    pub(crate) const fn new(hash: Hash, parents: Vec<Hash>, timestamp: OffsetDateTime) -> Self {
         Self {
             hash,
             timestamp,

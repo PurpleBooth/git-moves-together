@@ -18,7 +18,7 @@ impl InMemory {
     // Note, this is not actually dead, but rather proof that we can swap out our
     // git provider
     #[allow(dead_code)]
-    pub(crate) fn new(commits: Commits, changes: Vec<(Hash, ChangedFile)>) -> Self {
+    pub(crate) const fn new(commits: Commits, changes: Vec<(Hash, ChangedFile)>) -> Self {
         Self { commits, changes }
     }
 }
