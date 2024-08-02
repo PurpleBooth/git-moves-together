@@ -2,7 +2,7 @@ queue_rules:
 - name: default
   speculative_checks: 20
   batch_size: 20
-  conditions:
+  queue_conditions:
   - check-success=lint-markdown / lint-markdown
   - check-success=commit-checks / version
   - check-success=rust-checks / check
@@ -52,6 +52,5 @@ pull_request_rules:
   - author~=^dependabot(|-preview)\[bot\]$
   actions:
     queue:
-      method: rebase
-      rebase_fallback: merge
+      merge_method: rebase
       name: default
