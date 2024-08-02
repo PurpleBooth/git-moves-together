@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v2.5.65](https://github.com/PurpleBooth/git-moves-together/compare/66036cfc9e7eaead43fe8ff90e55a5850c898447..v2.5.65) - 2024-08-02
+#### Bug Fixes
+- Update openssl binding - ([66036cf](https://github.com/PurpleBooth/git-moves-together/commit/66036cfc9e7eaead43fe8ff90e55a5850c898447)) - Billie Thompson
+
+- - -
+
 ## [v2.5.64](https://github.com/PurpleBooth/git-moves-together/compare/4948adfbbc759a78cb3a78aed0a3771cc3d72ec7..v2.5.64) - 2024-08-02
 #### Bug Fixes
 - Update if to the binary release - ([3609176](https://github.com/PurpleBooth/git-moves-together/commit/3609176044c5670749be03ea83775e7047801b3e)) - Billie Thompson
