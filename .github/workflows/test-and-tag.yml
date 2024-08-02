@@ -28,8 +28,6 @@ jobs:
       - rust-checks
       - commit-checks
     outputs:
-      version_bump: ${{ steps.current_version.outputs.current_version != steps.previous_version.outputs.previous_version
-        }}
       current_version: ${{ steps.current_version.outputs.current_version }}
       previous_version: ${{ steps.previous_version.outputs.previous_version }}
     runs-on: ubuntu-latest
@@ -65,7 +63,7 @@ jobs:
         shell: bash
 
   release-binary:
-    if: needs.release.outputs.version_bump
+    if: needs.release.outputs.current_version != needs.release.outputs.previous_version
     needs:
       - release
     uses: PurpleBooth/common-pipelines/.github/workflows/release-rust-binary.yml@main
