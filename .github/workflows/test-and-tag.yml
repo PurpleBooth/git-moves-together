@@ -33,7 +33,7 @@ jobs:
       previous_version: ${{ steps.release.outputs.previous_version }}
     runs-on: ubuntu-latest
     steps:
-    - uses: PurpleBooth/versio-release-action@v0.1.17
+    - uses: PurpleBooth/versio-release-action@965e279326016054156ba8bec4f733e0ee327956 # v0.1.18
       id: release
 
   release-binary:
