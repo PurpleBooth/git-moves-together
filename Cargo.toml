@@ -21,7 +21,7 @@ futures = "0.3.30"
 miette = { version = "7.2.0", features = ["fancy"] }
 time = "0.3.36"
 [dev-dependencies]
-tempfile = "3.10.1"
+tempfile = "3.11.0"
 rand = "0.8.5"
 
 [features]
