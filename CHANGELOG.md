@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v2.5.67](https://github.com/PurpleBooth/git-moves-together/compare/69863021e6e9c0c55fe2f7aeec79f3c5daf8e8b2..v2.5.67) - 2024-08-07
+#### Bug Fixes
+- **(deps)** bump tempfile from 3.11.0 to 3.12.0 - ([6986302](https://github.com/PurpleBooth/git-moves-together/commit/69863021e6e9c0c55fe2f7aeec79f3c5daf8e8b2)) - dependabot[bot]
+
+- - -
+
 ## [v2.5.66](https://github.com/PurpleBooth/git-moves-together/compare/f0ab32e15825f8faf60e9ec91293cc2a6e31c66f..v2.5.66) - 2024-08-05
 #### Bug Fixes
 - **(deps)** bump tempfile from 3.10.1 to 3.11.0 - ([f0ab32e](https://github.com/PurpleBooth/git-moves-together/commit/f0ab32e15825f8faf60e9ec91293cc2a6e31c66f)) - dependabot[bot]
