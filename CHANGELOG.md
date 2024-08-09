@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v2.5.68](https://github.com/PurpleBooth/git-moves-together/compare/405b996d60b31de4b4d58c1ffc4f9ddb416af758..v2.5.68) - 2024-08-09
+#### Bug Fixes
+- **(deps)** bump clap from 4.5.13 to 4.5.14 - ([405b996](https://github.com/PurpleBooth/git-moves-together/commit/405b996d60b31de4b4d58c1ffc4f9ddb416af758)) - dependabot[bot]
+
+- - -
+
 ## [v2.5.67](https://github.com/PurpleBooth/git-moves-together/compare/69863021e6e9c0c55fe2f7aeec79f3c5daf8e8b2..v2.5.67) - 2024-08-07
 #### Bug Fixes
 - **(deps)** bump tempfile from 3.11.0 to 3.12.0 - ([6986302](https://github.com/PurpleBooth/git-moves-together/commit/69863021e6e9c0c55fe2f7aeec79f3c5daf8e8b2)) - dependabot[bot]
