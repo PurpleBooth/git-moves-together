@@ -3,10 +3,13 @@ ARG TARGETPLATFORM
 
 ## Build deps for git-moves-together
 RUN apt-get update && \
-    apt-get install -y musl-tools pkg-config xutils-dev build-essential && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y musl-tools pkg-config xutils-dev build-essential && \
     rm -vrf /var/lib/apt/lists/*
 
-USER 1000
+RUN groupadd -g 568 nonroot
+RUN useradd -u 568 -g 568 nonroot
+USER nonroot
+
 RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then  \
     rustup target add x86_64-unknown-linux-musl ;  \
     elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then  \
@@ -33,7 +36,10 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then  \
     fi
 
 FROM scratch
-USER 1000
+COPY --from=builder /etc/passwd /etc/passwd
+COPY --from=builder /etc/group /etc/group
+
+USER "nonroot"
 COPY --from=builder /app/git-moves-together/target/*/release/git-moves-together .
-RUN ["./git-moves-together", "-h"]
-ENTRYPOINT ["./git-moves-together"]
+RUN ["/git-moves-together", "--version"]
+ENTRYPOINT ["/git-moves-together"]
