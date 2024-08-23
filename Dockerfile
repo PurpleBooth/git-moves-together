@@ -3,7 +3,7 @@ ARG TARGETPLATFORM
 
 ## Build deps for git-moves-together
 RUN apt-get update && \
-    apt-get install -y musl-tools build-essential && \
+    apt-get install -y musl-tools pkg-config xutils-dev build-essential && \
     rm -vrf /var/lib/apt/lists/*
 
 USER 1000
@@ -19,6 +19,10 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then  \
 WORKDIR /app/git-moves-together
 COPY . ./
 
+ENV CC=musl-gcc
+ENV CXX=musl-g++
+ENV PKG_CONFIG_ALL_STATIC=true
+
 RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then  \
     cargo build --target=x86_64-unknown-linux-musl --release --features=vendored-libgit2-openssl ;  \
     elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then  \
@@ -28,9 +32,8 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then  \
     else exit 1 ;  \
     fi
 
-# Bundle Stage
 FROM scratch
+USER 1000
 COPY --from=builder /app/git-moves-together/target/*/release/git-moves-together .
 RUN ["./git-moves-together", "-h"]
-USER 1000
 ENTRYPOINT ["./git-moves-together"]
