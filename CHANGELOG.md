@@ -2,6 +2,26 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v2.6.0](https://github.com/PurpleBooth/git-moves-together/compare/ed6f1a981272cd3bbf73199eed1dbee1213636f4..v2.6.0) - 2024-08-24
+#### Bug Fixes
+- Disable clap debug - ([b151981](https://github.com/PurpleBooth/git-moves-together/commit/b151981356bbada2976b2a9d80bf77a202a74060)) - Billie Thompson
+- Switch to alpine based docker image for simpler musl builds - ([0b8712c](https://github.com/PurpleBooth/git-moves-together/commit/0b8712cbb181f8a5fc983914c90b2b09af8fdbca)) - Billie Thompson
+#### Build system
+- Add static ssl dep - ([7e002db](https://github.com/PurpleBooth/git-moves-together/commit/7e002db22a63f9acc6d6956df994bc5beaa11a71)) - Billie Thompson
+- Add a user to run binary with - ([1b11409](https://github.com/PurpleBooth/git-moves-together/commit/1b11409691789bf8c9aa962c637866a51502ee29)) - Billie Thompson
+- Set CC and CXX variables - ([df9db7d](https://github.com/PurpleBooth/git-moves-together/commit/df9db7d184cd238b96e804c7473c7ba50fd4a1b5)) - Billie Thompson
+#### Continuous Integration
+- Delete mergify file that is unused - ([1a5e0f4](https://github.com/PurpleBooth/git-moves-together/commit/1a5e0f4ec6e8ead7b2b38069a69563d9ecdb7867)) - Billie Thompson
+- Delete versio file that is unused - ([e742dad](https://github.com/PurpleBooth/git-moves-together/commit/e742dad529221e3b4eeee972adfc546373f06623)) - Billie Thompson
+- Delete dependabot file that is unused - ([ed6f1a9](https://github.com/PurpleBooth/git-moves-together/commit/ed6f1a981272cd3bbf73199eed1dbee1213636f4)) - Billie Thompson
+#### Documentation
+- Remove "only x86", as we build for aarch - ([4f0556f](https://github.com/PurpleBooth/git-moves-together/commit/4f0556f69d138609dd1d3922234d7a55d7fb8095)) - Billie Thompson
+#### Features
+- Offer a vendored version of the bin - ([6eb7726](https://github.com/PurpleBooth/git-moves-together/commit/6eb77268b72cc08a8aa22b35b7dcd315903fe694)) - Billie Thompson
+- Add docker image - ([3ac8a42](https://github.com/PurpleBooth/git-moves-together/commit/3ac8a42d471559f7a864c8e58753ec68f3334bf3)) - Billie Thompson
+
+- - -
+
 ## [v2.5.71](https://github.com/PurpleBooth/git-moves-together/compare/946d4ac034a53ba5ecc8e252ac141999853043ac..v2.5.71) - 2024-08-19
 #### Bug Fixes
 - **(deps)** bump tokio from 1.39.2 to 1.39.3 - ([946d4ac](https://github.com/PurpleBooth/git-moves-together/commit/946d4ac034a53ba5ecc8e252ac141999853043ac)) - dependabot[bot]
