@@ -1,7 +1,13 @@
 FROM rust:1.80.1-alpine AS builder
 ARG TARGETPLATFORM
 
-RUN apk add alpine-sdk openssl-dev pkgconfig libc-dev
+RUN apk add --no-cache --purge \
+      alpine-sdk \
+      libc-dev \
+      musl-dev \
+      openssl-dev \
+      openssl-libs-static \
+      pkgconfig
 
 RUN addgroup -g 568 nonroot
 RUN adduser -u 568 -G nonroot -D nonroot
