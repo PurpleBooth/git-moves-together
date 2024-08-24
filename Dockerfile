@@ -1,13 +1,10 @@
-FROM rust:1.80 AS builder
+FROM rust:1.80.1-alpine AS builder
 ARG TARGETPLATFORM
 
-## Build deps for git-moves-together
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y musl-tools pkg-config xutils-dev build-essential && \
-    rm -vrf /var/lib/apt/lists/*
+RUN apk add alpine-sdk openssl-dev pkgconfig libc-dev
 
-RUN groupadd -g 568 nonroot
-RUN useradd -u 568 -g 568 nonroot
+RUN addgroup -g 568 nonroot
+RUN adduser -u 568 -G nonroot -D nonroot
 USER nonroot
 
 RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then  \
@@ -22,16 +19,14 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then  \
 WORKDIR /app/git-moves-together
 COPY . ./
 
-ENV CC=musl-gcc
-ENV CXX=musl-g++
 ENV PKG_CONFIG_ALL_STATIC=true
 
 RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then  \
-    cargo build --target=x86_64-unknown-linux-musl --release --features=vendored-libgit2-openssl ;  \
+    RUST_BACKTRACE=1 cargo build --target=x86_64-unknown-linux-musl --release ;  \
     elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then  \
-    cargo build --target=armv7-unknown-linux-musleabihf --release --features=vendored-libgit2-openssl ;  \
+    RUST_BACKTRACE=1 cargo build --target=armv7-unknown-linux-musleabihf --release ;  \
     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then  \
-    cargo build --target=aarch64-unknown-linux-musl --release --features=vendored-libgit2-openssl ;  \
+    RUST_BACKTRACE=1 cargo build --target=aarch64-unknown-linux-musl --release ;  \
     else exit 1 ;  \
     fi
 
