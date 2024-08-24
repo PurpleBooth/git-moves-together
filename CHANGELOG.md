@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v2.6.1](https://github.com/PurpleBooth/git-moves-together/compare/2d4cabb1777fc973e912094085751f170212b6dd..v2.6.1) - 2024-08-24
+#### Bug Fixes
+- Bump versions - ([a33d33f](https://github.com/PurpleBooth/git-moves-together/commit/a33d33f4587d7e4928bd4284f2bf7854876a312a)) - Billie Thompson
+#### Miscellaneous Chores
+- **(deps)** pin rust docker tag to 1f5aff5 - ([2d4cabb](https://github.com/PurpleBooth/git-moves-together/commit/2d4cabb1777fc973e912094085751f170212b6dd)) - renovate[bot]
+
+- - -
+
 ## [v2.6.0](https://github.com/PurpleBooth/git-moves-together/compare/ed6f1a981272cd3bbf73199eed1dbee1213636f4..v2.6.0) - 2024-08-24
 #### Bug Fixes
 - Disable clap debug - ([b151981](https://github.com/PurpleBooth/git-moves-together/commit/b151981356bbada2976b2a9d80bf77a202a74060)) - Billie Thompson
