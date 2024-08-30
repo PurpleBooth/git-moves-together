@@ -1,4 +1,4 @@
-FROM rust:1.80.1-alpine@sha256:1f5aff501e02c1384ec61bb47f89e3eebf60e287e6ed5d1c598077afc82e83d5 AS builder
+FROM --platform=$BUILDPLATFORM rust:1.80.1-alpine@sha256:1f5aff501e02c1384ec61bb47f89e3eebf60e287e6ed5d1c598077afc82e83d5 AS builder
 ARG TARGETPLATFORM
 
 RUN apk add --no-cache --purge \
@@ -22,17 +22,21 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then  \
     else exit 1 ;  \
     fi
 
+WORKDIR /app
+RUN cargo new --lib git-moves-together
 WORKDIR /app/git-moves-together
+COPY Cargo.* ./
+RUN cargo vendor
 COPY . ./
 
 ENV PKG_CONFIG_ALL_STATIC=true
 
 RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then  \
-    RUST_BACKTRACE=1 cargo build --target=x86_64-unknown-linux-musl --release ;  \
+      cargo build --target=x86_64-unknown-linux-musl --release ;  \
     elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then  \
-    RUST_BACKTRACE=1 cargo build --target=armv7-unknown-linux-musleabihf --release ;  \
+      cargo build --target=armv7-unknown-linux-musleabihf --release ;  \
     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then  \
-    RUST_BACKTRACE=1 cargo build --target=aarch64-unknown-linux-musl --release ;  \
+      cargo build --target=aarch64-unknown-linux-musl --release ;  \
     else exit 1 ;  \
     fi
 
