@@ -2,6 +2,12 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v2.6.2](https://github.com/PurpleBooth/git-moves-together/compare/4a426fa0581974281a57f067a4641c73ab9c4613..v2.6.2) - 2024-08-30
+#### Bug Fixes
+- test deploy - ([4a426fa](https://github.com/PurpleBooth/git-moves-together/commit/4a426fa0581974281a57f067a4641c73ab9c4613)) - Billie Thompson
+
+- - -
+
 ## [v2.6.1](https://github.com/PurpleBooth/git-moves-together/compare/2d4cabb1777fc973e912094085751f170212b6dd..v2.6.1) - 2024-08-24
 #### Bug Fixes
 - Bump versions - ([a33d33f](https://github.com/PurpleBooth/git-moves-together/commit/a33d33f4587d7e4928bd4284f2bf7854876a312a)) - Billie Thompson
