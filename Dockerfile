@@ -1,50 +1,33 @@
-FROM --platform=$BUILDPLATFORM rust:1.80.1-alpine@sha256:1f5aff501e02c1384ec61bb47f89e3eebf60e287e6ed5d1c598077afc82e83d5 AS builder
+FROM --platform=$BUILDPLATFORM tonistiigi/xx AS xx
 ARG TARGETPLATFORM
 
-RUN apk add --no-cache --purge \
-      alpine-sdk \
-      libc-dev \
-      musl-dev \
-      openssl-dev \
-      openssl-libs-static \
-      pkgconfig
+FROM --platform=$BUILDPLATFORM rust:alpine AS builder
+RUN apk add clang lld openssl-dev
+# copy xx scripts to your build stage
+COPY --from=xx / /
+ARG TARGETPLATFORM
 
-RUN addgroup -g 568 nonroot
-RUN adduser -u 568 -G nonroot -D nonroot
-USER nonroot
-
-RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then  \
-    rustup target add x86_64-unknown-linux-musl ;  \
-    elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then  \
-    rustup target add armv7-unknown-linux-musleabihf ;  \
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then  \
-    rustup target add aarch64-unknown-linux-musl ;  \
-    else exit 1 ;  \
-    fi
+RUN xx-apk add --no-cache musl-dev zlib-dev zlib-static openssl-dev openssl-libs-static pkgconfig alpine-sdk
 
 WORKDIR /app
 RUN cargo new --lib git-moves-together
 WORKDIR /app/git-moves-together
 COPY Cargo.* ./
-RUN cargo vendor
+
+RUN xx-cargo build --release --target-dir ./build
 COPY . ./
-
-ENV PKG_CONFIG_ALL_STATIC=true
-
-RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then  \
-      cargo build --target=x86_64-unknown-linux-musl --release ;  \
-    elif [ "$TARGETPLATFORM" = "linux/arm/v7" ]; then  \
-      cargo build --target=armv7-unknown-linux-musleabihf --release ;  \
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then  \
-      cargo build --target=aarch64-unknown-linux-musl --release ;  \
-    else exit 1 ;  \
-    fi
+RUN xx-cargo build --release --target-dir ./build && \
+    xx-verify --static "./build/$(xx-cargo --print-target-triple)/release/git-moves-together" && \
+    cp -v  "./build/$(xx-cargo --print-target-triple)/release/git-moves-together" "./build/git-moves-together"
+RUN addgroup -g 568 nonroot
+RUN adduser -u 568 -G nonroot -D nonroot
+USER nonroot
 
 FROM scratch
 COPY --from=builder /etc/passwd /etc/passwd
 COPY --from=builder /etc/group /etc/group
 
-USER "nonroot"
-COPY --from=builder /app/git-moves-together/target/*/release/git-moves-together .
+USER nonroot
+COPY --from=builder /app/git-moves-together/build/git-moves-together .
 RUN ["/git-moves-together", "--version"]
 ENTRYPOINT ["/git-moves-together"]
