@@ -2,6 +2,19 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v2.6.3](https://github.com/PurpleBooth/git-moves-together/compare/33be24fc3569c08f4bb5f0301b9bb4698e35d684..v2.6.3) - 2024-08-31
+#### Bug Fixes
+- **(deps)** update rust crate tokio to 1.40.0 - ([4539f57](https://github.com/PurpleBooth/git-moves-together/commit/4539f570f876fcb8f3ddb4658d96856075865068)) - renovate[bot]
+#### Continuous Integration
+- Simplify push - ([1f8099d](https://github.com/PurpleBooth/git-moves-together/commit/1f8099da1f9f31ef1ca21ada45056a9275c53b4b)) - Billie Thompson
+#### Miscellaneous Chores
+- **(deps)** pin dependencies - ([4adc75a](https://github.com/PurpleBooth/git-moves-together/commit/4adc75a5873808130ec156fdcc472a254ca45bf8)) - renovate[bot]
+#### Refactoring
+- Rewrie docker file - ([c6f01df](https://github.com/PurpleBooth/git-moves-together/commit/c6f01df4af48c595a4bf91af82127d72def044fe)) - Billie Thompson
+- Cross compile to reduce build time - ([33be24f](https://github.com/PurpleBooth/git-moves-together/commit/33be24fc3569c08f4bb5f0301b9bb4698e35d684)) - Billie Thompson
+
+- - -
+
 ## [v2.6.2](https://github.com/PurpleBooth/git-moves-together/compare/4a426fa0581974281a57f067a4641c73ab9c4613..v2.6.2) - 2024-08-30
 #### Bug Fixes
 - test deploy - ([4a426fa](https://github.com/PurpleBooth/git-moves-together/commit/4a426fa0581974281a57f067a4641c73ab9c4613)) - Billie Thompson
