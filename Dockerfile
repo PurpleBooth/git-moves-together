@@ -1,7 +1,7 @@
 FROM --platform=$BUILDPLATFORM tonistiigi/xx@sha256:0c6a569797744e45955f39d4f7538ac344bfb7ebf0a54006a0a4297b153ccf0f AS xx
 ARG TARGETPLATFORM
 
-FROM --platform=$BUILDPLATFORM rust:alpine@sha256:e4ab5bdd6d6c93e984ba5d320691d7f4bddb1e061102a1def6ec203de8547472 AS builder
+FROM --platform=$BUILDPLATFORM rust:alpine@sha256:d57abe50ab0037f861817a85b4a26c8211d91075b5cca94a133ed02f803cd7c1 AS builder
 RUN apk add clang lld openssl-dev
 # copy xx scripts to your build stage
 COPY --from=xx / /
