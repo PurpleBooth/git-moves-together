@@ -13,7 +13,7 @@ authors = ["Billie Thompson <billie@billiecodes.com>"]
 
 [dependencies]
 git2 = "0.19.0"
-thiserror = "1.0.63"
+thiserror = "2.0.0"
 clap = { version = "4.5.16", features = ["derive", "cargo", "wrap_help", "env", "unicode"] }
 comfy-table = "7.1.1"
 tokio = { version = "1.40.0", features = ["full"] }
