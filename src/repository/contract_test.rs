@@ -5,7 +5,7 @@ use std::{
     process::Command,
 };
 
-use rand::{distributions::Alphanumeric, thread_rng, Rng};
+use rand::{Rng, distributions::Alphanumeric, thread_rng};
 use tempfile::tempdir;
 
 use crate::{

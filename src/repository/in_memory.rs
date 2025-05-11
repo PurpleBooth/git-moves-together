@@ -1,10 +1,6 @@
 use crate::{
     model::{
-        changed_file::ChangedFile,
-        commit::Commit,
-        commits::Commits,
-        delta::Delta,
-        hash::Hash,
+        changed_file::ChangedFile, commit::Commit, commits::Commits, delta::Delta, hash::Hash,
     },
     repository::{errors::Error, interface::Repository},
 };

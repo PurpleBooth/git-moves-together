@@ -4,11 +4,7 @@ use git2::{Oid, Repository as LibGit2Repository, Sort, Tree};
 
 use crate::{
     model::{
-        changed_file::ChangedFile,
-        commit::Commit,
-        commits::Commits,
-        delta::Delta,
-        hash::Hash,
+        changed_file::ChangedFile, commit::Commit, commits::Commits, delta::Delta, hash::Hash,
     },
     repository::{errors::Error, interface::Repository},
 };

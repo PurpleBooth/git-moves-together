@@ -1,7 +1,7 @@
 [package]
 name = "git-moves-together"
 version = "2.6.3"
-edition = "2018"
+edition = "2024"
 categories = ["development-tools", "command-line-utilities"]
 keywords = ["git", "coupling"]
 repository = "https://github.com/PurpleBooth/git-moves-together"
@@ -13,14 +13,20 @@ authors = ["Billie Thompson <billie@billiecodes.com>"]
 
 [dependencies]
 git2 = "0.19.0"
-thiserror = "1.0.63"
-clap = { version = "4.5.16", features = ["derive", "cargo", "wrap_help", "env", "unicode"] }
-comfy-table = "7.1.1"
-tokio = { version = "1.40.0", features = ["full"] }
-futures = "0.3.30"
-miette = { version = "7.2.0", features = ["fancy"] }
-time = "0.3.36"
+thiserror = "1.0.69"
+clap = { version = "4.5.38", features = [
+    "derive",
+    "cargo",
+    "wrap_help",
+    "env",
+    "unicode",
+] }
+comfy-table = "7.1.4"
+tokio = { version = "1.45.0", features = ["full"] }
+futures = "0.3.31"
+miette = { version = "7.6.0", features = ["fancy"] }
+time = "0.3.41"
 
 [dev-dependencies]
-tempfile = "3.12.0"
+tempfile = "3.19.1"
 rand = "0.8.5"

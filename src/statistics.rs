@@ -4,7 +4,7 @@ use std::{
     fmt::{Display, Formatter},
 };
 
-use comfy_table::{modifiers::UTF8_ROUND_CORNERS, presets::UTF8_FULL, ContentArrangement, Table};
+use comfy_table::{ContentArrangement, Table, modifiers::UTF8_ROUND_CORNERS, presets::UTF8_FULL};
 use time::{Duration, OffsetDateTime};
 
 use crate::model::{changed_file::ChangedFile, delta::Delta, hash::Hash};
@@ -99,7 +99,7 @@ impl Statistics {
 
     pub(crate) fn coupling(&self) -> CouplingResult {
         let changes = self.changed_files();
-        return CouplingResult {
+        CouplingResult {
             result: changes
                 .iter()
                 .fold(BTreeMap::new(), |total, change| {
@@ -107,7 +107,7 @@ impl Statistics {
                 })
                 .into_iter()
                 .collect(),
-        };
+        }
     }
 
     fn changed_files(&self) -> BTreeSet<ChangedFile> {
