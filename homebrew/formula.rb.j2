@@ -1,7 +1,7 @@
 class GitMovesTogether < Formula
   desc "Find coupling in git repositories"
-  homepage "https://github.com/${GITHUB_REPOSITORY}"
-  url "https://github.com/${GITHUB_REPOSITORY}/archive/${GITHUB_REF_NAME}.tar.gz"
+  homepage "https://codeberg.org/${GITHUB_REPOSITORY}"
+  url "https://codeberg.org/${GITHUB_REPOSITORY}/archive/${GITHUB_REF_NAME}.tar.gz"
   version "${VERSION}"
   sha256 "${FILE_SHA}"
 
@@ -16,7 +16,7 @@ class GitMovesTogether < Formula
   end
 
   test do
-    system "git", "clone", "https://github.com/PurpleBooth/git-moves-together.git"
+    system "git", "clone", "https://codeberg.org/PurpleBooth/git-moves-together.git"
     system "#{bin}/git-moves-together", "git-moves-together"
   end
 end
