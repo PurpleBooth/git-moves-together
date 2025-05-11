@@ -16,7 +16,7 @@ class GitMovesTogether < Formula
   end
 
   test do
-    system "#{bin}/git-moves-together", "-h"
-    system "#{bin}/git-moves-together", "-V"
+    system "git", "clone", "https://github.com/PurpleBooth/git-moves-together.git"
+    system "#{bin}/git-moves-together", "git-moves-together"
   end
 end
