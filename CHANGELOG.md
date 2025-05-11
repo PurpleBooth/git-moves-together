@@ -2,6 +2,22 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v2.7.0](https://github.com/PurpleBooth/git-moves-together/compare/b5bfc29644d554cf0d29f06fa7eae2d622b60eae..v2.7.0) - 2025-05-11
+#### Features
+- add docker-bake.hcl for multi-platform builds - ([09995b0](https://github.com/PurpleBooth/git-moves-together/commit/09995b07373a916def2245bcd0f445f1cfff6410)) - Billie Thompson
+#### Miscellaneous Chores
+- **(deps)** update rust:alpine docker digest to d6e876c - ([be95dcb](https://github.com/PurpleBooth/git-moves-together/commit/be95dcb913cf3a13bee03c02205d07ba69623592)) - renovate[bot]
+- **(deps)** update rust:alpine docker digest to d57abe5 - ([203a47f](https://github.com/PurpleBooth/git-moves-together/commit/203a47f53ad04c7efa5b056b092c18245491a46b)) - renovate[bot]
+- **(deps)** update rust:alpine docker digest to e4ab5bd - ([b5bfc29](https://github.com/PurpleBooth/git-moves-together/commit/b5bfc29644d554cf0d29f06fa7eae2d622b60eae)) - renovate[bot]
+- Update repository URLs from GitHub to Codeberg - ([bcf381f](https://github.com/PurpleBooth/git-moves-together/commit/bcf381f8fb03eaf8719447beaef69c0f252b3c66)) - Billie Thompson
+- Update Dockerfile to use latest rust:alpine image - ([92b1735](https://github.com/PurpleBooth/git-moves-together/commit/92b1735be22215d8b603ef298e3e2150ef1d26e4)) - Billie Thompson
+- update dependencies and refactor code - ([e9a1753](https://github.com/PurpleBooth/git-moves-together/commit/e9a175315fb0a1496570c7a6cab506d20c0ab0e6)) - Billie Thompson
+#### Refactoring
+- Restore original test block in homebrew formula - ([956c55b](https://github.com/PurpleBooth/git-moves-together/commit/956c55be76e94c0604362e7469222d2286ed499c)) - Billie Thompson (aider)
+- update formula template to match whatismyip style - ([eaea71c](https://github.com/PurpleBooth/git-moves-together/commit/eaea71cc14d1afb52f474953610c17807e8a93ff)) - Billie Thompson (aider)
+
+- - -
+
 ## [v2.6.3](https://github.com/PurpleBooth/git-moves-together/compare/33be24fc3569c08f4bb5f0301b9bb4698e35d684..v2.6.3) - 2024-08-31
 #### Bug Fixes
 - **(deps)** update rust crate tokio to 1.40.0 - ([4539f57](https://github.com/PurpleBooth/git-moves-together/commit/4539f570f876fcb8f3ddb4658d96856075865068)) - renovate[bot]
