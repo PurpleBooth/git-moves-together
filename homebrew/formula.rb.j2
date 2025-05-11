@@ -1,8 +1,9 @@
 class GitMovesTogether < Formula
   desc "Find coupling in git repositories"
-  homepage "https://github.com/{{ github_repo }}"
-  url "https://github.com/{{ github_repo }}/archive/refs/tags/{{ git_tag }}.tar.gz"
-  sha256 "{{ file_sha }}"
+  homepage "https://github.com/${GITHUB_REPOSITORY}"
+  url "https://github.com/${GITHUB_REPOSITORY}/archive/${GITHUB_REF_NAME}.tar.gz"
+  version "${VERSION}"
+  sha256 "${FILE_SHA}"
 
   depends_on "rust" => :build
   depends_on "openssl@3"
@@ -15,7 +16,7 @@ class GitMovesTogether < Formula
   end
 
   test do
-    system "git", "clone", "https://github.com/PurpleBooth/git-moves-together.git"
-    system "#{bin}/git-moves-together", "git-moves-together"
+    system "#{bin}/git-moves-together", "-h"
+    system "#{bin}/git-moves-together", "-V"
   end
 end
