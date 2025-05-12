@@ -9,7 +9,7 @@ version: "${VER}"
 section: "default"
 priority: "extra"
 maintainer: "Billie Thompson <billie@billiecodes.com>"
-description: Generate a readable names suitable for infrastructure
+description: Identify files frequently committed together in a Git repository
 vendor: "PurpleBooth"
 homepage: "https://codeberg.org/PurpleBooth/git-moves-together"
 license: "CC0"
