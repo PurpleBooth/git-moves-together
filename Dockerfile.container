@@ -36,9 +36,19 @@ RUN xx-cargo build --release --target-dir ./build && \
     cp -v  "./build/$(xx-cargo --print-target-triple)/release/git-moves-together" "./build/git-moves-together"
 RUN addgroup -g 568 nonroot
 RUN adduser -u 568 -G nonroot -D nonroot
+FROM alpine:latest AS final-prep
+ARG TARGETPLATFORM
+COPY --from=builder "/app/build/$(xx-cargo --print-target-triple)/release/git-moves-together*" /
+RUN if echo "$TARGETPLATFORM" | grep -q "windows"; then \
+      mv /git-moves-together.exe /entrypoint.exe; \
+    else \
+      mv /git-moves-together /entrypoint; \
+    fi
+
 FROM scratch
-COPY --from=builder "/app/git-moves-together/build/git-moves-together" /
+COPY --from=final-prep /entrypoint* /
 COPY --from=builder /etc/group /etc/group
 COPY --from=builder /etc/passwd /etc/passwd
-RUN ["/git-moves-together", "--version"]
-ENTRYPOINT ["/git-moves-together"]
+USER nonroot
+RUN ["/entrypoint", "--version"]
+ENTRYPOINT ["/entrypoint"]

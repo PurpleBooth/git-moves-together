@@ -41,7 +41,11 @@ RUN mkdir /PACKS && \
     GOARCH="$(xx-info arch)" GOOS="$(xx-info os)" nfpm pkg --packager rpm --config="nfpm.yaml" --target="/PACKS" && \
     GOARCH="$(xx-info arch)" GOOS="$(xx-info os)" nfpm pkg --packager apk --config="nfpm.yaml" --target="/PACKS" && \
     GOARCH="$(xx-info arch)" GOOS="$(xx-info os)" nfpm pkg --packager deb --config="nfpm.yaml" --target="/PACKS"
+FROM alpine:latest AS final-prep
+ARG TARGETPLATFORM
+COPY --from=builder "/app/build/$(xx-cargo --print-target-triple)/release/git-moves-together*" /binaries/
+
 FROM scratch
 USER nonroot
 COPY --from=builder /PACKS .
-COPY --from=builder /app/git-moves-together/git-moves-together* .
+COPY --from=final-prep /binaries/git-moves-together* .
