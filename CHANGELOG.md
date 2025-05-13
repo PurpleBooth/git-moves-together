@@ -2,6 +2,29 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v2.8.0](https://codeberg.org/PurpleBooth/git-moves-together/compare/ac1b9cc6521d47f4190a4edf841805b8364f5630..v2.8.0) - 2025-05-13
+#### Bug Fixes
+- **(deps)** update rust crate git2 to 0.20.0 - ([31e1861](https://codeberg.org/PurpleBooth/git-moves-together/commit/31e1861954670ddb77db72ad6733116b9821f8bf)) - Solace System Renovate Fox
+- update rand imports and random string generation - ([608fb06](https://codeberg.org/PurpleBooth/git-moves-together/commit/608fb06a3ca7e79a10d7988b790256983a7528fd)) - Billie Thompson (aider)
+- update rand crate imports and usage in contract_test.rs - ([d537ed5](https://codeberg.org/PurpleBooth/git-moves-together/commit/d537ed5abaa33124448368e9d36ebfb2376776f1)) - Billie Thompson (aider)
+- resolve rand import and deprecation issues in contract_test.rs - ([f0bff0a](https://codeberg.org/PurpleBooth/git-moves-together/commit/f0bff0a842ef59dc1d488bc15daf87edda30388f)) - Billie Thompson (aider)
+- remove shell expansion in Dockerfile COPY instructions - ([957b77a](https://codeberg.org/PurpleBooth/git-moves-together/commit/957b77ae7b9b4dcfac5cbd78c4ea148c39f42982)) - Billie Thompson (aider)
+- update Dockerfiles for cross-compilation with xx-cargo - ([27bab15](https://codeberg.org/PurpleBooth/git-moves-together/commit/27bab150e1f80dab7b10aa77934ee7f521e8a4df)) - Billie Thompson
+- install cargo-chef in builder stage for cross-compilation - ([08f4049](https://codeberg.org/PurpleBooth/git-moves-together/commit/08f40494dc026ca916a3994a36e40eacb893ac24)) - Billie Thompson (aider)
+#### Features
+- add platform-specific binary handling in Dockerfiles - ([c5ec669](https://codeberg.org/PurpleBooth/git-moves-together/commit/c5ec669d4dfa3f4a7dc0d16647729b9cac73ac78)) - Billie Thompson (aider)
+- integrate cargo-chef for optimized Docker build caching - ([00ac223](https://codeberg.org/PurpleBooth/git-moves-together/commit/00ac223626b4a0baecb1f01336968eb83408b92f)) - Billie Thompson (aider)
+#### Miscellaneous Chores
+- **(deps)** update rust crate rand to 0.9.0 - ([14ed1d3](https://codeberg.org/PurpleBooth/git-moves-together/commit/14ed1d3d6cf62348dac3a8148af925befc16fbae)) - Solace System Renovate Fox
+- add nfpm.yaml to dockerignore - ([4ab2e35](https://codeberg.org/PurpleBooth/git-moves-together/commit/4ab2e35bf1c895c55513734b106d368fb6f7fc6a)) - Billie Thompson
+- remove Dockerfile and update Cargo.lock dependencies - ([128c4e3](https://codeberg.org/PurpleBooth/git-moves-together/commit/128c4e33cedae9a91ae3f0179ff49d274f8b3f02)) - Billie Thompson
+- update repository URLs from GitHub to Codeberg in README.md - ([6073182](https://codeberg.org/PurpleBooth/git-moves-together/commit/6073182b94e7ecacce03376c154edf4607f46c6a)) - Billie Thompson (aider)
+- Update nfpm.yaml description to reflect actual functionality - ([ac1b9cc](https://codeberg.org/PurpleBooth/git-moves-together/commit/ac1b9cc6521d47f4190a4edf841805b8364f5630)) - Billie Thompson (aider)
+#### Refactoring
+- update random generation method in git_add_file function - ([d6c8b18](https://codeberg.org/PurpleBooth/git-moves-together/commit/d6c8b18c46f65ce05a468f3325a49510745ae010)) - Billie Thompson
+
+- - -
+
 ## [v2.7.0](https://codeberg.org/PurpleBooth/git-moves-together/compare/b5bfc29644d554cf0d29f06fa7eae2d622b60eae..v2.7.0) - 2025-05-11
 #### Features
 - add docker-bake.hcl for multi-platform builds - ([09995b0](https://codeberg.org/PurpleBooth/git-moves-together/commit/09995b07373a916def2245bcd0f445f1cfff6410)) - Billie Thompson
