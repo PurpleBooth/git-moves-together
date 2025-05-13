@@ -4,6 +4,13 @@ FROM goreleaser/nfpm@sha256:44ab1c1726fc775a8e7d6fcd216ed7632b52af4b8f43e2c1daec
 FROM --platform=$BUILDPLATFORM tonistiigi/xx@sha256:923441d7c25f1e2eb5789f82d987693c47b8ed987c4ab3b075d6ed2b5d6779a3 AS xx
 ARG TARGETPLATFORM
 
+FROM --platform=$BUILDPLATFORM lukemathwalker/cargo-chef:latest-rust-alpine AS chef
+WORKDIR /app
+
+FROM chef AS planner
+COPY . .
+RUN cargo chef prepare --recipe-path recipe.json
+
 FROM --platform=$BUILDPLATFORM rust:alpine@sha256:661d708cc863ce32007cf46807a72062a80d2944a6fae9e0d83742d2e04d5375 AS builder
 ARG BUILDKIT_SBOM_SCAN_STAGE=true
 RUN apk add clang lld openssl-dev curl bash
@@ -17,12 +24,11 @@ COPY --from=nfpm "/usr/bin/nfpm" "/usr/bin/nfpm"
 RUN xx-apk add --no-cache musl-dev zlib-dev zlib-static openssl-dev openssl-libs-static pkgconfig alpine-sdk
 
 WORKDIR /app
-RUN cargo new --lib git-moves-together
-WORKDIR /app/git-moves-together
-COPY Cargo.toml ./Cargo.toml
-COPY Cargo.lock ./Cargo.lock
-RUN xx-cargo build --release --target-dir ./build
-COPY . ./
+COPY --from=planner /app/recipe.json recipe.json
+# Build dependencies - this is the caching Docker layer!
+RUN cargo chef cook --release --recipe-path recipe.json --target-dir ./build
+# Build application
+COPY . .
 RUN xx-cargo build --release --target-dir ./build && \
     xx-verify --static "./build/$(xx-cargo --print-target-triple)/release/git-moves-together" && \
     cp -v  "./build/$(xx-cargo --print-target-triple)/release/git-moves-together" "./git-moves-together"

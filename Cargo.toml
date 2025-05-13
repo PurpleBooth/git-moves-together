@@ -30,3 +30,6 @@ time = "0.3.41"
 [dev-dependencies]
 tempfile = "3.19.1"
 rand = "0.8.5"
+
+[build-dependencies]
+cargo-chef = "0.1.62"
