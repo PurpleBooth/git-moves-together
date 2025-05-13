@@ -17,7 +17,7 @@ RUN apk add clang lld openssl-dev curl bash
 # copy xx scripts to your build stage
 COPY --from=xx / /
 # Install cargo-chef
-RUN cargo install cargo-chef
+RUN xx-cargo install cargo-chef
 ARG TARGETPLATFORM
 ARG VER
 ENV VER=$VER
@@ -28,7 +28,7 @@ RUN xx-apk add --no-cache musl-dev zlib-dev zlib-static openssl-dev openssl-libs
 WORKDIR /app
 COPY --from=planner /app/recipe.json recipe.json
 # Build dependencies - this is the caching Docker layer!
-RUN cargo chef cook --release --recipe-path recipe.json --target-dir ./build
+RUN xx-cargo chef cook --release --recipe-path recipe.json --target-dir ./build
 # Build application
 COPY . .
 RUN xx-cargo build --release --target-dir ./build && \
@@ -44,4 +44,4 @@ RUN mkdir /PACKS && \
 FROM scratch
 USER nonroot
 COPY --from=builder /PACKS .
-COPY --from=builder /app/git-moves-together/git-moves-together .
+COPY --from=builder /app/git-moves-together/git-moves-together* .

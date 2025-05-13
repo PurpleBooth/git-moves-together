@@ -3,27 +3,32 @@ FROM --platform=$BUILDPLATFORM tonistiigi/xx@sha256:923441d7c25f1e2eb5789f82d987
 ARG TARGETPLATFORM
 
 FROM --platform=$BUILDPLATFORM lukemathwalker/cargo-chef:latest-rust-alpine AS chef
+ARG BUILDKIT_SBOM_SCAN_CONTEXT=true
+ARG TARGETPLATFORM
 WORKDIR /app
 
 FROM chef AS planner
+ARG BUILDKIT_SBOM_SCAN_CONTEXT=true
+ARG TARGETPLATFORM
+
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
 FROM --platform=$BUILDPLATFORM rust:alpine@sha256:661d708cc863ce32007cf46807a72062a80d2944a6fae9e0d83742d2e04d5375 AS builder
 ARG BUILDKIT_SBOM_SCAN_CONTEXT=true
+ARG TARGETPLATFORM
 RUN apk add clang lld openssl-dev curl bash
 # copy xx scripts to your build stage
 COPY --from=xx / /
 # Install cargo-chef
-RUN cargo install cargo-chef
-ARG TARGETPLATFORM
+RUN xx-cargo install cargo-chef
 
 RUN xx-apk add --no-cache musl-dev zlib-dev zlib-static openssl-dev openssl-libs-static pkgconfig alpine-sdk
 
 WORKDIR /app
 COPY --from=planner /app/recipe.json recipe.json
 # Build dependencies - this is the caching Docker layer!
-RUN cargo chef cook --release --recipe-path recipe.json --target-dir ./build
+RUN xx-cargo chef cook --release --recipe-path recipe.json --target-dir ./build
 # Build application
 COPY . .
 RUN xx-cargo build --release --target-dir ./build && \
