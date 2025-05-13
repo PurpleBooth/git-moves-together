@@ -48,4 +48,4 @@ COPY --from=builder "/app/build/$(xx-cargo --print-target-triple)/release/git-mo
 FROM scratch
 USER nonroot
 COPY --from=builder /PACKS .
-COPY --from=final-prep /binaries/git-moves-together* .
+COPY --from=builder /app/git-moves-together .

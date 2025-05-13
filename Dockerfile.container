@@ -38,7 +38,7 @@ RUN addgroup -g 568 nonroot
 RUN adduser -u 568 -G nonroot -D nonroot
 FROM alpine:latest AS final-prep
 ARG TARGETPLATFORM
-COPY --from=builder "/app/build/$(xx-cargo --print-target-triple)/release/git-moves-together*" /
+COPY --from=builder /app/build/git-moves-together /
 RUN if echo "$TARGETPLATFORM" | grep -q "windows"; then \
       mv /git-moves-together.exe /entrypoint.exe; \
     else \
