@@ -174,7 +174,7 @@ Options:
 ## Installing
 
 See the [releases
-page](https://github.com/PurpleBooth/git-moves-together/releases/latest)
+page](https://codeberg.org/PurpleBooth/git-moves-together/releases/latest)
 we build for linux and mac, alternatively use brew
 
 ``` shell,skip()
