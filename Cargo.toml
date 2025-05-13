@@ -13,7 +13,7 @@ authors = ["Billie Thompson <billie@billiecodes.com>"]
 
 [dependencies]
 git2 = "0.20.0"
-thiserror = "1.0.69"
+thiserror = "2.0.0"
 clap = { version = "4.5.38", features = [
     "derive",
     "cargo",
