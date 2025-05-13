@@ -5,8 +5,7 @@ use std::{
     process::Command,
 };
 
-use rand::Rng;
-use rand::distributions::{Alphanumeric, DistString};
+use rand::prelude::*;
 use tempfile::tempdir;
 
 use crate::{
@@ -62,7 +61,11 @@ fn git_init(dir: &Path) {
 
 fn git_add_file(dir: &Path, file_name: &str) {
     let mut file = File::create(dir.join(file_name)).unwrap();
-    let random_junk = Alphanumeric.sample_string(&mut rand::rng(), 30);
+    let random_junk: String = rand::thread_rng()
+        .sample_iter(rand::distributions::Alphanumeric)
+        .take(30)
+        .map(char::from)
+        .collect();
     file.write_all(random_junk.as_bytes()).unwrap();
     file.flush().unwrap();
     Command::new("git")
