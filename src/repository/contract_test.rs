@@ -61,8 +61,8 @@ fn git_init(dir: &Path) {
 
 fn git_add_file(dir: &Path, file_name: &str) {
     let mut file = File::create(dir.join(file_name)).unwrap();
-    let random_junk: String = rand::thread_rng()
-        .sample_iter(rand::distributions::Alphanumeric)
+    let random_junk: String = rand::rng()
+        .sample_iter(rand::distr::Alphanumeric)
         .take(30)
         .map(char::from)
         .collect();
