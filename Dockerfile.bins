@@ -16,6 +16,8 @@ ARG BUILDKIT_SBOM_SCAN_STAGE=true
 RUN apk add clang lld openssl-dev curl bash
 # copy xx scripts to your build stage
 COPY --from=xx / /
+# Install cargo-chef
+RUN cargo install cargo-chef
 ARG TARGETPLATFORM
 ARG VER
 ENV VER=$VER

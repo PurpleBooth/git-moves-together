@@ -14,6 +14,8 @@ ARG BUILDKIT_SBOM_SCAN_CONTEXT=true
 RUN apk add clang lld openssl-dev curl bash
 # copy xx scripts to your build stage
 COPY --from=xx / /
+# Install cargo-chef
+RUN cargo install cargo-chef
 ARG TARGETPLATFORM
 
 RUN xx-apk add --no-cache musl-dev zlib-dev zlib-static openssl-dev openssl-libs-static pkgconfig alpine-sdk
