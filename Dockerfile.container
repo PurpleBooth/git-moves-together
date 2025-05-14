@@ -2,7 +2,7 @@ ARG BUILDKIT_SBOM_SCAN_CONTEXT=true
 FROM --platform=$BUILDPLATFORM tonistiigi/xx@sha256:923441d7c25f1e2eb5789f82d987693c47b8ed987c4ab3b075d6ed2b5d6779a3 AS xx
 ARG TARGETPLATFORM
 
-FROM --platform=$BUILDPLATFORM lukemathwalker/cargo-chef:latest-rust-alpine AS chef
+FROM --platform=$BUILDPLATFORM lukemathwalker/cargo-chef:latest-rust-alpine@sha256:f952df1ddaa3e04fd429ee2493105b23cd6befb336286d958cc52c2eccc30f6f AS chef
 ARG BUILDKIT_SBOM_SCAN_CONTEXT=true
 ARG TARGETPLATFORM
 WORKDIR /app
@@ -36,7 +36,7 @@ RUN xx-cargo build --release --target-dir ./build && \
     cp -v  "./build/$(xx-cargo --print-target-triple)/release/git-moves-together" "./build/git-moves-together"
 RUN addgroup -g 568 nonroot
 RUN adduser -u 568 -G nonroot -D nonroot
-FROM alpine:latest AS final-prep
+FROM alpine:latest@sha256:a8560b36e8b8210634f77d9f7f9efd7ffa463e380b75e2e74aff4511df3ef88c AS final-prep
 ARG TARGETPLATFORM
 COPY --from=builder /app/build/git-moves-together /
 RUN if echo "$TARGETPLATFORM" | grep -q "windows"; then \

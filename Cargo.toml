@@ -28,8 +28,8 @@ miette = { version = "7.6.0", features = ["fancy"] }
 time = "0.3.41"
 
 [dev-dependencies]
-tempfile = "3.19.1"
-rand = "0.9.0"
+tempfile = "=3.19.1"
+rand = "=0.9.0"
 
 [build-dependencies]
 cargo-chef = "0.1.62"
