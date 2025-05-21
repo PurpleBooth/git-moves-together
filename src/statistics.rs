@@ -32,7 +32,7 @@ pub struct CouplingResult {
 }
 
 impl CouplingResult {
-    pub(crate) fn is_empty(&self) -> bool {
+    pub(crate) const fn is_empty(&self) -> bool {
         self.result.is_empty()
     }
 }
