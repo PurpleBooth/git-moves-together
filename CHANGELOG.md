@@ -2,6 +2,25 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v2.8.1](https://codeberg.org/PurpleBooth/git-moves-together/compare/9d26789240051cbf5c3f6f91b58ba64dab9c5bb9..v2.8.1) - 2025-06-17
+#### Bug Fixes
+- **(deps)** update goreleaser/nfpm docker digest to 929e105 - ([c6d510f](https://codeberg.org/PurpleBooth/git-moves-together/commit/c6d510f9ee65d048669f0d374299114ee5e1a82b)) - Solace System Renovate Fox
+- **(deps)** update rust crate tokio to v1.45.1 - ([1b87d82](https://codeberg.org/PurpleBooth/git-moves-together/commit/1b87d82f6067364c9168f055ed7ffb776965ef9c)) - Solace System Renovate Fox
+- **(deps)** update goreleaser/nfpm docker digest to 10f7efb - ([7e25f00](https://codeberg.org/PurpleBooth/git-moves-together/commit/7e25f00cfd899c7af4d27ec69c92959bf7c1555d)) - Solace System Renovate Fox
+#### Continuous Integration
+- use app preset - ([2878498](https://codeberg.org/PurpleBooth/git-moves-together/commit/2878498093a24b86d1a6af2bd47a5d5991a6ab9d)) - PurpleBooth
+#### Miscellaneous Chores
+- **(deps)** update https://code.forgejo.org/docker/setup-buildx-action digest to 18ce135 - ([253a96c](https://codeberg.org/PurpleBooth/git-moves-together/commit/253a96c00734005cabb3364d731acd94851faa5e)) - Solace System Renovate Fox
+- **(deps)** update https://code.forgejo.org/docker/bake-action digest to 37816e7 - ([1b595f1](https://codeberg.org/PurpleBooth/git-moves-together/commit/1b595f1f68b18891e6c3b20fa56c10204af63d37)) - Solace System Renovate Fox
+- **(deps)** update https://code.forgejo.org/docker/bake-action digest to 212c367 - ([9d26789](https://codeberg.org/PurpleBooth/git-moves-together/commit/9d26789240051cbf5c3f6f91b58ba64dab9c5bb9)) - Solace System Renovate Fox
+- bump git2 dependency to version 0.20.2 - ([3c2ae59](https://codeberg.org/PurpleBooth/git-moves-together/commit/3c2ae59b71130bd3975e7b041c08de561103321c)) - Billie Thompson
+- update dependencies to latest versions - ([c9312f4](https://codeberg.org/PurpleBooth/git-moves-together/commit/c9312f4576cdbccf09e97e983bb14d6975a3e0cd)) - Billie Thompson
+- fix formatting - ([08623ac](https://codeberg.org/PurpleBooth/git-moves-together/commit/08623ac53216e4e9a19d598f48f0363361c725e5)) - SolaceRenovateFox
+#### Refactoring
+- Simplify Dockerfiles for cross-platform builds and improve build caching - ([66f060c](https://codeberg.org/PurpleBooth/git-moves-together/commit/66f060c3e7bf2cc8e607fa52932968f27557c9eb)) - Billie Thompson
+
+- - -
+
 ## [v2.8.0](https://codeberg.org/PurpleBooth/git-moves-together/compare/ac1b9cc6521d47f4190a4edf841805b8364f5630..v2.8.0) - 2025-05-13
 #### Bug Fixes
 - **(deps)** update rust crate git2 to 0.20.0 - ([31e1861](https://codeberg.org/PurpleBooth/git-moves-together/commit/31e1861954670ddb77db72ad6733116b9821f8bf)) - Solace System Renovate Fox
