@@ -100,7 +100,7 @@ fn git_commit(dir: &Path) {
 fn i_can_get_a_list_of_all_current_commits() {
     let dir = tempdir().unwrap();
     let repos: Vec<Box<dyn Repository>> = vec![
-        Box::from(libgit2_repository(dir.into_path())),
+        Box::from(libgit2_repository(dir.keep())),
         Box::from(in_memory_repository()),
     ];
     for repo in &repos {
