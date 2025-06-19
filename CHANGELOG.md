@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v2.8.2](https://codeberg.org/PurpleBooth/git-moves-together/compare/de1129986116662bf19d390c8d83a4406a364937..v2.8.2) - 2025-06-19
+#### Bug Fixes
+- **(deps)** update goreleaser/nfpm docker digest to 929e105 - ([e89d55c](https://codeberg.org/PurpleBooth/git-moves-together/commit/e89d55cd0ada38eaefcc265168237b3a3d49f638)) - Solace System Renovate Fox
+#### Miscellaneous Chores
+- **(deps)** update https://code.forgejo.org/docker/setup-buildx-action digest to e468171 - ([de11299](https://codeberg.org/PurpleBooth/git-moves-together/commit/de1129986116662bf19d390c8d83a4406a364937)) - Solace System Renovate Fox
+
+- - -
+
 ## [v2.8.1](https://codeberg.org/PurpleBooth/git-moves-together/compare/9d26789240051cbf5c3f6f91b58ba64dab9c5bb9..v2.8.1) - 2025-06-17
 #### Bug Fixes
 - **(deps)** update goreleaser/nfpm docker digest to 929e105 - ([c6d510f](https://codeberg.org/PurpleBooth/git-moves-together/commit/c6d510f9ee65d048669f0d374299114ee5e1a82b)) - Solace System Renovate Fox
