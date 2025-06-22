@@ -83,6 +83,7 @@ jobs:
       with:
         name: build-artifacts
         path: build-artifacts.tar
+        retention-days: 1
 
   lint:
     name: Lint
