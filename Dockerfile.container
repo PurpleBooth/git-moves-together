@@ -2,7 +2,7 @@ ARG BUILDKIT_SBOM_SCAN_CONTEXT=true
 FROM --platform=$BUILDPLATFORM tonistiigi/xx@sha256:923441d7c25f1e2eb5789f82d987693c47b8ed987c4ab3b075d6ed2b5d6779a3 AS xx
 ARG TARGETPLATFORM
 
-FROM --platform=$BUILDPLATFORM rust:alpine@sha256:541a1720c1cedddae9e17b4214075bf57c20bc7b176b4bba6bce3437c44d51ef AS builder
+FROM --platform=$BUILDPLATFORM rust:alpine@sha256:ec0413a092f4cc01b32e08f991485abe4467ef95c7416a6643a063a141c2e0ec AS chef
 ARG BUILDKIT_SBOM_SCAN_CONTEXT=true
 RUN apk add clang lld openssl-dev curl bash
 # copy xx scripts to your build stage
@@ -11,27 +11,29 @@ ARG TARGETPLATFORM
 
 RUN xx-apk add --no-cache musl-dev zlib-dev zlib-static openssl-dev openssl-libs-static pkgconfig alpine-sdk
 
-WORKDIR /app/git-moves-together
+WORKDIR /app
 
 # Install cargo-chef for dependency caching
 RUN cargo install cargo-chef --locked
 
-# Prepare recipe with host cargo
-COPY Cargo.toml Cargo.lock ./
-COPY src src/
+FROM chef AS planner
+COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
-# Build dependencies and application with cross-compilation
-COPY . ./
-RUN xx-cargo chef cook --release --recipe-path recipe.json && \
-    xx-cargo build --release --target-dir ./build && \
+FROM chef AS builder
+COPY --from=planner /app/recipe.json recipe.json
+# Build dependencies with cross-compilation
+RUN xx-cargo chef cook --release --recipe-path recipe.json
+COPY . .
+RUN xx-cargo build --release --target-dir ./build && \
     xx-verify --static "./build/$(xx-cargo --print-target-triple)/release/git-moves-together" && \
     cp -v "./build/$(xx-cargo --print-target-triple)/release/git-moves-together" ./build/git-moves-together
-RUN addgroup -g 568 nonroot
-RUN adduser -u 568 -G nonroot -D nonroot
-FROM scratch
-COPY --from=builder "/app/git-moves-together/build/git-moves-together" /
-COPY --from=builder /etc/group /etc/group
-COPY --from=builder /etc/passwd /etc/passwd
-RUN ["/git-moves-together", "--version"]
-ENTRYPOINT ["/git-moves-together"]
+
+FROM alpine AS users
+RUN addgroup -S nonroot && adduser -S nonroot -G nonroot
+
+FROM scratch AS runtime
+COPY --from=users /etc/passwd /etc/passwd
+COPY --from=builder /app/build/git-moves-together /usr/local/bin/
+USER nonroot
+ENTRYPOINT ["/usr/local/bin/git-moves-together"]
