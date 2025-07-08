@@ -3,11 +3,10 @@ FROM --platform=$BUILDPLATFORM tonistiigi/xx@sha256:923441d7c25f1e2eb5789f82d987
 ARG TARGETPLATFORM
 
 FROM --platform=$BUILDPLATFORM rust:alpine@sha256:ec0413a092f4cc01b32e08f991485abe4467ef95c7416a6643a063a141c2e0ec AS chef
-ARG BUILDKIT_SBOM_SCAN_CONTEXT=true
+ARG TARGETPLATFORM
 RUN apk add clang lld openssl-dev curl bash
 # copy xx scripts to your build stage
 COPY --from=xx / /
-ARG TARGETPLATFORM
 
 RUN xx-apk add --no-cache musl-dev zlib-dev zlib-static openssl-dev openssl-libs-static pkgconfig alpine-sdk
 
@@ -16,11 +15,13 @@ WORKDIR /app
 # Install cargo-chef for dependency caching
 RUN cargo install cargo-chef --locked
 
-FROM chef AS planner
+FROM --platform=$BUILDPLATFORM chef AS planner
+ARG TARGETPLATFORM
 COPY . .
 RUN cargo chef prepare --recipe-path recipe.json
 
-FROM chef AS builder
+FROM --platform=$BUILDPLATFORM chef AS builder
+ARG TARGETPLATFORM
 COPY --from=planner /app/recipe.json recipe.json
 # Build dependencies with cross-compilation
 RUN xx-cargo chef cook --release --recipe-path recipe.json
@@ -29,7 +30,7 @@ RUN xx-cargo build --release --target-dir ./build && \
     xx-verify --static "./build/$(xx-cargo --print-target-triple)/release/git-moves-together" && \
     cp -v "./build/$(xx-cargo --print-target-triple)/release/git-moves-together" ./build/git-moves-together
 
-FROM alpine AS users
+FROM --platform=$BUILDPLATFORM alpine AS users
 RUN addgroup -S nonroot && adduser -S nonroot -G nonroot
 
 FROM scratch AS runtime
