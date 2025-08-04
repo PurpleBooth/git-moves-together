@@ -2,6 +2,20 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## [v2.8.3](https://codeberg.org/PurpleBooth/git-moves-together/compare/6aaeced12feea51d73bd04bcf56506c99cb495b7..v2.8.3) - 2025-08-04
+#### Bug Fixes
+- **(deps)** update rust crate tokio to v1.47.0 - ([3f0a426](https://codeberg.org/PurpleBooth/git-moves-together/commit/3f0a426cca42849f95820a6fccec733a34b25ee8)) - Solace System Renovate Fox
+#### Continuous Integration
+- run less often - ([0ed0c01](https://codeberg.org/PurpleBooth/git-moves-together/commit/0ed0c0128bde49d7b8e6524513c46b0e772c6314)) - PurpleBooth
+- set a lower retension - ([6aaeced](https://codeberg.org/PurpleBooth/git-moves-together/commit/6aaeced12feea51d73bd04bcf56506c99cb495b7)) - PurpleBooth
+#### Miscellaneous Chores
+- **(deps)** update rust crate cargo-chef to v0.1.72 - ([d5e4252](https://codeberg.org/PurpleBooth/git-moves-together/commit/d5e42522e8604a0f433f933c63c2dba1033df020)) - Solace System Renovate Fox
+#### Refactoring
+- optimize Dockerfile cross-compilation build stages - ([7f260b3](https://codeberg.org/PurpleBooth/git-moves-together/commit/7f260b36d217d9cd1c1da95e47a465c1e2e99c6d)) - Billie Thompson
+- optimize Dockerfile with multi-stage build and cargo-chef - ([126f930](https://codeberg.org/PurpleBooth/git-moves-together/commit/126f9308238772258b26c4d5202b8dd6dac5a169)) - Billie Thompson
+
+- - -
+
 ## [v2.8.2](https://codeberg.org/PurpleBooth/git-moves-together/compare/de1129986116662bf19d390c8d83a4406a364937..v2.8.2) - 2025-06-19
 #### Bug Fixes
 - **(deps)** update goreleaser/nfpm docker digest to 929e105 - ([e89d55c](https://codeberg.org/PurpleBooth/git-moves-together/commit/e89d55cd0ada38eaefcc265168237b3a3d49f638)) - Solace System Renovate Fox
