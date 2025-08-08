@@ -89,6 +89,18 @@ RUN curl -L -o /tmp/lipo https://github.com/konoui/lipo/releases/download/v${LIP
 
 RUN rustup component add rustfmt clippy
 
+# Install Apple CommonCrypto headers for cross-compilation
+# We only install headers and modulemap, no library build, to keep the image lean and portable.
+# Source: https://github.com/apple-oss-distributions/CommonCrypto
+ARG COMMONCRYPTO_REPO=https://github.com/apple-oss-distributions/CommonCrypto
+RUN set -eux; \
+    TEMP_CC="$(mktemp -d)"; \
+    git clone --depth 1 "$COMMONCRYPTO_REPO" "$TEMP_CC"; \
+    install -d /usr/local/include/CommonCrypto; \
+    cp -r "$TEMP_CC/include/"* /usr/local/include/CommonCrypto/; \
+    rm -rf "$TEMP_CC"; \
+    ls -la /usr/local/include/CommonCrypto
+
 RUN addgroup --system nonroot && \
     adduser --system --ingroup nonroot nonroot && \
     mkdir -p /app /home/nonroot/.cargo/bin/ && \
