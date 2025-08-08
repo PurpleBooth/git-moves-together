@@ -92,10 +92,12 @@ RUN rustup component add rustfmt clippy
 # Install Apple CommonCrypto headers for cross-compilation
 # We only install headers and modulemap, no library build, to keep the image lean and portable.
 # Source: https://github.com/apple-oss-distributions/CommonCrypto
+# renovate: datasource=github-tags depName=apple-oss-distributions/CommonCrypto
+ARG COMMONCRYPTO_TAG=CommonCrypto-600035
 ARG COMMONCRYPTO_REPO=https://github.com/apple-oss-distributions/CommonCrypto
 RUN set -eux; \
     TEMP_CC="$(mktemp -d)"; \
-    git clone --depth 1 "$COMMONCRYPTO_REPO" "$TEMP_CC"; \
+    git clone --depth 1 --branch "$COMMONCRYPTO_TAG" --single-branch "$COMMONCRYPTO_REPO" "$TEMP_CC"; \
     install -d /usr/local/include/CommonCrypto; \
     cp -r "$TEMP_CC/include/"* /usr/local/include/CommonCrypto/; \
     rm -rf "$TEMP_CC"; \
