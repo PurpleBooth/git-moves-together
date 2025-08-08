@@ -1,5 +1,7 @@
-*
-!src
-!Cargo.lock
-!Cargo.toml
-!nfpm.yaml
+/target
+/.idea
+/mutants.out/
+/mutants.out.old/
+.aider*
+docker-bake.hcl
+Dockerfile

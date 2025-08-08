@@ -11,8 +11,12 @@ authors = ["Billie Thompson <billie@billiecodes.com>"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[[bin]]
+name = "git-moves-together"
+path = "src/main.rs"
+
 [dependencies]
-git2 = "0.20.2"
+git2 = { version = "0.20.2", features = ["vendored-openssl", "vendored-libgit2"] }
 thiserror = "2.0.12"
 clap = { version = "4.5.40", features = [
     "derive",
@@ -30,6 +34,3 @@ time = "0.3.41"
 [dev-dependencies]
 tempfile = "3.20.0"
 rand = "0.9.1"
-
-[build-dependencies]
-cargo-chef = "0.1.71"

@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+# This script handles cross-compilation of the application for various target platforms.
+# It sets up the necessary environment variables for each platform and builds the application
+# with the appropriate target-specific settings.
+#
+# You probably don't want to run this directly on your machine, unless you have a dependency installation kink.
+
+set -xeuo pipefail
+
+# =====================================================================
+# BUILD PROCESS
+# =====================================================================
+# Check if the target is Mac (darwin)
+if [[ $TARGETOS == *"darwin"* ]]; then
+	cargo zigbuild --release --target "x86_64-apple-darwin"
+	cargo zigbuild --release --target "aarch64-apple-darwin"
+	mkdir -p "/app/target/universal/release"
+	lipo -create \
+		"/app/target/x86_64-apple-darwin/release/git-moves-together" \
+		"/app/target/aarch64-apple-darwin/release/git-moves-together" \
+		-output "/app/target/universal/release/git-moves-together"
+	cp "/app/target/universal/release/git-moves-together" "/app/target/release/git-moves-together"
+elif [[ $TARGETOS == *"windows"* ]] && [[ $TARGETARCH == *"arm64"* ]]; then
+	cargo zigbuild --release --target "aarch64-pc-windows-gnullvm"
+	cp "/app/target/aarch64-pc-windows-gnullvm/release/git-moves-together.exe" "/app/target/release/git-moves-together.exe"
+elif [[ $TARGETOS == *"windows"* ]] && [[ $TARGETARCH == *"amd64"* ]]; then
+	cargo zigbuild --release --target "x86_64-pc-windows-gnu"
+	cp "/app/target/x86_64-pc-windows-gnu/release/git-moves-together.exe" "/app/target/release/git-moves-together.exe"
+elif [[ $TARGETOS == *"linux"* ]] && [[ $TARGETARCH == *"amd64"* ]]; then
+	cargo zigbuild --release --target "x86_64-unknown-linux-gnu"
+	cp "/app/target/x86_64-unknown-linux-gnu/release/git-moves-together" "/app/target/release/git-moves-together"
+elif [[ $TARGETOS == *"linux"* ]] && [[ $TARGETARCH == *"arm64"* ]]; then
+	cargo zigbuild --release --target "aarch64-unknown-linux-gnu"
+	cp "/app/target/aarch64-unknown-linux-gnu/release/git-moves-together" "/app/target/release/git-moves-together"
+elif [[ $TARGETOS == *"alpine"* ]] && [[ $TARGETARCH == *"amd64"* ]]; then
+	cargo zigbuild --release --target "x86_64-unknown-linux-musl"
+	cp "/app/target/x86_64-unknown-linux-musl/release/git-moves-together" "/app/target/release/git-moves-together"
+elif [[ $TARGETOS == *"alpine"* ]] && [[ $TARGETARCH == *"arm64"* ]]; then
+	cargo zigbuild --release --target "aarch64-unknown-linux-musl"
+	cp "/app/target/aarch64-unknown-linux-musl/release/git-moves-together" "/app/target/release/git-moves-together"
+else
+	echo "Target unsupported"
+	exit 1
+fi
