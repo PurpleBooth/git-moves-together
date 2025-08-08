@@ -38,7 +38,7 @@ FROM buildenv AS specdown
 # Build application
 COPY . .
 RUN cargo build --release
-RUN specdown run --temporary-workspace-dir --add-path "/app/target/release" ./README.md
+RUN ./test-harness/specdown ./README.md
 EOF
 
     contexts = {
