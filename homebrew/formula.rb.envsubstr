@@ -2,7 +2,6 @@ class GitMovesTogether < Formula
   desc "Find coupling in git repositories"
   homepage "https://codeberg.org/${GITHUB_REPOSITORY}"
   url "https://codeberg.org/${GITHUB_REPOSITORY}/archive/${GITHUB_REF_NAME}.tar.gz"
-  version "${VERSION}"
   sha256 "${FILE_SHA}"
 
   depends_on "rust" => :build

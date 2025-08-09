@@ -13,9 +13,6 @@ set -xeuo pipefail
 # =====================================================================
 # Check if the target is Mac (darwin)
 if [[ $TARGETOS == *"darwin"* ]]; then
-	# Ensure Apple CommonCrypto headers are found during cross-compilation.
-	# Clang targeting darwin may not search /usr/local/include by default with a sysroot.
-	# Provide the include path via CFLAGS/CPPFLAGS (both generic and target-specific).
 	export CFLAGS="-I/usr/local/include ${CFLAGS:-}"
 	export CPPFLAGS="-I/usr/local/include ${CPPFLAGS:-}"
 	export CFLAGS_x86_64_apple_darwin="-I/usr/local/include ${CFLAGS_x86_64_apple_darwin:-}"
