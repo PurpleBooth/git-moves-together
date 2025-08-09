@@ -97,6 +97,21 @@ RUN set -eux; \
     rm -rf "$TEMP_CC"; \
     ls -la /usr/local/include/CommonCrypto
 
+# Install Apple CoreFoundation headers for cross-compilation
+# We only install headers and modulemap, no library build, to keep the image lean and portable.
+# Source: https://github.com/apple-oss-distributions/CF
+# renovate: datasource=github-tags depName=apple-oss-distributions/CF
+ARG CF_TAG=CF-855.17
+ARG CF_REPO=https://github.com/apple-oss-distributions/CF
+RUN set -eux; \
+    TEMP_CF="$(mktemp -d)"; \
+    git clone --depth 1 --branch "$CF_TAG" --single-branch "$CF_REPO" "$TEMP_CF"; \
+    install -d /usr/local/include/CoreFoundation; \
+    find "$TEMP_CF" -maxdepth 1 -type f \( -name '*.h' -o -name '*.inc.h' \) -exec cp -t /usr/local/include/CoreFoundation {} +; \
+    printf 'module CoreFoundation [system] {\n  umbrella header "CoreFoundation.h"\n  export *\n  module * { export * }\n}\n' > /usr/local/include/CoreFoundation/module.modulemap; \
+    rm -rf "$TEMP_CF"; \
+    ls -la /usr/local/include/CoreFoundation
+
 RUN addgroup --system nonroot && \
     adduser --system --ingroup nonroot nonroot && \
     mkdir -p /app /home/nonroot/.cargo/bin/ && \
