@@ -13,6 +13,15 @@ set -xeuo pipefail
 # =====================================================================
 # Check if the target is Mac (darwin)
 if [[ $TARGETOS == *"darwin"* ]]; then
+	# Ensure Apple CommonCrypto headers are found during cross-compilation.
+	# Clang targeting darwin may not search /usr/local/include by default with a sysroot.
+	# Provide the include path via CFLAGS/CPPFLAGS (both generic and target-specific).
+	export CFLAGS="-I/usr/local/include ${CFLAGS:-}"
+	export CPPFLAGS="-I/usr/local/include ${CPPFLAGS:-}"
+	export CFLAGS_x86_64_apple_darwin="-I/usr/local/include ${CFLAGS_x86_64_apple_darwin:-}"
+	export CPPFLAGS_x86_64_apple_darwin="-I/usr/local/include ${CPPFLAGS_x86_64_apple_darwin:-}"
+	export CFLAGS_aarch64_apple_darwin="-I/usr/local/include ${CFLAGS_aarch64_apple_darwin:-}"
+	export CPPFLAGS_aarch64_apple_darwin="-I/usr/local/include ${CPPFLAGS_aarch64_apple_darwin:-}"
 	cargo zigbuild --release --target "x86_64-apple-darwin"
 	cargo zigbuild --release --target "aarch64-apple-darwin"
 	mkdir -p "/app/target/universal/release"

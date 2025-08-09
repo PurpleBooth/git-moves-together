@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     cmake \
     curl \
+    dpkg-cross \
     g++-mingw-w64 \
     g++-multilib \
     gcc-mingw-w64 \
@@ -29,6 +30,7 @@ RUN apt-get update && apt-get install -y \
     git \
     libc++-dev \
     libc++abi-dev \
+    librust-commoncrypto-dev \
     libssl-dev \
     lld \
     pkg-config \
