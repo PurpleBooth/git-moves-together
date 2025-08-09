@@ -22,20 +22,13 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     cmake \
     curl \
-    dpkg-cross \
-    g++-mingw-w64 \
-    g++-multilib \
-    gcc-mingw-w64 \
-    gcc-multilib \
     git \
     libc++-dev \
     libc++abi-dev \
-    librust-commoncrypto-dev \
+    libgit2-dev \
     libssl-dev \
-    lld \
     pkg-config \
     unzip \
-    wget \
     xz-utils \
     zlib1g-dev \
     && rm -rf /var/lib/apt/lists/*
@@ -52,7 +45,7 @@ RUN curl -L https://ziglang.org/download/${ZIG_VERSION}/zig-x86_64-linux-${ZIG_V
 
 # renovate: datasource=crate depName=cargo-binstall
 ARG CARGO_BINSTALL_VERSION=1.14.1
-RUN wget https://github.com/cargo-bins/cargo-binstall/releases/download/v${CARGO_BINSTALL_VERSION}/cargo-binstall-x86_64-unknown-linux-musl.full.tgz -O - | \
+RUN curl -L https://github.com/cargo-bins/cargo-binstall/releases/download/v${CARGO_BINSTALL_VERSION}/cargo-binstall-x86_64-unknown-linux-musl.full.tgz | \
     tar -xz && \
     mv cargo-binstall /usr/local/bin/
 ENV PATH=/root/.cargo/bin:$PATH
@@ -60,7 +53,7 @@ ENV PATH=/root/.cargo/bin:$PATH
 # renovate: datasource=github-releases depName=mikefarah/yq
 ARG YQ_VERSION=4.47.1
 ARG YQ_BINARY=yq_linux_amd64
-RUN wget https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/${YQ_BINARY}.tar.gz -O - | \
+RUN curl -L https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/${YQ_BINARY}.tar.gz | \
     tar -xz && mv ${YQ_BINARY} /usr/local/bin/yq
 
 # renovate: datasource=github-releases depName=specdown/specdown
@@ -89,7 +82,6 @@ RUN curl -L -o /tmp/lipo https://github.com/konoui/lipo/releases/download/v${LIP
     chmod +x /tmp/lipo && \
     mv /tmp/lipo /usr/local/bin/
 
-RUN rustup component add rustfmt clippy
 
 # Install Apple CommonCrypto headers for cross-compilation
 # We only install headers and modulemap, no library build, to keep the image lean and portable.
