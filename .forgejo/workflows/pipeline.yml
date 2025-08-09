@@ -10,7 +10,7 @@ jobs:
     continue-on-error: true
     runs-on: docker
     container:
-      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
+      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:3ac21d9cac9079e3e8d5910fb763301e8d8faa08914fdf4a8a2015bb16f33f47
     steps:
       - name: Checkout code
         uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -26,7 +26,7 @@ jobs:
       - lint
     runs-on: docker
     container:
-      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
+      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:3ac21d9cac9079e3e8d5910fb763301e8d8faa08914fdf4a8a2015bb16f33f47
     if: always() && contains(needs.lint.result, 'failure') && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout Repository
@@ -75,7 +75,7 @@ jobs:
     name: Unit Test
     runs-on: docker
     container:
-      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
+      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:3ac21d9cac9079e3e8d5910fb763301e8d8faa08914fdf4a8a2015bb16f33f47
     steps:
       - name: Checkout Repository
         uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -89,7 +89,7 @@ jobs:
     name: Integration Test
     runs-on: docker
     container:
-      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
+      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:3ac21d9cac9079e3e8d5910fb763301e8d8faa08914fdf4a8a2015bb16f33f47
     steps:
       - uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         name: Checkout Code
@@ -102,7 +102,7 @@ jobs:
   bake-edge-test:
     runs-on: docker
     container:
-      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
+      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:3ac21d9cac9079e3e8d5910fb763301e8d8faa08914fdf4a8a2015bb16f33f47
     needs:
       - semver
     name: Test Release Build
@@ -185,7 +185,7 @@ jobs:
       - semver
     runs-on: docker
     container:
-      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
+      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:3ac21d9cac9079e3e8d5910fb763301e8d8faa08914fdf4a8a2015bb16f33f47
     steps:
       - uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         name: Checkout Repository
@@ -211,7 +211,7 @@ jobs:
       - lint-homebrew-formula
     runs-on: docker
     container:
-      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
+      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:3ac21d9cac9079e3e8d5910fb763301e8d8faa08914fdf4a8a2015bb16f33f47
     steps:
       - run: echo "Looks good"
 
@@ -226,7 +226,7 @@ jobs:
       changelog: ${{ steps.release.outputs.changelog }}
     runs-on: docker
     container:
-      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
+      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:3ac21d9cac9079e3e8d5910fb763301e8d8faa08914fdf4a8a2015bb16f33f47
     steps:
       - name: Checkout Repository
         uses: https://code.forgejo.org/actions/checkout@main
@@ -251,7 +251,7 @@ jobs:
     if: needs.release.outputs.current_version == needs.release.outputs.previous_version
     runs-on: docker
     container:
-      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
+      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:3ac21d9cac9079e3e8d5910fb763301e8d8faa08914fdf4a8a2015bb16f33f47
     needs:
       - release
     steps:
@@ -388,7 +388,7 @@ jobs:
       - release
     runs-on: docker
     container:
-      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
+      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:3ac21d9cac9079e3e8d5910fb763301e8d8faa08914fdf4a8a2015bb16f33f47
     steps:
       - name: Checkout Code
         uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
@@ -599,4 +599,4 @@ jobs:
           CHANGELOG: ${{ needs.release.outputs.changelog }}
     runs-on: docker
     container:
-      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
+      image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:3ac21d9cac9079e3e8d5910fb763301e8d8faa08914fdf4a8a2015bb16f33f47
