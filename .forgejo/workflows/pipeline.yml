@@ -15,7 +15,7 @@ jobs:
       - name: Checkout code
         uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
       - name: Run lint checks
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
+        uses: https://code.forgejo.org/docker/bake-action@3acf805d94d93a86cce4ca44798a76464a75b88c  # v6
         with:
           targets: lint
   fix:
@@ -49,15 +49,15 @@ jobs:
       - name: Format Code
         run: just fmt
       - name: Lint Code
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
+        uses: https://code.forgejo.org/docker/bake-action@3acf805d94d93a86cce4ca44798a76464a75b88c  # v6
         with:
           targets: lint
       - name: Run Unit Tests
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
+        uses: https://code.forgejo.org/docker/bake-action@3acf805d94d93a86cce4ca44798a76464a75b88c  # v6
         with:
           targets: test
       - name: Run Integration Tests
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
+        uses: https://code.forgejo.org/docker/bake-action@3acf805d94d93a86cce4ca44798a76464a75b88c  # v6
         with:
           targets: specdown
       - name: Configure Git User
@@ -76,7 +76,7 @@ jobs:
       - name: Checkout Repository
         uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
       - name: Run Tests
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
+        uses: https://code.forgejo.org/docker/bake-action@3acf805d94d93a86cce4ca44798a76464a75b88c  # v6
         with:
           targets: test
   integration-test:
@@ -88,7 +88,7 @@ jobs:
       - uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
         name: Checkout Code
       - name: Run Integration Tests
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
+        uses: https://code.forgejo.org/docker/bake-action@3acf805d94d93a86cce4ca44798a76464a75b88c  # v6
         with:
           targets: specdown
   bake-edge-test:
@@ -121,7 +121,7 @@ jobs:
             type=ref,event=pr
             type=sha
       - name: Build (Bake) - docker
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
+        uses: https://code.forgejo.org/docker/bake-action@3acf805d94d93a86cce4ca44798a76464a75b88c  # v6
         env:
           GPG_PRIVATE_KEY: ''
           GPG_PASSPHRASE: ''
@@ -138,7 +138,7 @@ jobs:
             cwd://${{ steps.extract-docker-metadata.outputs.bake-file-labels }}
           targets: docker
       - name: Build (Bake) - bins
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
+        uses: https://code.forgejo.org/docker/bake-action@3acf805d94d93a86cce4ca44798a76464a75b88c  # v6
         env:
           GPG_PRIVATE_KEY: ''
           GPG_PASSPHRASE: ''
@@ -152,7 +152,7 @@ jobs:
             ./docker-bake.hcl
           targets: bins
       - name: Build (Bake) - packages
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
+        uses: https://code.forgejo.org/docker/bake-action@3acf805d94d93a86cce4ca44798a76464a75b88c  # v6
         env:
           GPG_PRIVATE_KEY: ''
           GPG_PASSPHRASE: ''
@@ -177,7 +177,7 @@ jobs:
       - name: Set Up Docker Buildx
         uses: https://code.forgejo.org/docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435  # v3
       - name: Run Lint Homebrew Formula
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
+        uses: https://code.forgejo.org/docker/bake-action@3acf805d94d93a86cce4ca44798a76464a75b88c  # v6
         with:
           targets: lint-homebrew-formula
   all-tests-passed:
@@ -263,7 +263,7 @@ jobs:
             type=sha
           labels: org.opencontainers.image.licenses=CC0-1.0
       - name: Bake Docker Images
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
+        uses: https://code.forgejo.org/docker/bake-action@3acf805d94d93a86cce4ca44798a76464a75b88c  # v6
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -299,7 +299,7 @@ jobs:
           # Remove the private key file
           rm cosign.key
       - name: Bake Binaries
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
+        uses: https://code.forgejo.org/docker/bake-action@3acf805d94d93a86cce4ca44798a76464a75b88c  # v6
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -313,7 +313,7 @@ jobs:
             ./docker-bake.hcl
           targets: bins
       - name: Bake Packages
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
+        uses: https://code.forgejo.org/docker/bake-action@3acf805d94d93a86cce4ca44798a76464a75b88c  # v6
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -395,7 +395,7 @@ jobs:
             type=sha
           labels: org.opencontainers.image.licenses=CC0-1.0
       - name: Docker Bake
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
+        uses: https://code.forgejo.org/docker/bake-action@3acf805d94d93a86cce4ca44798a76464a75b88c  # v6
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -431,7 +431,7 @@ jobs:
           # Remove the private key file
           rm cosign.key
       - name: Bake Binaries
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
+        uses: https://code.forgejo.org/docker/bake-action@3acf805d94d93a86cce4ca44798a76464a75b88c  # v6
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -445,7 +445,7 @@ jobs:
             ./docker-bake.hcl
           targets: bins
       - name: Bake Packages
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
+        uses: https://code.forgejo.org/docker/bake-action@3acf805d94d93a86cce4ca44798a76464a75b88c  # v6
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -496,7 +496,7 @@ jobs:
       - name: Set Up Docker Buildx
         uses: https://code.forgejo.org/docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435  # v3
       - name: Generate Homebrew Formula
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
+        uses: https://code.forgejo.org/docker/bake-action@3acf805d94d93a86cce4ca44798a76464a75b88c  # v6
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
         with:
