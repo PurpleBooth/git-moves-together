@@ -13,7 +13,7 @@ jobs:
       image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
     steps:
       - name: Checkout code
-        uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
+        uses: https://code.forgejo.org/actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5
       - name: Run lint checks
         uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
         with:
@@ -27,7 +27,7 @@ jobs:
     if: always() && contains(needs.lint.result, 'failure') && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout Repository
-        uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
+        uses: https://code.forgejo.org/actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5
         with:
           token: ${{ secrets.FJ_TOKEN }}
       - name: Install Rust Toolchain
@@ -74,7 +74,7 @@ jobs:
       image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
     steps:
       - name: Checkout Repository
-        uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
+        uses: https://code.forgejo.org/actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5
       - name: Run Tests
         uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
         with:
@@ -85,7 +85,7 @@ jobs:
     container:
       image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
+      - uses: https://code.forgejo.org/actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5
         name: Checkout Code
       - name: Run Integration Tests
         uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
@@ -99,7 +99,7 @@ jobs:
     name: Test Release Build
     steps:
       - name: Checkout Repository
-        uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
+        uses: https://code.forgejo.org/actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5
       - name: Set Up Docker Buildx
         uses: https://code.forgejo.org/docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435  # v3
       - name: Normalize Repository Name for Docker Registry
@@ -172,7 +172,7 @@ jobs:
     container:
       image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
+      - uses: https://code.forgejo.org/actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5
         name: Checkout Repository
       - name: Set Up Docker Buildx
         uses: https://code.forgejo.org/docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435  # v3
@@ -233,7 +233,7 @@ jobs:
     needs: [release]
     steps:
       - name: Checkout Repository
-        uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
+        uses: https://code.forgejo.org/actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5
       - name: Install Cosign
         uses: https://github.com/sigstore/cosign-installer@main
       - name: Set Up Docker Buildx
@@ -354,7 +354,7 @@ jobs:
       image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
     steps:
       - name: Checkout Code
-        uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
+        uses: https://code.forgejo.org/actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5
         with:
           token: ${{ secrets.FJ_TOKEN }}
           ref: v${{ needs.release.outputs.current_version }}
@@ -486,7 +486,7 @@ jobs:
     if: needs.release.outputs.current_version != needs.release.outputs.previous_version
     needs: [release]
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
+      - uses: https://code.forgejo.org/actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5
         name: Checkout
         with:
           ref: v${{ needs.release.outputs.current_version }}
