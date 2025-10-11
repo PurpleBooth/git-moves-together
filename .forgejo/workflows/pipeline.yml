@@ -1,9 +1,9 @@
+---
 name: Test
 on:
   push:
   pull_request:
   workflow_dispatch:
-
 jobs:
   lint:
     name: Lint
@@ -13,24 +13,21 @@ jobs:
       image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
     steps:
       - name: Checkout code
-        uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-
+        uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
       - name: Run lint checks
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8 # v6
+        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
         with:
           targets: lint
-
   fix:
     name: Fix Formatting
-    needs:
-      - lint
+    needs: [lint]
     runs-on: docker
     container:
       image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
     if: always() && contains(needs.lint.result, 'failure') && github.ref == 'refs/heads/main'
     steps:
       - name: Checkout Repository
-        uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
         with:
           token: ${{ secrets.FJ_TOKEN }}
       - name: Install Rust Toolchain
@@ -42,7 +39,7 @@ jobs:
       - name: Install Just
         uses: https://codeberg.org/PurpleBooth/common-pipelines/actions/install-just@main
       - name: Download Built Assets
-        uses: https://code.forgejo.org/forgejo/download-artifact@d8d0a99033603453ad2255e58720b460a0555e1e # v4
+        uses: https://code.forgejo.org/forgejo/download-artifact@d8d0a99033603453ad2255e58720b460a0555e1e  # v4
         with:
           name: build-artifacts
       - name: Unpack Built Assets
@@ -52,15 +49,15 @@ jobs:
       - name: Format Code
         run: just fmt
       - name: Lint Code
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8 # v6
+        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
         with:
           targets: lint
       - name: Run Unit Tests
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8 # v6
+        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
         with:
           targets: test
       - name: Run Integration Tests
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8 # v6
+        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
         with:
           targets: specdown
       - name: Configure Git User
@@ -70,7 +67,6 @@ jobs:
           git add .
           git commit -m "chore: fix formatting"
           git push origin main
-
   unit-test:
     name: Unit Test
     runs-on: docker
@@ -78,50 +74,42 @@ jobs:
       image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
     steps:
       - name: Checkout Repository
-        uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-
+        uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
       - name: Run Tests
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8 # v6
+        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
         with:
           targets: test
-
   integration-test:
     name: Integration Test
     runs-on: docker
     container:
       image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
         name: Checkout Code
-
       - name: Run Integration Tests
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8 # v6
+        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
         with:
           targets: specdown
-
   bake-edge-test:
     runs-on: docker
     container:
       image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
-    needs:
-      - semver
+    needs: [semver]
     name: Test Release Build
     steps:
       - name: Checkout Repository
-        uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-
+        uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
       - name: Set Up Docker Buildx
-        uses: https://code.forgejo.org/docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
-
+        uses: https://code.forgejo.org/docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435  # v3
       - name: Normalize Repository Name for Docker Registry
         id: docker
         shell: bash
         run: |
           echo "repository=$( echo "codeberg.org/$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
-
       - name: Extract Docker Metadata
         id: extract-docker-metadata
-        uses: https://code.forgejo.org/docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5
+        uses: https://code.forgejo.org/docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f  # v5
         with:
           bake-target: docker
           images: ${{ steps.docker.outputs.repository }}
@@ -132,12 +120,11 @@ jobs:
             type=ref,event=tag
             type=ref,event=pr
             type=sha
-
       - name: Build (Bake) - docker
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8 # v6
+        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
         env:
-          GPG_PRIVATE_KEY: ""
-          GPG_PASSPHRASE: ""
+          GPG_PRIVATE_KEY: ''
+          GPG_PASSPHRASE: ''
         with:
           set: |
             *.attest=type=provenance,mode=max
@@ -151,10 +138,10 @@ jobs:
             cwd://${{ steps.extract-docker-metadata.outputs.bake-file-labels }}
           targets: docker
       - name: Build (Bake) - bins
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8 # v6
+        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
         env:
-          GPG_PRIVATE_KEY: ""
-          GPG_PASSPHRASE: ""
+          GPG_PRIVATE_KEY: ''
+          GPG_PASSPHRASE: ''
         with:
           set: |
             *.attest=type=provenance,mode=max
@@ -165,10 +152,10 @@ jobs:
             ./docker-bake.hcl
           targets: bins
       - name: Build (Bake) - packages
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8 # v6
+        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
         env:
-          GPG_PRIVATE_KEY: ""
-          GPG_PASSPHRASE: ""
+          GPG_PRIVATE_KEY: ''
+          GPG_PASSPHRASE: ''
         with:
           set: |
             *.attest=type=provenance,mode=max
@@ -178,26 +165,21 @@ jobs:
           files: |
             ./docker-bake.hcl
           targets: packages
-
   lint-homebrew-formula:
     name: Lint Homebrew Formula
-    needs:
-      - semver
+    needs: [semver]
     runs-on: docker
     container:
       image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
         name: Checkout Repository
-
       - name: Set Up Docker Buildx
-        uses: https://code.forgejo.org/docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
-
+        uses: https://code.forgejo.org/docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435  # v3
       - name: Run Lint Homebrew Formula
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8 # v6
+        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
         with:
           targets: lint-homebrew-formula
-
   all-tests-passed:
     name: All tests passed
     defaults:
@@ -214,12 +196,10 @@ jobs:
       image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
     steps:
       - run: echo "Looks good"
-
   release:
     if: github.ref == 'refs/heads/main'
     name: Release
-    needs:
-      - all-tests-passed
+    needs: [all-tests-passed]
     outputs:
       current_version: ${{ steps.release.outputs.current_version }}
       previous_version: ${{ steps.release.outputs.previous_version }}
@@ -239,47 +219,38 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
       - name: Install Cocogitto
         uses: https://codeberg.org/PurpleBooth/common-pipelines/actions/install-cocogitto@main
-
       - name: Configure Git User
         uses: https://codeberg.org/PurpleBooth/common-pipelines/actions/configure-git-user@main
       - name: Release with Cocogitto
         id: release
         uses: https://codeberg.org/PurpleBooth/common-pipelines/actions/release-with-cog@main
-
   bake-edge-build:
     name: Create Pre-release Assets
     if: needs.release.outputs.current_version == needs.release.outputs.previous_version
     runs-on: docker
     container:
       image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
-    needs:
-      - release
+    needs: [release]
     steps:
       - name: Checkout Repository
-        uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-
+        uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
       - name: Install Cosign
         uses: https://github.com/sigstore/cosign-installer@main
-
       - name: Set Up Docker Buildx
-        uses: https://code.forgejo.org/docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
-
+        uses: https://code.forgejo.org/docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435  # v3
       - name: Log in to GitHub Container Registry
-        uses: https://code.forgejo.org/docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3
+        uses: https://code.forgejo.org/docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1  # v3
         with:
           registry: codeberg.org
           username: ${{ github.actor }}
           password: ${{ secrets.FJ_TOKEN }}
-
       - name: Format Repository Name for Docker Registry
         id: docker
-        run:
-          echo "repository=$(echo "codeberg.org/$GITHUB_REPOSITORY" | tr '[:upper:]'
+        run: echo "repository=$(echo "codeberg.org/$GITHUB_REPOSITORY" | tr '[:upper:]'
           '[:lower:]')" >> "$GITHUB_OUTPUT"
-
       - name: Extract Metadata for Docker (Tags, Labels)
         id: extract-docker-metadata
-        uses: https://code.forgejo.org/docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5
+        uses: https://code.forgejo.org/docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f  # v5
         with:
           bake-target: docker
           images: ${{ steps.docker.outputs.repository }}
@@ -292,7 +263,7 @@ jobs:
             type=sha
           labels: org.opencontainers.image.licenses=CC0-1.0
       - name: Bake Docker Images
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8 # v6
+        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -308,7 +279,6 @@ jobs:
             cwd://${{ steps.extract-docker-metadata.outputs.bake-file-annotations }}
             cwd://${{ steps.extract-docker-metadata.outputs.bake-file-labels }}
           targets: docker
-
       - name: Sign Docker Images with Cosign
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
@@ -328,9 +298,8 @@ jobs:
 
           # Remove the private key file
           rm cosign.key
-
       - name: Bake Binaries
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8 # v6
+        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -343,9 +312,8 @@ jobs:
           files: |
             ./docker-bake.hcl
           targets: bins
-
       - name: Bake Packages
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8 # v6
+        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -358,7 +326,6 @@ jobs:
           files: |
             ./docker-bake.hcl
           targets: packages
-
       - name: Move Binaries to Release Path
         shell: bash
         run: |
@@ -366,7 +333,6 @@ jobs:
             mv -v "$I" "target/bins/$(echo "$I" | cut -d '/' -f 3- | tr '/' '-')"
           done
           find target/bins/ -type d -empty -delete
-
       - name: Move Packages to Release Directory
         shell: bash
         run: |
@@ -374,56 +340,46 @@ jobs:
             mv -v "$I" "target/bins/$(echo "$I" | cut -d '/' -f 3- | tr '/' '-')"
           done
           find target/packages/ -type d -empty -delete
-
       - name: Upload Binaries
-        uses: https://code.forgejo.org/forgejo/upload-artifact@16871d9e8cfcf27ff31822cac382bbb5450f1e1e # v4
+        uses: https://code.forgejo.org/forgejo/upload-artifact@16871d9e8cfcf27ff31822cac382bbb5450f1e1e  # v4
         with:
           name: built-binaries
           path: target/bins/
-
   bake-release-build:
     name: Create Release Assets
     if: needs.release.outputs.current_version != needs.release.outputs.previous_version
-    needs:
-      - release
+    needs: [release]
     runs-on: docker
     container:
       image: ghcr.io/catthehacker/ubuntu:runner-latest@sha256:0202c993063fc51108183905c9489b946ec826fb89101bebf30d1c3929e0dac4
     steps:
       - name: Checkout Code
-        uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
         with:
           token: ${{ secrets.FJ_TOKEN }}
           ref: v${{ needs.release.outputs.current_version }}
           fetch-depth: 0
-
       - name: Install Cosign
         uses: https://github.com/sigstore/cosign-installer@main
-
       - name: Install Cocogitto
         uses: https://codeberg.org/PurpleBooth/common-pipelines/actions/install-cocogitto@main
-
       - name: Set Up Docker Buildx
-        uses: https://code.forgejo.org/docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
-
+        uses: https://code.forgejo.org/docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435  # v3
       - name: Login to Container Registry
-        uses: https://code.forgejo.org/docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1 # v3
+        uses: https://code.forgejo.org/docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1  # v3
         with:
           registry: codeberg.org
           username: ${{ github.actor }}
           password: ${{ secrets.FJ_TOKEN }}
-
       - name: Normalize Repository Name for Docker
         id: docker
-        run:
-          echo "repository=$( echo "codeberg.org/$REPOSITORY" | tr '[:upper:]' '[:lower:]')"
-          >> "$GITHUB_OUTPUT"
+        run: echo "repository=$( echo "codeberg.org/$REPOSITORY" | tr '[:upper:]'
+          '[:lower:]')" >> "$GITHUB_OUTPUT"
         env:
           REPOSITORY: ${{ github.repository }}
-
       - name: Extract Docker Metadata
         id: meta-with-version
-        uses: https://code.forgejo.org/docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # v5
+        uses: https://code.forgejo.org/docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f  # v5
         with:
           bake-target: docker
           images: ${{ steps.docker.outputs.repository }}
@@ -439,7 +395,7 @@ jobs:
             type=sha
           labels: org.opencontainers.image.licenses=CC0-1.0
       - name: Docker Bake
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8 # v6
+        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -455,7 +411,6 @@ jobs:
             cwd://${{ steps.meta-with-version.outputs.bake-file-annotations }}
             cwd://${{ steps.meta-with-version.outputs.bake-file-labels }}
           targets: docker
-
       - name: Sign Docker Images with Cosign
         env:
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
@@ -475,9 +430,8 @@ jobs:
 
           # Remove the private key file
           rm cosign.key
-
       - name: Bake Binaries
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8 # v6
+        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -490,9 +444,8 @@ jobs:
           files: |
             ./docker-bake.hcl
           targets: bins
-
       - name: Bake Packages
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8 # v6
+        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
         env:
           GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
           GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
@@ -505,7 +458,6 @@ jobs:
           files: |
             ./docker-bake.hcl
           targets: packages
-
       - name: Move Binaries to Release Directory
         shell: bash
         run: |
@@ -513,7 +465,6 @@ jobs:
             mv -v "$I" "target/bins/$(echo "$I" | cut -d '/' -f 3- | tr '/' '-')"
           done
           find target/bins/ -type d -empty -delete
-
       - name: Move Packages to Release Directory
         shell: bash
         run: |
@@ -521,7 +472,6 @@ jobs:
             mv -v "$I" "target/bins/$(echo "$I" | cut -d '/' -f 3- | tr '/' '-')"
           done
           find target/packages/ -type d -empty -delete
-
       - name: Upload Release Artifacts
         uses: https://codeberg.org/PurpleBooth/common-pipelines/actions/forgejo-release@main
         with:
@@ -531,14 +481,12 @@ jobs:
           changelog: ${{ needs.release.outputs.changelog }}
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           gpg_passphrase: ${{ secrets.GPG_PASSPHRASE }}
-
   generate-formula:
     name: Generate Homebrew formula
     if: needs.release.outputs.current_version != needs.release.outputs.previous_version
-    needs:
-      - release
+    needs: [release]
     steps:
-      - uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: https://code.forgejo.org/actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4
         name: Checkout
         with:
           ref: v${{ needs.release.outputs.current_version }}
@@ -546,23 +494,20 @@ jobs:
       - uses: https://codeberg.org/PurpleBooth/common-pipelines/actions/configure-git-user@main
         name: Configure git user
       - name: Set Up Docker Buildx
-        uses: https://code.forgejo.org/docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435 # v3
-
+        uses: https://code.forgejo.org/docker/setup-buildx-action@e468171a9de216ec08956ac3ada2f0791b6bd435  # v3
       - name: Generate Homebrew Formula
-        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8 # v6
+        uses: https://code.forgejo.org/docker/bake-action@37816e747588cb137173af99ab33873600c46ea8  # v6
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
         with:
           targets: build-homebrew-formula
-
       - name: Set Formula Path
         id: generate-formula
         run: |
           FORMULA_NAME="$(echo "$GITHUB_REPOSITORY" | cut -d "/" -f2 ).rb"
           cp -v target/homebrew/git-moves-together.rb "$FORMULA_NAME"
           echo "path=$FORMULA_NAME" >> "$GITHUB_OUTPUT"
-
-      - uses: https://code.forgejo.org/forgejo/upload-artifact@16871d9e8cfcf27ff31822cac382bbb5450f1e1e # v4
+      - uses: https://code.forgejo.org/forgejo/upload-artifact@16871d9e8cfcf27ff31822cac382bbb5450f1e1e  # v4
         name: Upload built files
         with:
           name: homebrew-formula
@@ -579,12 +524,10 @@ jobs:
         name: Install gh
       - run: |
           #!/usr/bin/env bash
-
           set -x
           TEMP_DIR="$(mktemp -d)"
           gh auth setup-git
           gh repo clone PurpleBooth/homebrew-repo "$TEMP_DIR"
-
           cp -v "$FORMULA_PATH" "$TEMP_DIR/Formula/"
           cd "$TEMP_DIR" || exit 1
           git switch --create "update-$(echo "$GITHUB_REPOSITORY" | cut -d "/" -f2 )-$VERSION"

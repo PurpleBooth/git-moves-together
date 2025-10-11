@@ -1,18 +1,19 @@
+---
 # nfpm example configuration file
 #
 # check https://nfpm.goreleaser.com/configuration for detailed usage
 #
-name: "git-moves-together"
-arch: "${GOARCH}"
-platform: "${GOOS}"
-version: "${VER}"
-section: "default"
-priority: "extra"
-maintainer: "Billie Thompson <billie@billiecodes.com>"
+name: git-moves-together
+arch: ${GOARCH}
+platform: ${GOOS}
+version: ${VER}
+section: default
+priority: extra
+maintainer: Billie Thompson <billie@billiecodes.com>
 description: Identify files frequently committed together in a Git repository
-vendor: "PurpleBooth"
-homepage: "https://codeberg.org/PurpleBooth/git-moves-together"
-license: "CC0"
+vendor: PurpleBooth
+homepage: https://codeberg.org/PurpleBooth/git-moves-together
+license: CC0
 contents:
   - src: ./git-moves-together
     dst: /usr/bin/git-moves-together
