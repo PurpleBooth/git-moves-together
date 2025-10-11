@@ -51,7 +51,7 @@ RUN curl -L https://github.com/cargo-bins/cargo-binstall/releases/download/v${CA
 ENV PATH=/root/.cargo/bin:$PATH
 
 # renovate: datasource=github-releases depName=mikefarah/yq
-ARG YQ_VERSION=4.47.1
+ARG YQ_VERSION=4.47.2
 ARG YQ_BINARY=yq_linux_amd64
 RUN curl -L https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/${YQ_BINARY}.tar.gz | \
     tar -xz && mv ${YQ_BINARY} /usr/local/bin/yq
