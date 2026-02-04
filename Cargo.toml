@@ -16,7 +16,7 @@ name = "git-moves-together"
 path = "src/main.rs"
 
 [dependencies]
-git2 = { version = "0.20.2", features = ["vendored-openssl", "vendored-libgit2"] }
+git2 = { version = "0.20.4", features = ["vendored-openssl", "vendored-libgit2"] }
 thiserror = "2.0.12"
 clap = { version = "4.5.40", features = [
     "derive",
