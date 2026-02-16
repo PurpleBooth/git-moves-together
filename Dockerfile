@@ -69,7 +69,7 @@ RUN TEMP_SRC="$(mktemp -d)" && \
     specdown --version
 
 # renovate: datasource=crate depName=cargo-audit
-ARG CARGO_AUDIT_VERSION=0.21.2
+ARG CARGO_AUDIT_VERSION=0.22.0
 RUN cargo binstall cargo-audit --version ${CARGO_AUDIT_VERSION} --locked
 
 # renovate: datasource=crate depName=cargo-zigbuild
