@@ -29,7 +29,7 @@ mod statistics;
 
 use std::path::PathBuf;
 
-use futures::{StreamExt, TryStreamExt, future, stream};
+use futures::{StreamExt, TryStreamExt, stream};
 use model::delta::Delta;
 use repository::interface::Repository;
 use time::Duration;
@@ -51,7 +51,7 @@ async fn main() -> Result<(), crate::errors::Error> {
     });
 
     let deltas: Vec<Vec<Delta>> = stream::iter(args.git_repo.iter())
-        .then(|path_str| read_deltas(args.max_days_ago, path_str))
+        .map(|path_str| read_deltas(args.max_days_ago, path_str))
         .try_collect()
         .await?;
 
@@ -80,13 +80,14 @@ fn add_prefix((delta, prefix): (&Vec<Delta>, &str)) -> Vec<Delta> {
         .collect::<Vec<_>>()
 }
 
-async fn read_deltas(max_days: Option<i64>, path_str: &str) -> Result<Vec<Delta>, Error> {
+fn read_deltas(max_days: Option<i64>, path_str: &str) -> Result<Vec<Delta>, Error> {
     let path = PathBuf::from(path_str);
-    let commits = LibGit2::new(path.clone())?.commits_in_current_branch()?;
-    stream::iter(commits.iter())
-        .filter(|commit| future::ready(filters::within_time_limit(max_days, commit)))
-        .map(|commit| LibGit2::new(path.clone())?.compare_with_parent(commit))
-        .try_collect()
-        .await
+    let repo = LibGit2::new(path)?;
+    let commits = repo.commits_in_current_branch()?;
+    commits
+        .iter()
+        .filter(|commit| filters::within_time_limit(max_days, commit))
+        .map(|commit| repo.clone().compare_with_parent(commit))
+        .collect::<Result<Vec<_>, _>>()
         .map_err(Error::from)
 }
