@@ -112,8 +112,8 @@ impl Statistics {
 
     fn changed_files(&self) -> BTreeSet<ChangedFile> {
         self.hash_to_delta
-            .iter()
-            .flat_map(|(_, change_delta)| change_delta.clone())
+            .values()
+            .flat_map(std::clone::Clone::clone)
             .collect()
     }
 
