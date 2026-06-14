@@ -40,7 +40,7 @@ impl CouplingResult {
 #[derive(Default)]
 pub struct Statistics {
     hash_to_delta: BTreeMap<Hash, Delta>,
-    change_to_delta: BTreeMap<ChangedFile, BTreeSet<Delta>>,
+    change_to_delta: BTreeMap<ChangedFile, BTreeSet<Hash>>,
 }
 
 type Calculation = (f64, usize, usize);
@@ -79,7 +79,7 @@ impl Statistics {
                 )
             }
         };
-        hash_to_delta.insert(key, grouped_delta.clone());
+        hash_to_delta.insert(key.clone(), grouped_delta.clone());
 
         let mut change_to_delta = self.change_to_delta;
         for change in grouped_delta {
@@ -87,7 +87,7 @@ impl Statistics {
                 .get(&change)
                 .map_or_else(BTreeSet::new, std::clone::Clone::clone);
 
-            coupled_deltas.insert(delta.clone());
+            coupled_deltas.insert(key.clone());
             change_to_delta.insert(change, coupled_deltas);
         }
 
@@ -331,6 +331,28 @@ mod tests {
                 ),
                 (Key::new("file_3".into(), "file_5".into()), (0.25, 1, 4)),
             ]
+        );
+    }
+
+    #[allow(clippy::semicolon_if_nothing_returned)]
+    #[tokio::test]
+    async fn commit_time_strategy_groups_files_in_same_window() {
+        // Two commits touching different files, but within the same time
+        // window, should show 100% coupling because they belong to the same
+        // grouped delta.
+        let base = OffsetDateTime::from_unix_timestamp(1_700_000_000).unwrap();
+        let statistics = Statistics::default()
+            .add_delta(
+                &Delta::new("1".into(), base, vec!["file_a".into()]),
+                &Strategy::CommitTime(time::Duration::minutes(60)),
+            )
+            .add_delta(
+                &Delta::new("2".into(), base, vec!["file_b".into()]),
+                &Strategy::CommitTime(time::Duration::minutes(60)),
+            );
+        assert_eq!(
+            statistics.coupling().result,
+            vec![(Key::new("file_a".into(), "file_b".into()), (1.0, 1, 1))]
         );
     }
 
