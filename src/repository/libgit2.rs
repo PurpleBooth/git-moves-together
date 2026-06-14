@@ -62,14 +62,26 @@ impl Repository for LibGit2 {
             .and_then(|oid| self.repo.find_commit(oid))
             .and_then(|commit| commit.tree())?;
 
-        let changes = commit
-            .parents()
-            .iter()
-            .map(|parent| self.diff_with_parent(&tree, parent))
-            .reduce(flatten_or_first_err)
-            .unwrap_or_else(|| Ok(vec![]));
+        let parents = commit.parents();
+        let changes = if parents.is_empty() {
+            // Root commit has no parent to diff against — diff against an
+            // empty tree so that files added in the initial commit are
+            // included in coupling analysis.
+            self.repo
+                .clone()
+                .diff_tree_to_tree(None, Some(&tree), None)?
+                .deltas()
+                .map(std::convert::Into::into)
+                .collect()
+        } else {
+            parents
+                .iter()
+                .map(|parent| self.diff_with_parent(&tree, parent))
+                .reduce(flatten_or_first_err)
+                .unwrap_or_else(|| Ok(vec![]))?
+        };
 
-        Ok(Delta::new(commit.hash(), commit.timestamp(), changes?))
+        Ok(Delta::new(commit.hash(), commit.timestamp(), changes))
     }
 }
 

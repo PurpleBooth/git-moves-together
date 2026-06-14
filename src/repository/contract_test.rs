@@ -156,3 +156,31 @@ fn given_a_commit_i_can_find_out_what_files_changed_in_it() {
 
     tempdir.close().unwrap();
 }
+
+#[test]
+fn root_commit_includes_its_added_files() {
+    let tempdir = tempdir().unwrap();
+    let path = tempdir.path();
+    let repos: Vec<Box<dyn Repository>> = vec![
+        Box::from(in_memory_repository()),
+        Box::from(libgit2_repository(path.to_path_buf())),
+    ];
+    for repo in &repos {
+        let actual = repo.commits_in_current_branch().unwrap();
+        let mut iter = actual.iter();
+        iter.next().unwrap();
+        iter.next().unwrap();
+        let root = iter.next().unwrap();
+
+        assert!(iter.next().is_none());
+
+        let delta = repo.compare_with_parent(root).unwrap();
+        let changed: Vec<String> = delta.into_iter().map(String::from).collect();
+        assert!(
+            changed.contains(&"file1".to_string()),
+            "Root commit should include file1, got {changed:?}"
+        );
+    }
+
+    tempdir.close().unwrap();
+}
