@@ -21,8 +21,8 @@ impl Key {
         keys.sort();
 
         Self {
-            left: keys.first().unwrap().clone(),
-            right: keys.get(1).unwrap().clone(),
+            left: keys[0].clone(),
+            right: keys[1].clone(),
         }
     }
 }
@@ -49,7 +49,7 @@ type Calculation = (f64, usize, usize);
 fn display_order((_, a): &(Key, Calculation), (_, b): &(Key, Calculation)) -> Ordering {
     (a.0 * (a.2 as f64))
         .partial_cmp(&(b.0 * (b.2 as f64)))
-        .unwrap()
+        .unwrap_or(Ordering::Equal)
 }
 
 #[derive(Copy, Clone)]
@@ -85,7 +85,7 @@ impl Statistics {
         for change in grouped_delta {
             let mut coupled_deltas = change_to_delta
                 .get(&change)
-                .map_or_else(BTreeSet::new, std::clone::Clone::clone);
+                .map_or_else(BTreeSet::new, Clone::clone);
 
             coupled_deltas.insert(key.clone());
             change_to_delta.insert(change, coupled_deltas);

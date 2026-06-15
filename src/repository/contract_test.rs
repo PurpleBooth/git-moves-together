@@ -1,6 +1,7 @@
 use std::{
     fs::File,
     io::Write,
+    os::unix::ffi::OsStringExt,
     path::{Path, PathBuf},
     process::Command,
 };
@@ -52,7 +53,7 @@ fn libgit2_repository(dir: PathBuf) -> LibGit2 {
 fn git_init(dir: &Path) {
     Command::new("git")
         .arg("init")
-        .arg(dir.to_str().unwrap())
+        .arg(dir.to_string_lossy().as_ref())
         .spawn()
         .unwrap()
         .wait()
@@ -183,4 +184,18 @@ fn root_commit_includes_its_added_files() {
     }
 
     tempdir.close().unwrap();
+}
+
+#[test]
+fn git_init_handles_non_utf8_paths() {
+    // Create a directory with a non-UTF-8 character
+    let tempdir = tempdir().unwrap();
+    let non_utf8_name = std::ffi::OsString::from_vec(vec![0xC0, 0x80]); // Invalid UTF-8
+    let non_utf8_path = tempdir.path().join(&non_utf8_name);
+
+    // Create the directory with the non-UTF-8 name
+    std::fs::create_dir(&non_utf8_path).unwrap();
+
+    // This should not panic even with non-UTF-8 paths
+    git_init(&non_utf8_path);
 }
