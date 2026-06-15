@@ -1,0 +1,237 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  CARGO_TERM_COLOR: always
+  HOMEBREW_TAP: PurpleBooth/homebrew-repo
+
+jobs:
+  release:
+    name: Build, sign, and release
+    runs-on: codeberg-small
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install Rust Toolchain
+        uses: https://codeberg.org/PurpleBooth/common-pipelines/actions/install-rust@main
+        with:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install tools
+        run: |
+          cargo binstall --no-confirm --locked cocogitto
+          sudo apt-get update
+          sudo apt-get install -y gettext jq
+          sudo apt-get clean
+          curl -L "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64" -o /tmp/yq
+          chmod +x /tmp/yq
+
+      - name: Install zig
+        run: |
+          curl -L "https://ziglang.org/download/0.13.0/zig-linux-x86_64-0.13.0.tar.xz" -o /tmp/zig.tar.xz
+          tar -xf /tmp/zig.tar.xz -C /tmp
+          sudo install -m 755 /tmp/zig-linux-x86_64-0.13.0/zig /usr/local/bin/zig
+
+      - name: Install cargo-zigbuild
+        run: cargo binstall --no-confirm --locked cargo-zigbuild
+
+      - name: Add cross-compilation targets
+        run: |
+          rustup target add x86_64-apple-darwin
+          rustup target add x86_64-pc-windows-gnu
+
+      - name: Build Linux x86_64
+        run: |
+          cargo build --release --target x86_64-unknown-linux-gnu
+          cp target/x86_64-unknown-linux-gnu/release/git-moves-together ./git-moves-together-x86_64-unknown-linux-gnu
+          chmod +x ./git-moves-together-x86_64-unknown-linux-gnu
+          sha256sum ./git-moves-together-x86_64-unknown-linux-gnu > ./git-moves-together-x86_64-unknown-linux-gnu.sha256
+
+      - name: Build macOS x86_64
+        id: build-macos
+        continue-on-error: true
+        run: |
+          cargo zigbuild --release --target x86_64-apple-darwin
+          cp target/x86_64-apple-darwin/release/git-moves-together ./git-moves-together-x86_64-apple-darwin
+          chmod +x ./git-moves-together-x86_64-apple-darwin
+          sha256sum ./git-moves-together-x86_64-apple-darwin > ./git-moves-together-x86_64-apple-darwin.sha256
+
+      - name: Build Windows x86_64
+        id: build-windows
+        continue-on-error: true
+        run: |
+          cargo zigbuild --release --target x86_64-pc-windows-gnu
+          cp target/x86_64-pc-windows-gnu/release/git-moves-together.exe ./git-moves-together-x86_64-pc-windows-gnu.exe
+          sha256sum ./git-moves-together-x86_64-pc-windows-gnu.exe > ./git-moves-together-x86_64-pc-windows-gnu.exe.sha256
+
+      - name: Install Cosign
+        run: |
+          curl -LO https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64
+          chmod +x cosign-linux-amd64
+          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
+
+      - name: Sign binaries with cosign
+        env:
+          COSIGN_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          for binary in git-moves-together-x86_64-unknown-linux-gnu git-moves-together-x86_64-apple-darwin git-moves-together-x86_64-pc-windows-gnu.exe; do
+            if [ -f "$binary" ]; then
+              echo "Signing $binary"
+              cosign sign-blob --key env://COSIGN_KEY --yes "$binary"
+            fi
+          done
+
+      - name: Install nfpm
+        run: |
+          curl -LO https://github.com/goreleaser/nfpm/releases/latest/download/nfpm_linux_amd64
+          chmod +x nfpm_linux_amd64
+          sudo mv nfpm_linux_amd64 /usr/local/bin/nfpm
+
+      - name: Build packages
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          mkdir -p target/release
+          cp git-moves-together-x86_64-unknown-linux-gnu target/release/git-moves-together
+          chmod +x target/release/git-moves-together
+
+          export VER="$VERSION" GOARCH="amd64" GOOS="linux"
+
+          if [ -n "$GPG_PRIVATE_KEY" ]; then
+            echo "$GPG_PRIVATE_KEY" > /tmp/nfpm-signing.key
+            chmod 600 /tmp/nfpm-signing.key
+            export NFPM_SIGNING_KEY_FILE="/tmp/nfpm-signing.key"
+            export NFPM_PASSPHRASE="$GPG_PASSPHRASE"
+          fi
+
+          nfpm pkg --packager archlinux --config nfpm.yaml
+          nfpm pkg --packager rpm --config nfpm.yaml
+          nfpm pkg --packager apk --config nfpm.yaml
+          nfpm pkg --packager deb --config nfpm.yaml
+
+          # Generate checksums for packages
+          for pkg in *.pkg.tar.zst *.rpm *.apk *.deb; do
+            [ -f "$pkg" ] && sha256sum "$pkg" > "$pkg.sha256"
+          done
+
+      - name: Build and push container image
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          docker login codeberg.org -u "$GITHUB_ACTOR" -p "$GITHUB_TOKEN"
+
+          cat > Containerfile <<'EOF'
+          FROM scratch
+          COPY git-moves-together-x86_64-unknown-linux-gnu /git-moves-together
+          USER 65532:65532
+          ENTRYPOINT ["/git-moves-together"]
+          EOF
+
+          docker build -t "codeberg.org/$GITHUB_REPOSITORY:$VERSION" -t "codeberg.org/$GITHUB_REPOSITORY:latest" -f Containerfile .
+          docker push "codeberg.org/$GITHUB_REPOSITORY:$VERSION"
+          docker push "codeberg.org/$GITHUB_REPOSITORY:latest"
+
+      - name: Sign container image with cosign
+        env:
+          COSIGN_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' "codeberg.org/$GITHUB_REPOSITORY:$VERSION")
+          cosign sign --key env://COSIGN_KEY --yes "$DIGEST"
+
+      - name: Generate release notes
+        run: |
+          cog changelog --unified --at "$GITHUB_REF_NAME" > RELEASE_NOTES.md
+
+      - name: Create Codeberg release and upload assets
+        env:
+          CODEBERG_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RELEASE_NAME="${GITHUB_REF_NAME}"
+          RELEASE_BODY=$(jq -s -R '.' < RELEASE_NOTES.md)
+
+          # Create release
+          RELEASE_RESPONSE=$(curl -s -X POST \
+            -H "Authorization: token ${CODEBERG_TOKEN}" \
+            -H "Content-Type: application/json" \
+            "https://codeberg.org/api/v1/repos/${GITHUB_REPOSITORY}/releases" \
+            -d "{\"tag_name\":\"${RELEASE_NAME}\",\"name\":\"${RELEASE_NAME}\",\"body\":${RELEASE_BODY}}")
+
+          RELEASE_ID=$(echo "$RELEASE_RESPONSE" | jq -r '.id')
+
+          # Upload binary assets
+          for file in git-moves-together-x86_64-* git-moves-together-x86_64-*.sha256 git-moves-together-x86_64-*.sig; do
+            if [ -f "$file" ]; then
+              echo "Uploading $file"
+              curl -s -X POST \
+                -H "Authorization: token ${CODEBERG_TOKEN}" \
+                -F "attachment=@$file" \
+                "https://codeberg.org/api/v1/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets" > /dev/null
+            fi
+          done
+
+          # Upload package assets
+          for pkg in *.pkg.tar.zst *.rpm *.apk *.deb *.sha256; do
+            if [ -f "$pkg" ]; then
+              echo "Uploading $pkg"
+              curl -s -X POST \
+                -H "Authorization: token ${CODEBERG_TOKEN}" \
+                -F "attachment=@$pkg" \
+                "https://codeberg.org/api/v1/repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/assets" > /dev/null
+            fi
+          done
+
+      - name: Generate updated homebrew formula
+        id: formula
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          TEMP_DIR=$(mktemp -d)
+          TARBALL_URL="https://codeberg.org/${GITHUB_REPOSITORY}/archive/v${VERSION}.tar.gz"
+          curl --silent --fail --output "$TEMP_DIR/v${VERSION}.tar.gz" "$TARBALL_URL"
+          FILE_SHA=$(sha256sum --binary "$TEMP_DIR/v${VERSION}.tar.gz" | cut -d' ' -f1)
+
+          export GITHUB_REF_NAME="v${VERSION}"
+          export FILE_SHA
+          envsubst < homebrew/formula.rb.envsubstr > git-moves-together.rb
+
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "sha256=${FILE_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Clone homebrew tap and create PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PR_TOKEN }}
+        run: |
+          VERSION="${{ steps.formula.outputs.version }}"
+          BRANCH="update-git-moves-together-${VERSION}"
+
+          # Clone the homebrew tap
+          git clone "https://x-access-token:${GITHUB_TOKEN}@github.com/${HOMEBREW_TAP}.git" homebrew-tap
+          cd homebrew-tap
+
+          git config user.name "Forgejo Actions"
+          git config user.email "forgejo-actions@codeberg.org"
+
+          git checkout -b "$BRANCH"
+          cp ../git-moves-together.rb Formula/git-moves-together.rb
+          git add Formula/git-moves-together.rb
+          git commit -m "chore: update git-moves-together to ${VERSION}"
+          git push origin "$BRANCH"
+
+          # Open PR via GitHub API
+          PR_BODY="Automated update of git-moves-together formula to ${VERSION}."
+          curl -X POST \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${HOMEBREW_TAP}/pulls" \
+            -d "{\"title\":\"chore: update git-moves-together to ${VERSION}\",\"head\":\"${BRANCH}\",\"base\":\"main\",\"body\":\"${PR_BODY}\"}"

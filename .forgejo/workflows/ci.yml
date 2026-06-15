@@ -1,0 +1,184 @@
+name: CI
+
+on:
+  push:
+    paths-ignore:
+      - CHANGELOG.md
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - CHANGELOG.md
+      - '**.md'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    name: Test
+    runs-on: codeberg-small
+    strategy:
+      matrix:
+        rust: [stable, beta, nightly]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain
+        uses: https://codeberg.org/PurpleBooth/common-pipelines/actions/install-rust@main
+        with:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Rust ${{ matrix.rust }}
+        run: rustup default ${{ matrix.rust }}
+
+      - name: Run tests
+        run: cargo test --all-features --all-targets
+
+  lint:
+    name: Lint
+    runs-on: codeberg-small
+    strategy:
+      matrix:
+        rust: [stable, beta, nightly]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain
+        uses: https://codeberg.org/PurpleBooth/common-pipelines/actions/install-rust@main
+        with:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Rust ${{ matrix.rust }}
+        run: |
+          rustup default ${{ matrix.rust }}
+          rustup component add rustfmt clippy
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Run Clippy
+        run: cargo clippy --all-features --all-targets -- -D warnings
+
+      - name: Run cargo check
+        run: cargo check --all-features --all-targets
+
+  security:
+    name: Security
+    runs-on: codeberg-small
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain
+        uses: https://codeberg.org/PurpleBooth/common-pipelines/actions/install-rust@main
+        with:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run cargo audit
+        run: cargo audit
+
+      - name: Run Trivy filesystem scan
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          trivy fs --scanners vuln,secret,misconfig --exit-code 1 .
+
+  specdown:
+    name: Specdown
+    runs-on: codeberg-small
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain
+        uses: https://codeberg.org/PurpleBooth/common-pipelines/actions/install-rust@main
+        with:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build release binary
+        run: cargo build --release
+
+      - name: Run specdown
+        run: ./test-harness/specdown ./README.md
+
+  homebrew-formula:
+    name: Audit Homebrew Formula
+    runs-on: codeberg-small
+    container:
+      image: homebrew/brew:latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install yq and gettext
+        run: |
+          curl -L "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64" -o /tmp/yq
+          chmod +x /tmp/yq
+          sudo apt-get update
+          sudo apt-get install -y gettext
+          sudo apt-get clean
+
+      - name: Generate and audit formula
+        run: |
+          VERSION=$(/tmp/yq -o tsv -p toml '.package.version' Cargo.toml)
+          TEMP_DIR=$(mktemp -d)
+          curl --silent --fail --output "$TEMP_DIR/v$VERSION.tar.gz" "https://codeberg.org/$GITHUB_REPOSITORY/archive/v$VERSION.tar.gz" || true
+          if [ -f "$TEMP_DIR/v$VERSION.tar.gz" ]; then
+            FILE_SHA=$(sha256sum --binary "$TEMP_DIR/v$VERSION.tar.gz" | cut -d' ' -f1)
+            export GITHUB_REF_NAME="v$VERSION"
+            export FILE_SHA
+            envsubst < homebrew/formula.rb.envsubstr > "${GITHUB_REPOSITORY##*/}.rb"
+            brew tap-new homebrew-releaser/test --no-git
+            cp -v "${GITHUB_REPOSITORY##*/}.rb" "$(brew --repository)/Library/Taps/homebrew-releaser/homebrew-test/Formula/"
+            brew audit --formula "homebrew-releaser/test/${GITHUB_REPOSITORY##*/}"
+          else
+            echo "Skipping formula audit: release tarball not yet published"
+          fi
+
+  bump:
+    name: Bump version
+    needs: [test, lint, security, specdown, homebrew-formula]
+    if: github.ref == 'refs/heads/main'
+    runs-on: codeberg-small
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install Rust Toolchain
+        uses: https://codeberg.org/PurpleBooth/common-pipelines/actions/install-rust@main
+        with:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install tools
+        run: cargo binstall --no-confirm --locked cocogitto
+
+      - name: Configure Git user
+        run: |
+          git config user.name "Forgejo Actions"
+          git config user.email "forgejo-actions@codeberg.org"
+
+      - name: Import GPG key
+        run: |
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --yes --import
+          gpg --export-ownertrust | sed 's/:.*/:5:/' | gpg --import-ownertrust
+          echo "${{ secrets.GPG_PASSPHRASE }}" > ~/.gpg-passphrase
+          chmod 600 ~/.gpg-passphrase
+          cat > ~/.gpg-wrapper.sh <<'EOF'
+          #!/bin/sh
+          gpg --batch --pinentry-mode loopback --passphrase-file ~/.gpg-passphrase "$@"
+          EOF
+          chmod +x ~/.gpg-wrapper.sh
+          git config gpg.program ~/.gpg-wrapper.sh
+          git config gpg.format openpgp
+          KEY_ID=$(gpg --list-secret-keys --keyid-format LONG | grep sec | awk '{print $2}' | cut -d'/' -f2)
+          git config user.signingkey "$KEY_ID"
+          git config commit.gpgsign true
+
+      - name: Bump version with cog
+        run: |
+          if VERSION=$(cog bump --dry-run --auto 2>/dev/null); then
+            echo "Bumping to $VERSION"
+            cog bump --auto
+            git remote set-url origin https://token:${{ secrets.GITHUB_TOKEN }}@codeberg.org/${{ github.repository }}.git
+            git push origin main --follow-tags
+          else
+            echo "No version bump needed"
+          fi
