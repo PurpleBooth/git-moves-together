@@ -1,0 +1,2 @@
+[env]
+OPENSSL_NO_VENDOR = "1"
