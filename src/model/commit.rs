@@ -19,16 +19,16 @@ impl Commit {
         }
     }
 
-    pub(crate) fn hash(&self) -> Hash {
-        self.hash.clone()
+    pub(crate) const fn hash(&self) -> &Hash {
+        &self.hash
     }
 
     pub(crate) const fn timestamp(&self) -> OffsetDateTime {
         self.timestamp
     }
 
-    pub(crate) fn parents(&self) -> Vec<Hash> {
-        self.parents.clone()
+    pub(crate) fn parents(&self) -> &[Hash] {
+        &self.parents
     }
 }
 

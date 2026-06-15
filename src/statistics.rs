@@ -62,7 +62,7 @@ impl Statistics {
     pub(crate) fn add_delta(self, delta: &Delta, strategy: &Strategy) -> Self {
         let mut hash_to_delta = self.hash_to_delta;
         let (key, grouped_delta) = match strategy {
-            Strategy::Hash => (delta.hash(), delta.clone()),
+            Strategy::Hash => (delta.hash().clone(), delta.clone()),
             Strategy::CommitTime(duration) => {
                 let key: Hash = OffsetDateTime::from_unix_timestamp(
                     duration.whole_seconds()

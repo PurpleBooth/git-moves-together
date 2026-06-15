@@ -114,9 +114,17 @@ fn i_can_get_a_list_of_all_current_commits() {
         assert!(iter.next().is_none());
         assert_eq!(
             Commits::from(vec![
-                Commit::new(head.hash(), vec![mid.hash()], head.timestamp()),
-                Commit::new(mid.hash(), vec![root.hash()], mid.timestamp()),
-                Commit::new(root.hash(), vec![], root.timestamp()),
+                Commit::new(
+                    head.hash().clone(),
+                    vec![mid.hash().clone()],
+                    head.timestamp()
+                ),
+                Commit::new(
+                    mid.hash().clone(),
+                    vec![root.hash().clone()],
+                    mid.timestamp()
+                ),
+                Commit::new(root.hash().clone(), vec![], root.timestamp()),
             ]),
             actual
         );
@@ -140,15 +148,15 @@ fn given_a_commit_i_can_find_out_what_files_changed_in_it() {
 
         assert!(iter.next().is_none());
         let expected: Delta = Delta::new(
-            head.hash(),
+            head.hash().clone(),
             head.timestamp(),
             vec!["file2".into(), "file3".into()],
         );
         assert_eq!(
             expected,
             repo.compare_with_parent(&Commit::new(
-                head.hash(),
-                vec![mid.hash()],
+                head.hash().clone(),
+                vec![mid.hash().clone()],
                 head.timestamp(),
             ))
             .unwrap()

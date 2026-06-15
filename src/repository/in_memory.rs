@@ -26,13 +26,13 @@ impl Repository for InMemory {
 
     fn compare_with_parent(&self, commit: &Commit) -> Result<Delta, Error> {
         Ok(Delta::new(
-            commit.hash(),
+            commit.hash().clone(),
             commit.timestamp(),
             self.changes
                 .clone()
                 .iter()
                 .filter_map(|(hash, change)| {
-                    if &commit.hash() == hash {
+                    if commit.hash() == hash {
                         Some(change.clone())
                     } else {
                         None

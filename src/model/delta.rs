@@ -14,7 +14,7 @@ pub struct Delta {
 impl Delta {
     pub(crate) fn merge(&self, other: &Self) -> Self {
         Self {
-            hash: self.hash(),
+            hash: self.hash().clone(),
             timestamp: self.timestamp(),
             changes: self
                 .changes
@@ -24,8 +24,8 @@ impl Delta {
         }
     }
 
-    pub(crate) fn hash(&self) -> Hash {
-        self.hash.clone()
+    pub(crate) const fn hash(&self) -> &Hash {
+        &self.hash
     }
 
     pub(crate) const fn timestamp(&self) -> OffsetDateTime {

@@ -81,7 +81,11 @@ impl Repository for LibGit2 {
                 .unwrap_or_else(|| Ok(vec![]))?
         };
 
-        Ok(Delta::new(commit.hash(), commit.timestamp(), changes))
+        Ok(Delta::new(
+            commit.hash().clone(),
+            commit.timestamp(),
+            changes,
+        ))
     }
 }
 
