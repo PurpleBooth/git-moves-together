@@ -39,7 +39,7 @@ git add .
 git commit --message "demo: coupling-setup"
 ```
 
-When we run git-moves-together we can see that these files have no
+When we run git-moves-together we can see that these files have
 direct commit based coupling
 
 ``` shell,script(name="coupling",expected_exit_code=0)
@@ -50,9 +50,9 @@ git-moves-together $PWD
 ╭──────────────────┬──────────────────┬────────────┬──────────┬─────────╮
 │ File A           ┆ File B           ┆ Together % ┆ Together ┆ Commits │
 ╞══════════════════╪══════════════════╪════════════╪══════════╪═════════╡
-│ some-repo@file_1 ┆ some-repo@file_2 ┆ 50.00%     ┆ 1        ┆ 2       │
+│ some-repo@file_1 ┆ some-repo@file_2 ┆ 33.33%     ┆ 1        ┆ 3       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ some-repo@file_1 ┆ some-repo@file_3 ┆ 100.00%    ┆ 1        ┆ 1       │
+│ some-repo@file_1 ┆ some-repo@file_3 ┆ 50.00%     ┆ 1        ┆ 2       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
 │ some-repo@file_2 ┆ some-repo@file_3 ┆ 50.00%     ┆ 1        ┆ 2       │
 ╰──────────────────┴──────────────────┴────────────┴──────────┴─────────╯
@@ -75,9 +75,9 @@ git-moves-together -d 30 $PWD
 ╭──────────────────┬──────────────────┬────────────┬──────────┬─────────╮
 │ File A           ┆ File B           ┆ Together % ┆ Together ┆ Commits │
 ╞══════════════════╪══════════════════╪════════════╪══════════╪═════════╡
-│ some-repo@file_1 ┆ some-repo@file_2 ┆ 50.00%     ┆ 1        ┆ 2       │
+│ some-repo@file_1 ┆ some-repo@file_2 ┆ 33.33%     ┆ 1        ┆ 3       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ some-repo@file_1 ┆ some-repo@file_3 ┆ 100.00%    ┆ 1        ┆ 1       │
+│ some-repo@file_1 ┆ some-repo@file_3 ┆ 50.00%     ┆ 1        ┆ 2       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
 │ some-repo@file_2 ┆ some-repo@file_3 ┆ 50.00%     ┆ 1        ┆ 2       │
 ╰──────────────────┴──────────────────┴────────────┴──────────┴─────────╯
@@ -112,35 +112,35 @@ git-moves-together -t 30 "$PWD" "$PWD/../other-repo"
 ╭───────────────────┬───────────────────┬────────────┬──────────┬─────────╮
 │ File A            ┆ File B            ┆ Together % ┆ Together ┆ Commits │
 ╞═══════════════════╪═══════════════════╪════════════╪══════════╪═════════╡
-│ other-repo@file_1 ┆ other-repo@file_2 ┆ 100.00%    ┆ 2        ┆ 2       │
+│ other-repo@file_1 ┆ other-repo@file_2 ┆ 100.00%    ┆ 1        ┆ 1       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ other-repo@file_1 ┆ other-repo@file_3 ┆ 100.00%    ┆ 2        ┆ 2       │
+│ other-repo@file_1 ┆ other-repo@file_3 ┆ 100.00%    ┆ 1        ┆ 1       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ other-repo@file_1 ┆ some-repo@file_1  ┆ 33.33%     ┆ 2        ┆ 6       │
+│ other-repo@file_1 ┆ some-repo@file_1  ┆ 50.00%     ┆ 1        ┆ 2       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ other-repo@file_1 ┆ some-repo@file_2  ┆ 40.00%     ┆ 2        ┆ 5       │
+│ other-repo@file_1 ┆ some-repo@file_2  ┆ 100.00%    ┆ 1        ┆ 1       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ other-repo@file_1 ┆ some-repo@file_3  ┆ 40.00%     ┆ 2        ┆ 5       │
+│ other-repo@file_1 ┆ some-repo@file_3  ┆ 100.00%    ┆ 1        ┆ 1       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ other-repo@file_2 ┆ other-repo@file_3 ┆ 100.00%    ┆ 2        ┆ 2       │
+│ other-repo@file_2 ┆ other-repo@file_3 ┆ 100.00%    ┆ 1        ┆ 1       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ other-repo@file_2 ┆ some-repo@file_1  ┆ 33.33%     ┆ 2        ┆ 6       │
+│ other-repo@file_2 ┆ some-repo@file_1  ┆ 50.00%     ┆ 1        ┆ 2       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ other-repo@file_2 ┆ some-repo@file_2  ┆ 40.00%     ┆ 2        ┆ 5       │
+│ other-repo@file_2 ┆ some-repo@file_2  ┆ 100.00%    ┆ 1        ┆ 1       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ other-repo@file_2 ┆ some-repo@file_3  ┆ 40.00%     ┆ 2        ┆ 5       │
+│ other-repo@file_2 ┆ some-repo@file_3  ┆ 100.00%    ┆ 1        ┆ 1       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ other-repo@file_3 ┆ some-repo@file_1  ┆ 33.33%     ┆ 2        ┆ 6       │
+│ other-repo@file_3 ┆ some-repo@file_1  ┆ 50.00%     ┆ 1        ┆ 2       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ other-repo@file_3 ┆ some-repo@file_2  ┆ 40.00%     ┆ 2        ┆ 5       │
+│ other-repo@file_3 ┆ some-repo@file_2  ┆ 100.00%    ┆ 1        ┆ 1       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ other-repo@file_3 ┆ some-repo@file_3  ┆ 40.00%     ┆ 2        ┆ 5       │
+│ other-repo@file_3 ┆ some-repo@file_3  ┆ 100.00%    ┆ 1        ┆ 1       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ some-repo@file_1  ┆ some-repo@file_2  ┆ 83.33%     ┆ 5        ┆ 6       │
+│ some-repo@file_1  ┆ some-repo@file_2  ┆ 50.00%     ┆ 1        ┆ 2       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ some-repo@file_1  ┆ some-repo@file_3  ┆ 83.33%     ┆ 5        ┆ 6       │
+│ some-repo@file_1  ┆ some-repo@file_3  ┆ 50.00%     ┆ 1        ┆ 2       │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┤
-│ some-repo@file_2  ┆ some-repo@file_3  ┆ 100.00%    ┆ 5        ┆ 5       │
+│ some-repo@file_2  ┆ some-repo@file_3  ┆ 100.00%    ┆ 1        ┆ 1       │
 ╰───────────────────┴───────────────────┴────────────┴──────────┴─────────╯
 ```
 
