@@ -104,6 +104,14 @@ jobs:
     container:
       image: homebrew/brew:latest
     steps:
+      - name: Install Node.js
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl gnupg
+          curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+          node --version
+
       - uses: actions/checkout@v4
 
       - name: Install yq and gettext
