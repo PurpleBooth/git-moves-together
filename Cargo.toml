@@ -16,21 +16,21 @@ name = "git-moves-together"
 path = "src/main.rs"
 
 [dependencies]
-git2 = { version = "0.20.2", features = ["vendored-openssl", "vendored-libgit2"] }
-thiserror = "2.0.12"
-clap = { version = "4.5.40", features = [
+git2 = { version = "0.21", features = ["vendored-openssl", "vendored-libgit2"] }
+thiserror = "2"
+clap = { version = "4", features = [
     "derive",
     "cargo",
     "wrap_help",
     "env",
     "unicode",
 ] }
-comfy-table = "7.1.4"
-tokio = { version = "1.45.1", features = ["full"] }
-futures = "0.3.31"
-miette = { version = "7.6.0", features = ["fancy"] }
-time = "0.3.41"
+comfy-table = "7"
+tokio = { version = "1", features = ["full"] }
+futures = "0.3"
+miette = { version = "7", features = ["fancy"] }
+time = "0.3"
 
 [dev-dependencies]
-tempfile = "3.20.0"
-rand = "0.9.1"
+tempfile = "3"
+rand = "0.10"
