@@ -3,20 +3,20 @@ ARG BUILDKIT_SBOM_SCAN_CONTEXT=true
 # Download NFPM
 FROM goreleaser/nfpm@sha256:c3e0280ee9b7a3ac3916897ab22c25d027ae32dc56841e5de6d1873ca7bd9ee1 AS nfpm
 
-# Use Debian bookworm (stable) as base instead of Alpine
-FROM --platform=$BUILDPLATFORM ubuntu AS base
+# Use Ubuntu LTS (Noble Numbat) as base instead of Alpine
+FROM --platform=$BUILDPLATFORM ubuntu:24.04 AS base
 ARG BUILDKIT_SBOM_SCAN_STAGE=true
 
 # Update system packages
 RUN apt-get update && \
-    apt-get upgrade -y && \
+    apt-get upgrade -y --no-install-recommends && \
     rm -rf /var/lib/apt/lists/*
 
 # Use bash as default shell
 SHELL ["/bin/bash", "-c"]
 
 # Install essential cross-compilation tools and development packages
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     bzip2 \
     ca-certificates \
@@ -58,15 +58,13 @@ RUN curl -L https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/${Y
 
 # renovate: datasource=github-releases depName=specdown/specdown
 ARG SPECDOWN_VERSION=1.2.112
-RUN TEMP_SRC="$(mktemp -d)" && \
-    git clone https://github.com/specdown/specdown.git "$TEMP_SRC" && \
-    cd "$TEMP_SRC" && \
-    git switch --detach "v${SPECDOWN_VERSION}" && \
+RUN git clone https://github.com/specdown/specdown.git /tmp/specdown-src
+WORKDIR /tmp/specdown-src
+RUN git switch --detach "v${SPECDOWN_VERSION}" && \
     cargo build --release && \
-    cp -v target/release/specdown /usr/local/bin/specdown && \
-    cd / && \
-    rm -rf "$TEMP_SRC" && \
-    specdown --version
+    cp -v target/release/specdown /usr/local/bin/specdown
+WORKDIR /
+RUN rm -rf /tmp/specdown-src && specdown --version
 
 # renovate: datasource=crate depName=cargo-audit
 ARG CARGO_AUDIT_VERSION=0.21.2
@@ -135,3 +133,10 @@ RUN cargo fetch
 
 COPY --from=nfpm /usr/bin/nfpm /usr/bin/nfpm
 COPY . .
+
+# Run as non-root user for safety
+USER nonroot
+
+# Basic health check for the build environment
+HEALTHCHECK --interval=5m --timeout=10s --start-period=10s --retries=2 \
+    CMD which cargo && which zig && which specdown || exit 1
