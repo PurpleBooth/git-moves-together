@@ -96,6 +96,8 @@ jobs:
         run: cargo build --release
 
       - name: Run specdown
+        env:
+          COLUMNS: "120"
         run: ./test-harness/specdown ./README.md
 
   homebrew-formula:
