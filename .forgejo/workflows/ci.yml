@@ -95,6 +95,9 @@ jobs:
       - name: Build release binary
         run: cargo build --release
 
+      - name: Install specdown
+        uses: https://github.com/specdown/setup-specdown-action@v0.2.32
+
       - name: Run specdown
         env:
           COLUMNS: "120"
