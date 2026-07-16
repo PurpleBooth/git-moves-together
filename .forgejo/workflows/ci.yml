@@ -68,14 +68,6 @@ jobs:
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v4
 
-      - name: Install Rust Toolchain
-        uses: https://codeberg.org/PurpleBooth/common-pipelines/actions/install-rust@main
-        with:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Run cargo audit
-        run: cargo audit
-
       - name: Run Trivy filesystem scan
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
