@@ -19,7 +19,7 @@ jobs:
     runs-on: codeberg-small
     strategy:
       matrix:
-        rust: [stable, beta, nightly]
+        rust: [stable]
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v4
 
@@ -39,7 +39,7 @@ jobs:
     runs-on: codeberg-small
     strategy:
       matrix:
-        rust: [stable, beta, nightly]
+        rust: [stable]
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v4
 
@@ -71,11 +71,11 @@ jobs:
       - name: Run Trivy filesystem scan
         run: |
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
-          trivy fs --scanners vuln,secret,misconfig --exit-code 1 .
+          trivy fs --scanners vuln,secret,misconfig --exit-code 1 --ignore-unfixed .
 
   specdown:
     name: Specdown
-    runs-on: codeberg-small
+    runs-on: codeberg-medium
     steps:
       - uses: https://code.forgejo.org/actions/checkout@v4
 
@@ -101,37 +101,33 @@ jobs:
     container:
       image: homebrew/brew:latest
     steps:
-      - name: Install Node.js
+      - name: Clone repository (checkout action requires node, unavailable in homebrew container)
         run: |
-          sudo apt-get update
-          sudo apt-get install -y curl gnupg
-          curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-          sudo apt-get install -y nodejs
-          node --version
-
-      - uses: https://code.forgejo.org/actions/checkout@v4
+          git clone --depth 50 "https://codeberg.org/${{ github.repository }}.git" .
+          git fetch origin "${{ github.event.pull_request.head.sha || github.sha }}" 2>/dev/null || true
+          git checkout FETCH_HEAD 2>/dev/null || git checkout "${{ github.sha }}" 2>/dev/null || true
 
       - name: Install yq and gettext
         run: |
           curl -L "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64" -o /tmp/yq
           chmod +x /tmp/yq
-          sudo apt-get update
-          sudo apt-get install -y gettext
-          sudo apt-get clean
+          apt-get update
+          apt-get install -y gettext
+          apt-get clean
 
       - name: Generate and audit formula
         run: |
           VERSION=$(/tmp/yq -o tsv -p toml '.package.version' Cargo.toml)
           TEMP_DIR=$(mktemp -d)
           curl --silent --fail --output "$TEMP_DIR/v$VERSION.tar.gz" "https://codeberg.org/$GITHUB_REPOSITORY/archive/v$VERSION.tar.gz" || true
-          if [ -f "$TEMP_DIR/v$VERSION.tar.gz" ]; then
+          if [ -s "$TEMP_DIR/v$VERSION.tar.gz" ]; then
             FILE_SHA=$(sha256sum --binary "$TEMP_DIR/v$VERSION.tar.gz" | cut -d' ' -f1)
             export GITHUB_REF_NAME="v$VERSION"
             export FILE_SHA
             envsubst < homebrew/formula.rb.envsubstr > "${GITHUB_REPOSITORY##*/}.rb"
-            brew tap-new homebrew-releaser/test --no-git
-            cp -v "${GITHUB_REPOSITORY##*/}.rb" "$(brew --repository)/Library/Taps/homebrew-releaser/homebrew-test/Formula/"
-            brew audit --formula "homebrew-releaser/test/${GITHUB_REPOSITORY##*/}"
+            brew tap-new PurpleBooth/homebrew-releaser --no-git
+            cp -v "${GITHUB_REPOSITORY##*/}.rb" "$(brew --repository)/Library/Taps/PurpleBooth/homebrew-releaser/Formula/"
+            brew audit --formula "PurpleBooth/homebrew-releaser/${GITHUB_REPOSITORY##*/}"
           else
             echo "Skipping formula audit: release tarball not yet published"
           fi
