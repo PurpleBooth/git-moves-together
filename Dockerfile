@@ -1,7 +1,7 @@
 ARG BUILDKIT_SBOM_SCAN_CONTEXT=true
 
 # Download NFPM
-FROM goreleaser/nfpm@sha256:c3e0280ee9b7a3ac3916897ab22c25d027ae32dc56841e5de6d1873ca7bd9ee1 AS nfpm
+FROM goreleaser/nfpm@sha256:d57a1452e7a019896b355f7b1ec67262278f6c503631f652d4fce7aef9ac8df7 AS nfpm
 
 # Use Ubuntu LTS (Noble Numbat) as base instead of Alpine
 FROM --platform=$BUILDPLATFORM ubuntu:24.04 AS base
@@ -37,27 +37,27 @@ RUN curl https://sh.rustup.rs -sSf | bash -s -- -y --profile complete --componen
 
 # Install Zig
 # renovate: datasource=github-releases depName=ziglang/zig
-ARG ZIG_VERSION=0.14.1
+ARG ZIG_VERSION=0.15.1
 RUN curl -L https://ziglang.org/download/${ZIG_VERSION}/zig-x86_64-linux-${ZIG_VERSION}.tar.xz | \
     tar -xJ -C /opt && \
     ln -s /opt/zig-x86_64-linux-${ZIG_VERSION}/zig /usr/local/bin/zig && \
     zig version
 
 # renovate: datasource=crate depName=cargo-binstall
-ARG CARGO_BINSTALL_VERSION=1.14.1
+ARG CARGO_BINSTALL_VERSION=1.26.0
 RUN curl -L https://github.com/cargo-bins/cargo-binstall/releases/download/v${CARGO_BINSTALL_VERSION}/cargo-binstall-x86_64-unknown-linux-musl.full.tgz | \
     tar -xz && \
     mv cargo-binstall /usr/local/bin/
 ENV PATH=/root/.cargo/bin:$PATH
 
 # renovate: datasource=github-releases depName=mikefarah/yq
-ARG YQ_VERSION=4.47.1
+ARG YQ_VERSION=4.54.1
 ARG YQ_BINARY=yq_linux_amd64
 RUN curl -L https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/${YQ_BINARY}.tar.gz | \
     tar -xz && mv ${YQ_BINARY} /usr/local/bin/yq
 
 # renovate: datasource=github-releases depName=specdown/specdown
-ARG SPECDOWN_VERSION=1.2.112
+ARG SPECDOWN_VERSION=1.9.14
 RUN git clone https://github.com/specdown/specdown.git /tmp/specdown-src
 WORKDIR /tmp/specdown-src
 RUN git switch --detach "v${SPECDOWN_VERSION}" && \
@@ -67,11 +67,11 @@ WORKDIR /
 RUN rm -rf /tmp/specdown-src && specdown --version
 
 # renovate: datasource=crate depName=cargo-audit
-ARG CARGO_AUDIT_VERSION=0.21.2
+ARG CARGO_AUDIT_VERSION=0.22.2
 RUN cargo binstall cargo-audit --version ${CARGO_AUDIT_VERSION} --locked
 
 # renovate: datasource=crate depName=cargo-zigbuild
-ARG CARGO_ZIGBUILD_VERSION=0.20.1
+ARG CARGO_ZIGBUILD_VERSION=0.23.4
 RUN cargo binstall cargo-zigbuild --version ${CARGO_ZIGBUILD_VERSION} --locked
 
 # renovate: datasource=github-releases depName=konoui/lipo
