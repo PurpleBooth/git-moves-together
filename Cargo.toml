@@ -25,7 +25,7 @@ clap = { version = "4", features = [
     "env",
     "unicode",
 ] }
-comfy-table = "7"
+comfy-table = "8"
 tokio = { version = "1", features = ["full"] }
 futures = "0.3"
 miette = { version = "7", features = ["fancy"] }
